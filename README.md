@@ -1,36 +1,136 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🌱 Plantiful
 
-## Getting Started
+> **3D 시각화를 이용한 반려식물 케어 서비스**
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 📆 프로젝트 기간
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+> 2025.10.30 ~ 2025.11.26
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 💻 과정명
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+> 구름 DEEP DIVE 프론트엔드 5회차
 
-## Learn More
+## 👥 팀 구성
 
-To learn more about Next.js, take a look at the following resources:
+| 이름   | 역할                                                                    |
+| ------ | ----------------------------------------------------------------------- |
+| 최원형 | Auth 담당 / 식물 등록 페이지                                            |
+| 박나현 | 디자인 시스템 / 공통 컴포넌트 / 검색·정렬 / 무한 스크롤                 |
+| 서민욱 | 레이아웃·헤더 / FAB / 식물 상세 모달 / Lottie(404, 로딩) / 식물 3D 박스 |
+| 진현지 | 식물 등록 모달                                                          |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🌿 프로젝트 소개
 
-## Deploy on Vercel
+> 반려식물을 직접 키우고자 하지만 **관리 방법을 잘 모르는 사람들**을 위해, **식물의 상태를 3D 그래픽으로 시각화하고 관리 주기를 돕는 웹 서비스**입니다.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- 본인의 반려식물을 기록하고 환경에 맞게 관리할 수 있음
+- 물주기·영양제·분갈이 주기 등 케어 루틴을 체계적으로 관리
+- Three.js를 활용한 **직관적 3D 시각화** 제공
+- Supabase를 통한 인증 및 데이터 관리
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## 🎯 프로젝트 목표
+
+| 목표               | 설명                                                     |
+| ------------------ | -------------------------------------------------------- |
+| **3D 시각화**      | Three.js를 활용하여 식물 상태를 3D 그래픽으로 표현       |
+| **케어 관리 기능** | 물주기, 영양제, 분갈이 등 주기 설정                      |
+| **사용자 관리**    | Supabase Auth로 계정 관리, 마이페이지에서 정보 수정 가능 |
+| **UI/UX 향상**     | 반응형 디자인 및 직관적인 인터페이스 구현                |
+
+---
+
+## 🌈 기대 효과
+
+- **재미있고 직관적인 식물 관리 경험** 제공
+- **시각적 상태 표현**을 통한 식물 케어 이해도 향상
+- **물주기 알림**으로 식물의 건강한 성장 유도
+
+---
+
+## 🗓️ 추진 일정
+
+| 주차      | 주요 진행 내용                             |
+| --------- | ------------------------------------------ |
+| **1주차** | 기획 및 요구사항 정의, 백로그 작성, 디자인 |
+| **2주차** | 디자인 및 MVP 기능 구현 시작               |
+| **3주차** | MVP 기능 완성                              |
+| **4주차** | QA 및 리팩토링                             |
+| **5주차** | 리팩토링, 발표 준비, 시연                  |
+
+---
+
+## ⚙️ 주요 기능
+
+### 🏠 메인 페이지
+
+- 레이아웃 / 헤더 구성
+- 오늘의 식물 3D 렌더링 (Three.js)
+- 검색 / 정렬 필터 (디바운스 적용)
+- 무한 스크롤
+- 식물 카드 리스트 (1xN & 2xN 배치)
+- 물주기 버튼 컴포넌트
+- 등록 FAB 버튼
+- React Query 쿼리키 관리
+
+### 🔐 로그인 & 회원가입
+
+- Supabase Auth 이메일 회원가입/로그인
+- OAuth (Google, Kakao) 연동
+- 로그인/회원가입 폼 UI 구성
+
+### 👤 마이페이지
+
+- Zustand로 인증 상태 전역 관리
+- 닉네임 및 비밀번호 변경 기능
+
+### 🌼 식물 등록 모달
+
+- 식물 검색 및 선택
+- 종류별 API 연동
+- 사용자 입력으로 직접 추가 가능
+- 사진 업로드 기능
+- 커스텀 스크롤 디자인
+
+### 🍃 식물 상세 모달
+
+- 상세 정보 UI 구성
+- 식물 정보 수정
+- 삭제 기능 (Alert 모달)
+
+### 🧩 공통 컴포넌트
+
+- Card, Dropdown, Input, Modal, SearchBar, Button, FAB
+
+### 💫 기타 페이지 (Lottie)
+
+- 404 페이지
+- 로딩 컴포넌트
+- 반응형 레이아웃
+
+---
+
+## 🛠️ 기술 스택
+
+| 구분               | 사용 기술                            |
+| ------------------ | ------------------------------------ |
+| **Frontend**       | Next.js 15, TypeScript, Tailwind CSS |
+| **3D 그래픽**      | Three.js                             |
+| **상태 관리**      | Zustand, React Query                 |
+| **인증 및 백엔드** | Supabase Auth / DB                   |
+| **디자인**         | Figma, Lottie                        |
+
+---
+
+## 📌 참고
+
+- 본 프로젝트는 [DEEP DIVE Frontend 5기] 과정 내 **자율 주제 웹 서비스 개발 프로젝트**입니다.
+- HTML/CSS/JS, React, Next.js, Supabase 등 최신 프론트엔드 기술을 사용합니다.
+- 사용자 경험 향상과 시각적 완성도를 목표로 개발되었습니다.
+
+---
