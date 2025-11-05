@@ -1,0 +1,60 @@
+name: Auto Close Issue on PR Merge to Dev
+
+on:
+  pull_request_target:
+    types: [closed]
+    branches:
+      - 'dev'
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  close-issue:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Close linked issues
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          echo "=== Checking PR #$PR_NUMBER for linked issues ==="
+
+          # 1. PR 본문에서 이슈 추출
+          PR_BODY=$(gh pr view $PR_NUMBER --json body -q '.body')
+          echo "PR Body:"
+          echo "$PR_BODY"
+          echo ""
+
+          ISSUES_FROM_BODY=$(echo "$PR_BODY" | grep -iE "close[sd]? #[0-9]+" | grep -oE "#[0-9]+" | sed 's/#//' | sort -u)
+
+          # 2. 커밋 메시지에서 이슈 추출
+          ISSUES_FROM_COMMITS=$(git log --format=%B | grep -iE "close[sd]? #[0-9]+" | grep -oE "#[0-9]+" | sed 's/#//' | sort -u)
+
+          # 3. Development 섹션에서 연결된 이슈 추출 (GitHub API)
+          ISSUES_FROM_LINKED=$(gh pr view $PR_NUMBER --json closingIssuesReferences -q '.closingIssuesReferences[].number')
+
+          # 모든 이슈 번호 합치기 (중복 제거)
+          ALL_ISSUES=$(echo -e "$ISSUES_FROM_BODY\n$ISSUES_FROM_COMMITS\n$ISSUES_FROM_LINKED" | grep -v '^$' | sort -u)
+
+          if [ -z "$ALL_ISSUES" ]; then
+            echo "No linked issues found"
+            exit 0
+          fi
+
+          echo "Found issues to close: $ALL_ISSUES"
+
+          # 각 이슈 닫기
+          for ISSUE_NUMBER in $ALL_ISSUES; do
+            echo "Closing issue #$ISSUE_NUMBER"
+            gh issue close "$ISSUE_NUMBER" --comment "✅ Automatically closed by PR #$PR_NUMBER merged to dev"
+          done
