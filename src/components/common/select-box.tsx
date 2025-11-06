@@ -1,7 +1,7 @@
 'use client'
 
 import { ChevronDown, Check } from 'lucide-react'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useLayoutEffect } from 'react'
 import cn from '@/lib/cn'
 
 interface SelectBoxProps {
@@ -21,7 +21,9 @@ export default function SelectBox({
 }: SelectBoxProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [hoveredValue, setHoveredValue] = useState<string | null>(null)
+  const [openUpward, setOpenUpward] = useState(false)
   const selectRef = useRef<HTMLDivElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -46,6 +48,26 @@ export default function SelectBox({
       document.removeEventListener('keydown', handleEscape)
     }
   }, [isOpen])
+
+  useLayoutEffect(() => {
+    if (isOpen && selectRef.current && dropdownRef.current) {
+      const buttonRect = selectRef.current.getBoundingClientRect()
+      const dropdownHeight = Math.min(240, options.length * 36) // max-h-60 = 240px, 각 옵션 약 36px
+      const spaceBelow = window.innerHeight - buttonRect.bottom
+      const spaceAbove = buttonRect.top
+
+      // 아래 공간이 부족하면 위로 열기
+      setOpenUpward(spaceBelow < dropdownHeight && spaceAbove > spaceBelow)
+
+      // 선택된 옵션으로 스크롤
+      if (value) {
+        const selectedElement = dropdownRef.current.querySelector(`[data-value="${value}"]`)
+        if (selectedElement) {
+          selectedElement.scrollIntoView({ block: 'nearest', behavior: 'auto' })
+        }
+      }
+    }
+  }, [isOpen, options.length, value])
 
   const handleOptionClick = (optionValue: string) => {
     onSelect(optionValue)
@@ -75,12 +97,14 @@ export default function SelectBox({
 
       {isOpen && (
         <div
+          ref={dropdownRef}
           className={cn(
-            'absolute z-50 w-full mt-2 min-w-32 max-h-96 overflow-hidden rounded-md border bg-popver text-popover-foreground shadow-md',
-            'animate-in fade-in-0 zoom-in-95'
+            'absolute z-50 w-full min-w-32 max-h-96 overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md',
+            'animate-in fade-in-0 zoom-in-95',
+            openUpward ? 'bottom-full mb-2' : 'top-full mt-2'
           )}
         >
-          <div className="p-1 max-h-60 overflow-auto">
+          <div className="p-1 max-h-60 overflow-auto custom-scrollbar">
             {options.map((option) => {
               const isSelected = value === option.value
               const isHovered = hoveredValue === option.value
@@ -90,6 +114,7 @@ export default function SelectBox({
                 <button
                   key={option.value}
                   type="button"
+                  data-value={option.value}
                   onClick={() => handleOptionClick(option.value)}
                   onMouseEnter={() => setHoveredValue(option.value)}
                   onMouseLeave={() => setHoveredValue(null)}
