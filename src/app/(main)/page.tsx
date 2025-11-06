@@ -1,6 +1,11 @@
+import Header from "@/components/Header"
+
 export default function Home() {
   return (
+  <>
+  <Header />
     <div className="max-w-xl mx-auto p-4 space-y-6 animate-fade-in">
+      
       {/* 3D 식물 표시 박스 */}
       <section>
             <div className="mb-3 flex items-center justify-between">
@@ -35,6 +40,6 @@ export default function Home() {
       <button className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-float bg-destructive hover:bg-destructive/90 text-destructive-foreground"
       >+</button>
     </div>
-    
+    </>
   );
 }
