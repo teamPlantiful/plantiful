@@ -137,6 +137,14 @@
     }
   }
 }
+:root {
+  /* Custom plant theme tokens */
+  --leaf-green: hsl(103 43% 55%);
+  --terracotta: hsl(12 89% 61%);
+  --sunshine: hsl(42 100% 74%);
+  --plant-healthy: hsl(103 43% 55%);
+  --plant-weak: hsl(45 90% 60%);
+  --plant-dead: hsl(30 30% 40%);
 
 /* Manual Dark Mode Toggle Support (when implemented) */
 .dark {
