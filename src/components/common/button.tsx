@@ -30,6 +30,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       variant = 'default',
       size = 'default',
       as: Comp = 'button',
+      type,
       className,
       widthFull = false,
       isLoading = false,
@@ -68,7 +69,13 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     )
 
     return (
-      <Comp ref={ref} className={computedClassName} disabled={disabled || isLoading} {...props}>
+      <Comp
+        ref={ref}
+        type={type ?? (Comp === 'button' ? 'button' : undefined)}
+        className={computedClassName}
+        disabled={disabled || isLoading}
+        {...props}
+      >
         {isLoading ? (
           <>
             <div
@@ -80,9 +87,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           </>
         ) : (
           <>
-            {leftIcon && <span className="flex-shrink-0">{leftIcon}</span>}
+            {leftIcon && <span className="shrink-0">{leftIcon}</span>}
             {children}
-            {rightIcon && <span className="flex-shrink-0">{rightIcon}</span>}
+            {rightIcon && <span className="shrink-0">{rightIcon}</span>}
           </>
         )}
       </Comp>
