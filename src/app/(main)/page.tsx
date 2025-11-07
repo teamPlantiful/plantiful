@@ -19,7 +19,7 @@ export default function Home() {
       <div className="max-w-xl mx-auto p-4 space-y-6 md:space-y-8 animate-fade-in">
         <section>
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-semibold text-foreground">랜덤 식물</h2>
+            <h2 className="font-semibold text-foreground">오늘의 식물</h2>
             <span className="text-sm text-muted-foreground">몬스테라</span>
           </div>
 
