@@ -16,11 +16,7 @@ export default function Page() {
         <div className="max-w-xl mx-auto flex items-center gap-3">
           {/* 뒤로가기 버튼 */}
           <Link href="/">
-            <Button 
-              variant="ghost" 
-              size="icon"
-              className="rounded-full w-9 h-9"
-            >
+            <Button variant="ghost" size="icon" className="rounded-full w-9 h-9">
               <ArrowLeft className="h-5 w-5" />
             </Button>
           </Link>
@@ -43,27 +39,23 @@ export default function Page() {
           </CardHeader>
           <CardContent className="pt-0 space-y-4">
             <div className="space-y-2">
-              <label 
+              <label
                 htmlFor="nickname"
-                className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
                 닉네임
               </label>
               <div className="pt-2 flex gap-2">
-                <div className='flex-1'>
-                  <Input 
-                    id="nickname" 
+                <div className="flex-1">
+                  <Input
+                    id="nickname"
                     value={nickname}
                     onChange={(e) => setNickname(e.target.value)}
                     placeholder="닉네임을 입력하세요"
-                    size='sm'
+                    size="sm"
                   />
                 </div>
-                <Button
-                  variant="default"
-                  size='sm'
-                  className="bg-primary hover:bg-primary/90"
-                >
+                <Button variant="default" size="sm" className="bg-primary hover:bg-primary/90">
                   저장
                 </Button>
               </div>
@@ -80,54 +72,52 @@ export default function Page() {
           </CardHeader>
           <CardContent className="pt-0 space-y-4">
             <div className="space-y-2">
-              <label 
+              <label
                 htmlFor="current-password"
-                className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
                 현재 비밀번호
               </label>
-              <Input 
-                size='sm'
-                id="current-password" 
+              <Input
+                size="sm"
+                id="current-password"
                 type="password"
                 placeholder="••••••••"
-                className='mt-2'
+                className="mt-2"
               />
             </div>
             <div className="space-y-2">
-              <label 
+              <label
                 htmlFor="new-password"
-                className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
                 새 비밀번호
               </label>
-              <Input 
-                size='sm'
-                id="new-password" 
+              <Input
+                size="sm"
+                id="new-password"
                 type="password"
                 placeholder="••••••••"
-                className='mt-2'
+                className="mt-2"
               />
             </div>
             <div className="space-y-2">
-              <label 
+              <label
                 htmlFor="confirm-password"
-                className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
                 새 비밀번호 확인
               </label>
-              <Input 
-                size='sm'
-                id="confirm-password" 
+              <Input
+                size="sm"
+                id="confirm-password"
                 type="password"
                 placeholder="••••••••"
-                className='mt-2'                
+                className="mt-2"
               />
             </div>
-            <Button
-              variant="default"
-              className="w-full bg-primary hover:bg-primary/90"
-            >비밀번호 변경
+            <Button variant="default" className="w-full bg-primary hover:bg-primary/90">
+              비밀번호 변경
             </Button>
           </CardContent>
         </Card>
@@ -136,10 +126,11 @@ export default function Page() {
         {/* 로그아웃 기능 */}
         <Link href="/auth">
           <Button
-            variant='outline'
+            variant="outline"
             className="w-full border-destructive bg-destructive-foreground text-destructive hover:bg-destructive/10"
           >
-            <LogOut className="h-4 w-4 mr-2"/>로그아웃
+            <LogOut className="h-4 w-4 mr-2" />
+            로그아웃
           </Button>
         </Link>
       </main>
