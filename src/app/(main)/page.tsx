@@ -8,17 +8,50 @@ import Fab from '@/components/common/fab'
 import SelectBox from '@/components/common/select-box'
 import { Card, CardContent } from '@/components/common/card'
 import PlantSpeciesSearchModal from '@/components/PlantSearchModal'
+import { RegisterPlantModal } from '@/components/RegisterPlantModal'
 import { PerenualPlant } from '@/hooks/usePlantSearch'
-        
+import type { PlantSpeciesInfo } from '@/types/plant'
+
 import { Search } from 'lucide-react'
 
 export default function Home() {
   const [sort, setSort] = useState('water')
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false)
+  const [selectedSpecies, setSelectedSpecies] = useState<PlantSpeciesInfo | null>(null)
 
   const handlePlantSelect = (plant: PerenualPlant | { common_name: string }) => {
-    console.log('Selected plant:', plant)
-    // TODO: 선택된 식물을 '내 식물' 목록에 추가하는 로직
+    // PerenualPlant를 PlantSpeciesInfo로 변환
+    const isPerenualPlant = 'id' in plant
+    const perenualPlant = isPerenualPlant ? (plant as PerenualPlant) : null
+
+    const plantSpecies: PlantSpeciesInfo = {
+      id: perenualPlant ? String(perenualPlant.id) : Date.now().toString(),
+      koreanName: plant.common_name,
+      scientificName: perenualPlant?.scientific_name[0] ?? '',
+      careInfo: {
+        waterAmount: '적당히',
+        sunlight: '밝은 간접광',
+        temperature: '18-27°C',
+        humidity: '50-70%',
+      },
+    }
+
+    setSelectedSpecies(plantSpecies)
+    setIsSearchModalOpen(false)
+    setIsRegisterModalOpen(true)
+  }
+
+  const handleBackToSearch = () => {
+    setIsRegisterModalOpen(false)
+    setIsSearchModalOpen(true)
+  }
+
+  const handleRegister = (data: any) => {
+    console.log('식물 등록:', data)
+    // TODO: 실제 등록 로직 추가
+    setIsRegisterModalOpen(false)
+    setSelectedSpecies(null)
   }
   return (
     <>
@@ -73,11 +106,18 @@ export default function Home() {
           <p className="text-center text-muted-foreground">아직 등록된 식물이 없습니다</p>
         </section>
 
-        <Fab onClick={() => setIsModalOpen(true)} />
+        <Fab onClick={() => setIsSearchModalOpen(true)} />
         <PlantSpeciesSearchModal
-          open={isModalOpen}
-          onOpenChange={setIsModalOpen}
+          open={isSearchModalOpen}
+          onOpenChange={setIsSearchModalOpen}
           onSelect={handlePlantSelect}
+        />
+        <RegisterPlantModal
+          open={isRegisterModalOpen}
+          onOpenChange={setIsRegisterModalOpen}
+          selectedSpecies={selectedSpecies}
+          onRegister={handleRegister}
+          onBack={handleBackToSearch}
         />
       </div>
     </>

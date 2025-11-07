@@ -23,7 +23,6 @@ export default function PlantSpeciesSearchModal({
 
   const handleSelect = (plant: PerenualPlant) => {
     onSelect(plant)
-    onOpenChange(false)
     setSearchQuery('')
   }
 
@@ -31,7 +30,6 @@ export default function PlantSpeciesSearchModal({
     if (!customName.trim()) return
     onSelect({ common_name: customName })
     setCustomName('')
-    onOpenChange(false)
   }
 
   return (
