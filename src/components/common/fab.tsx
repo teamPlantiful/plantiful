@@ -27,7 +27,8 @@ const Fab = React.forwardRef<HTMLButtonElement, FabProps>(({ className, icon, ..
         'shadow-lg',
         'animate-pulse-glow',
         'transition-all duration-200 ease-in-out',
-        'hover:shadow-2xl'
+        'hover:shadow-2xl',
+        className
       )}
       {...props}
     >
