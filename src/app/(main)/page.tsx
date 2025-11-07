@@ -4,7 +4,7 @@ import Header from '@/components/Header'
 import { useState } from 'react'
 
 import Input from '@/components/common/Input'
-import Fab from '@/components/common/fab-button'
+import Fab from '@/components/common/fab'
 import SelectBox from '@/components/common/select-box'
 import { Card, CardContent } from '@/components/common/card'
 
@@ -19,7 +19,7 @@ export default function Home() {
       <div className="max-w-xl mx-auto p-4 space-y-6 md:space-y-8 animate-fade-in">
         <section>
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-semibold text-foreground">오늘의 식물</h2>
+            <h2 className="font-semibold text-foreground">오늘의식물</h2>
             <span className="text-sm text-muted-foreground">몬스테라</span>
           </div>
 
@@ -66,7 +66,11 @@ export default function Home() {
           <p className="text-center text-muted-foreground">아직 등록된 식물이 없습니다</p>
         </section>
 
-        <Fab aria-label="새 식물 추가" onClick={() => alert('까꿍')} />
+        <Fab
+          aria-label="새 식물 추가"
+          onClick={() => alert('까꿍')}
+          className="fixed right-5 bottom-8"
+        />
       </div>
     </>
   )
