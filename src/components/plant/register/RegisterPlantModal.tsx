@@ -8,9 +8,9 @@ import { ArrowLeft } from 'lucide-react'
 import { useState } from 'react'
 import { PlantSpeciesInfo, PlantData } from '@/types/plant'
 import { ImageUpload } from './ImageUpload'
-import { PlantInfo } from './shared/PlantInfo'
+import { PlantInfo } from '../../shared/PlantInfo'
 import { DateSelect } from './DateSelect'
-import { CareGuideSection } from './shared/CareGuideSection'
+import { CareGuideSection } from '../../shared/CareGuideSection'
 
 interface RegisterPlantModalProps {
   open: boolean
