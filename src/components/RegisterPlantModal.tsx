@@ -2,7 +2,7 @@
 
 import { Modal, ModalHeader, ModalContent } from '@/components/common/modal'
 import Button from '@/components/common/button'
-import { Input } from '@/components/common/Input'
+import Input from '@/components/common/Input'
 import SelectBox from '@/components/common/select-box'
 import { ArrowLeft } from 'lucide-react'
 import { useState } from 'react'

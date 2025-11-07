@@ -5,7 +5,7 @@ import cn from '@/lib/cn'
 
 type Size = 'sm' | 'md' | 'lg'
 
-export interface InputProps extends Omit<React.ComponentProps<'input'>, 'size'> {
+interface InputProps extends Omit<React.ComponentProps<'input'>, 'size'> {
   label?: string
   helperText?: string
   error?: string
@@ -16,7 +16,7 @@ export interface InputProps extends Omit<React.ComponentProps<'input'>, 'size'> 
   className?: string
 }
 
-export const Input = React.forwardRef<HTMLInputElement, InputProps>(
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
   (
     {
       label,
@@ -92,3 +92,5 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 )
 
 Input.displayName = 'Input'
+
+export default Input
