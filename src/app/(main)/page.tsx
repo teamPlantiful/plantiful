@@ -69,7 +69,7 @@ export default function Home() {
         <Fab
           aria-label="새 식물 추가"
           onClick={() => alert('까꿍')}
-          className="fixed right-5 bottom-8"
+          className="fixed right-6 bottom-8"
         />
       </div>
     </>
