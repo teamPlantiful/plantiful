@@ -4,7 +4,7 @@ import Header from '@/components/Header'
 import { useState } from 'react'
 
 import Input from '@/components/common/Input'
-import Fab from '@/components/common/fab-button'
+import Fab from '@/components/common/fab'
 import SelectBox from '@/components/common/select-box'
 import { Card, CardContent } from '@/components/common/card'
 
