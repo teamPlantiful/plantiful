@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { ArrowLeft, Leaf, User, Lock, LogOut } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/common/card'
 import Button from '@/components/common/button'
-import { Input } from '@/components/common/Input'
+import Input from '@/components/common/Input'
 
 export default function Page() {
   const [nickname, setNickname] = useState('식집사')
