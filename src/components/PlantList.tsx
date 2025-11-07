@@ -26,7 +26,7 @@ export default function PlantList({
         <button
           key={plant.id}
           onClick={() => onSelect(plant)}
-          className="w-full p-4 rounded-lg border border-border hover:bg-accent/50 transition-colors text-left flex items-center gap-3"
+          className="w-full cursor-pointer p-4 rounded-lg border border-border hover:bg-accent/50 transition-colors text-left flex items-center gap-3"
         >
           <img
             src={
