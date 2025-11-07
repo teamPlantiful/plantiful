@@ -7,12 +7,19 @@ import Input from '@/components/common/Input'
 import Fab from '@/components/common/fab'
 import SelectBox from '@/components/common/select-box'
 import { Card, CardContent } from '@/components/common/card'
-
+import PlantSpeciesSearchModal from '@/components/PlantSearchModal'
+import { PerenualPlant } from '@/hooks/usePlantSearch'
+        
 import { Search } from 'lucide-react'
 
 export default function Home() {
   const [sort, setSort] = useState('water')
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
+  const handlePlantSelect = (plant: PerenualPlant | { common_name: string }) => {
+    console.log('Selected plant:', plant)
+    // TODO: 선택된 식물을 '내 식물' 목록에 추가하는 로직
+  }
   return (
     <>
       <Header />
@@ -66,10 +73,11 @@ export default function Home() {
           <p className="text-center text-muted-foreground">아직 등록된 식물이 없습니다</p>
         </section>
 
-        <Fab
-          aria-label="새 식물 추가"
-          onClick={() => alert('까꿍')}
-          className="fixed right-6 bottom-8"
+        <Fab onClick={() => setIsModalOpen(true)} />
+        <PlantSpeciesSearchModal
+          open={isModalOpen}
+          onOpenChange={setIsModalOpen}
+          onSelect={handlePlantSelect}
         />
       </div>
     </>
