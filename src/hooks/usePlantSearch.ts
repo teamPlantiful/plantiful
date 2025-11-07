@@ -1,4 +1,3 @@
-// src/hooks/usePlantSearch.ts
 import { useState, useEffect } from 'react'
 
 export interface PerenualPlant {
