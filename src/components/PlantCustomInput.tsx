@@ -1,7 +1,7 @@
 'use client'
 
 import Button from '@/components/common/button'
-import { Input } from '@/components/common/Input'
+import Input from '@/components/common/Input'
 
 interface PlantCustomInputProps {
   value: string
