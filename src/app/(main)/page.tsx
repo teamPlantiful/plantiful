@@ -1,7 +1,7 @@
 'use client'
 
 import Header from '@/components/Header'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import Input from '@/components/common/Input'
 import Fab from '@/components/common/fab'
@@ -11,7 +11,7 @@ import PlantSpeciesSearchModal from '@/components/plant/search/PlantSearchModal'
 import { RegisterPlantModal } from '@/components/plant/register/RegisterPlantModal'
 import { PerenualPlant } from '@/hooks/usePlantSearch'
 import type { PlantSpeciesInfo } from '@/types/plant'
-
+import PlantCard from '@/components/plant/detail/PlantCard'
 import { Search } from 'lucide-react'
 
 export default function Home() {
@@ -19,6 +19,84 @@ export default function Home() {
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false)
   const [selectedSpecies, setSelectedSpecies] = useState<PlantSpeciesInfo | null>(null)
+
+  //테스트용=======================================
+  type MyPlant = {
+    id: string
+    nickname: string
+    species_name?: string | null
+    cover_image_url?: string | null
+    default_image_url?: string | null
+    dday_water: number
+    watering_interval_days: number
+  }
+
+  const [plants, setPlants] = useState<MyPlant[]>([
+    {
+      id: 'p-1',
+      nickname: '몬스테라',
+      species_name: 'Monstera deliciosa',
+      default_image_url: '',
+      dday_water: 0,
+      watering_interval_days: 20,
+    },
+    {
+      id: 'p-2',
+      nickname: '스파티필름',
+      species_name: 'Spathiphyllum wallisii',
+      default_image_url: '',
+      dday_water: 2,
+      watering_interval_days: 10,
+    },
+    {
+      id: 'p-3',
+      nickname: '산세베리아',
+      species_name: 'Sansevieria trifasciata',
+      default_image_url: '',
+      dday_water: 15,
+      watering_interval_days: 30,
+    },
+    {
+      id: 'p-4',
+      nickname: '안스리움',
+      species_name: 'Anthurium andraeanum',
+      default_image_url: '',
+      dday_water: 5,
+      watering_interval_days: 12,
+    },
+    {
+      id: 'p-5',
+      nickname: '필로덴드론',
+      species_name: 'Philodendron hederaceum',
+      default_image_url: '',
+      dday_water: 10,
+      watering_interval_days: 25,
+    },
+  ])
+  //====================================
+  const sortedPlants = useMemo(() => {
+    if (sort === 'name') {
+      return [...plants].sort((a, b) => a.nickname.localeCompare(b.nickname))
+    }
+    if (sort === 'recent') {
+      return [...plants]
+    }
+    return [...plants].sort((a, b) => a.dday_water - b.dday_water)
+  }, [plants, sort])
+
+  const handleCardClick = (id: string) => {
+    const target = plants.find((p) => p.id === id)
+  }
+
+  const handleWater = (id: string) => {
+    setPlants((prev) =>
+      prev.map((p) =>
+        p.id === id
+          ? { ...p, dday_water: Math.max(1, Math.min(60, p.watering_interval_days || 7)) }
+          : p
+      )
+    )
+  }
 
   const handlePlantSelect = (plant: PerenualPlant | { common_name: string }) => {
     // PerenualPlant를 PlantSpeciesInfo로 변환
@@ -49,7 +127,6 @@ export default function Home() {
 
   const handleRegister = (data: any) => {
     console.log('식물 등록:', data)
-    // TODO: 실제 등록 로직 추가
     setIsRegisterModalOpen(false)
     setSelectedSpecies(null)
   }
@@ -101,10 +178,34 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 빈 상태  */}
-        <section>
-          <p className="text-center text-muted-foreground">아직 등록된 식물이 없습니다</p>
-        </section>
+        {sortedPlants.length === 0 ? (
+          <section>
+            <p className="text-center text-muted-foreground">아직 등록된 식물이 없습니다</p>
+          </section>
+        ) : (
+          <section
+            className="
+            grid gap-3
+            grid-cols-1
+            md:grid-cols-2
+          "
+          >
+            {sortedPlants.map((p) => (
+              <PlantCard
+                key={p.id}
+                id={p.id}
+                nickname={p.nickname}
+                speciesName={p.species_name}
+                coverImageUrl={p.cover_image_url}
+                defaultImageUrl={p.default_image_url}
+                ddayWater={p.dday_water}
+                onClick={handleCardClick}
+                onWater={handleWater}
+                className="w-full"
+              />
+            ))}
+          </section>
+        )}
 
         <Fab onClick={() => setIsSearchModalOpen(true)} />
         <PlantSpeciesSearchModal
