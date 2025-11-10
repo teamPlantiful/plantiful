@@ -68,3 +68,25 @@ export function getMonthCalendarDays(year: number, month: number) {
 
   return days
 }
+
+/**
+ * SelectBox용 일(day) 옵션 생성
+ * @param maxDays 최대 일수 (기본값: 60)
+ */
+export function generateDayOptions(maxDays: number = 60) {
+  return Array.from({ length: maxDays }, (_, i) => ({
+    value: String(i + 1),
+    label: `${i + 1}일`,
+  }))
+}
+
+/**
+ * SelectBox용 월(month) 옵션 생성
+ * @param maxMonths 최대 개월 수 (기본값: 24)
+ */
+export function generateMonthOptions(maxMonths: number = 24) {
+  return Array.from({ length: maxMonths }, (_, i) => ({
+    value: String(i + 1),
+    label: `${i + 1}개월`,
+  }))
+}
