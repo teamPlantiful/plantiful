@@ -7,10 +7,11 @@ import SelectBox from '@/components/common/select-box'
 import { ArrowLeft } from 'lucide-react'
 import { useState } from 'react'
 import { PlantSpeciesInfo, PlantData } from '@/types/plant'
-import { ImageUpload } from './ImageUpload'
+import ImageUpload from './ImageUpload'
 import { PlantInfo } from '../../shared/PlantInfo'
 import { DateSelect } from './DateSelect'
 import { CareGuideSection } from '../../shared/CareGuideSection'
+import { generateDayOptions, generateMonthOptions } from '@/utils/date'
 
 interface RegisterPlantModalProps {
   open: boolean
@@ -19,6 +20,9 @@ interface RegisterPlantModalProps {
   onRegister: (data: Omit<PlantData, 'species'> & { species: PlantSpeciesInfo }) => void
   onBack: () => void
 }
+
+const dayOptions = generateDayOptions()
+const monthOptions = generateMonthOptions()
 
 export const RegisterPlantModal = ({
   open,
@@ -33,24 +37,24 @@ export const RegisterPlantModal = ({
   const [repottingInterval, setRepottingInterval] = useState('12')
   const [lastWateredDate, setLastWateredDate] = useState<Date>(new Date())
   const [startDate, setStartDate] = useState<Date>(new Date())
+  const [uploadedImage, setUploadedImage] = useState<File | null>(null)
 
-  const dayOptions = Array.from({ length: 60 }, (_, i) => ({
-    value: String(i + 1),
-    label: `${i + 1}일`,
-  }))
-
-  const monthOptions = Array.from({ length: 24 }, (_, i) => ({
-    value: String(i + 1),
-    label: `${i + 1}개월`,
-  }))
+  // 필수 입력 필드 검증 (기본값이 있으면 활성화)
+  const isFormValid =
+    wateringInterval !== '' && fertilizerInterval !== '' && repottingInterval !== ''
 
   const handleClose = () => {
     onOpenChange(false)
+    setUploadedImage(null)
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!selectedSpecies) return
+
+    // 이미지 우선순위: 사용자 업로드 > API 제공 > undefined
+    // TODO: Supabase에 업로드 후 URL로 변환 필요
+    const imageUrl = uploadedImage ? URL.createObjectURL(uploadedImage) : selectedSpecies.imageUrl
 
     onRegister({
       species: selectedSpecies,
@@ -60,6 +64,7 @@ export const RegisterPlantModal = ({
       repottingInterval: parseInt(repottingInterval) * 30,
       lastWateredDate,
       startDate,
+      image: imageUrl,
     })
     handleClose()
 
@@ -69,6 +74,7 @@ export const RegisterPlantModal = ({
     setRepottingInterval('12')
     setLastWateredDate(new Date())
     setStartDate(new Date())
+    setUploadedImage(null)
   }
 
   if (!selectedSpecies) return null
@@ -92,7 +98,7 @@ export const RegisterPlantModal = ({
         <form onSubmit={handleSubmit} className="space-y-5 pb-6">
           <div className="p-6 rounded-lg bg-secondary/10 border border-border">
             <div className="flex flex-col items-center gap-4">
-              <ImageUpload />
+              <ImageUpload onImageChange={setUploadedImage} />
               <PlantInfo
                 koreanName={selectedSpecies.koreanName}
                 scientificName={selectedSpecies.scientificName}
@@ -110,9 +116,9 @@ export const RegisterPlantModal = ({
           />
 
           <div className="grid grid-cols-2 gap-3">
-            <DateSelect label="처음 함께한 날짜 *" value={startDate} onChange={setStartDate} />
+            <DateSelect label="처음 함께한 날짜" value={startDate} onChange={setStartDate} />
             <DateSelect
-              label="마지막 물 준 날짜 *"
+              label="마지막 물 준 날짜"
               value={lastWateredDate}
               onChange={setLastWateredDate}
             />
@@ -120,7 +126,7 @@ export const RegisterPlantModal = ({
 
           <div className="grid grid-cols-3 gap-3">
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-foreground/80">물주기 *</label>
+              <label className="block text-sm font-medium text-foreground/80">물주기</label>
               <SelectBox
                 value={wateringInterval}
                 placeholder="선택"
@@ -130,7 +136,7 @@ export const RegisterPlantModal = ({
             </div>
 
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-foreground/80">영양제 *</label>
+              <label className="block text-sm font-medium text-foreground/80">영양제</label>
               <SelectBox
                 value={fertilizerInterval}
                 placeholder="선택"
@@ -140,7 +146,7 @@ export const RegisterPlantModal = ({
             </div>
 
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-foreground/80">분갈이 *</label>
+              <label className="block text-sm font-medium text-foreground/80">분갈이</label>
               <SelectBox
                 value={repottingInterval}
                 placeholder="선택"
@@ -152,7 +158,7 @@ export const RegisterPlantModal = ({
 
           <CareGuideSection careInfo={selectedSpecies.careInfo} />
 
-          <Button type="submit" widthFull>
+          <Button type="submit" widthFull disabled={!isFormValid}>
             등록하기
           </Button>
         </form>

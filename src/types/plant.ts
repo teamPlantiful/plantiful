@@ -9,6 +9,7 @@ export interface PlantSpeciesInfo {
   id: string
   koreanName: string
   scientificName: string
+  imageUrl?: string
   careInfo: CareInfo
 }
 
@@ -21,4 +22,16 @@ export interface PlantData {
   lastWateredDate: Date
   startDate: Date
   image?: string
+}
+
+export interface PlantCardInfo {
+  id: string
+  nickname: string
+  speciesName?: string | null
+  coverImageUrl?: string | null
+  defaultImageUrl?: string | null
+  ddayWater: number
+  onWater: (id: string) => void
+  onClick: (id: string) => void
+  className?: string
 }
