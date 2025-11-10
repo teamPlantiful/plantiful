@@ -22,3 +22,15 @@ export interface PlantData {
   startDate: Date
   image?: string
 }
+
+export interface PlantCardInfo {
+  id: string
+  nickname: string
+  speciesName?: string | null
+  coverImageUrl?: string | null
+  defaultImageUrl?: string | null
+  ddayWater: number
+  onWater: (id: string) => void
+  onClick: (id: string) => void
+  className?: string
+}

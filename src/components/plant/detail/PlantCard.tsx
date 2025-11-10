@@ -5,18 +5,7 @@ import { Droplets } from 'lucide-react'
 import Button from '@/components/common/button'
 import { Card } from '@/components/common/card'
 import cn from '@/lib/cn'
-
-export interface PlantCardProps {
-  id: string
-  nickname: string
-  speciesName?: string | null
-  coverImageUrl?: string | null
-  defaultImageUrl?: string | null
-  ddayWater: number
-  onWater: (id: string) => void
-  onClick: (id: string) => void
-  className?: string
-}
+import type { PlantCardInfo } from '@/types/plant'
 
 export default function PlantCard({
   id,
@@ -28,7 +17,7 @@ export default function PlantCard({
   onWater,
   onClick,
   className,
-}: PlantCardProps) {
+}: PlantCardInfo) {
   const [isWatering, setIsWatering] = useState(false)
 
   const image = useMemo(
