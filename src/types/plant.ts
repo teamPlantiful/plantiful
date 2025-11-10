@@ -9,6 +9,7 @@ export interface PlantSpeciesInfo {
   id: string
   koreanName: string
   scientificName: string
+  imageUrl?: string
   careInfo: CareInfo
 }
 
