@@ -1,19 +1,12 @@
 'use client'
 
-import { useState } from 'react';
 import Button from '@/components/common/button';
 import Input from '@/components/common/Input';
 import { Card, CardContent, CardHeader } from '@/components/common/card'; 
 import { Leaf } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-interface AuthFormProps {
-  authMode?: 'login' | 'register';
-}
-
-export default function Auth({ authMode = 'login' }: AuthFormProps) {
-  // useState로 로그인/회원가입 화면 나누기
-  const [isLogin, setIsLogin] = useState(authMode === 'login');
+export default function RegisterForm() {
   const router = useRouter();
 
   // 폼 이벤트 초기화 후 메인으로 돌아가기
@@ -37,10 +30,8 @@ export default function Auth({ authMode = 'login' }: AuthFormProps) {
 
         <Card className="shadow-card">
           <CardHeader>
-            <span className="text-2xl font-bold">{isLogin ? '로그인' : '회원가입'}</span>
-            <p className="pt-1 text-sm">
-              {isLogin ? '계정에 로그인하세요' : '새 계정을 만드세요'}
-            </p>
+            <span className="text-2xl font-bold">회원가입</span>
+            <p className="pt-1 text-sm">새 계정을 만드세요</p>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -66,25 +57,22 @@ export default function Auth({ authMode = 'login' }: AuthFormProps) {
                   required
                 />
               </div>
-              {!isLogin && (
-                <div className="pb-3">
-                  <label 
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    htmlFor="checkPassword">비밀번호 확인</label>
-                  <Input 
-                    id="checkPassword" 
-                    type="password" 
-                    placeholder="••••••••"
-                    required
-                  />
-                </div>
-              )}
+              <div className="pb-3">
+                <label 
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  htmlFor="checkPassword">비밀번호 확인</label>
+                <Input 
+                  id="checkPassword" 
+                  type="password" 
+                  placeholder="••••••••"
+                  required
+                />
+              </div>
+            
               <Button 
                 type="submit" 
                 className="w-full bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-              >
-                {isLogin ? '로그인' : '회원가입'}
-              </Button>
+              >회원가입</Button>
 
               <div className="relative my-3">
                 <div className="absolute inset-0 flex items-center">
@@ -95,10 +83,9 @@ export default function Auth({ authMode = 'login' }: AuthFormProps) {
               <div className="text-center text-sm mt-8">
                 <button
                   type="button"
-                  onClick={() => router.push(isLogin ? '/register' : '/login')}
+                  onClick={() => router.push('/login')}
                   className="text-primary hover:underline cursor-pointer"
-                >
-                  {isLogin ? '계정이 없으신가요? 회원가입하기' : '이미 계정이 있으신가요? 로그인하기'}
+                >이미 계정이 있으신가요? 로그인하기
                 </button>
               </div>
             </form>
