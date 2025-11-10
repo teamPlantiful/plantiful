@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Link from "next/link"
 
 export default function Register() {
   return (
@@ -11,4 +12,4 @@ export default function Register() {
       </Link>
     </div>
   )
-}
+
