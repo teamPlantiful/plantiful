@@ -124,7 +124,7 @@ export default function Page() {
         <div className="my-6" />
 
         {/* 로그아웃 기능 */}
-        <Link href="/auth">
+        <Link href="/login">
           <Button
             variant="outline"
             className="w-full border-destructive bg-destructive-foreground text-destructive hover:bg-destructive/10"
