@@ -1,14 +1,14 @@
 export interface CareInfo {
-  sunlight: string
-  waterAmount: string
-  temperature: string
-  humidity: string
+  lightDemandCode?: string
+  waterCycleCode?: string
+  temperatureCode?: string
+  humidityCode?: string
 }
 
 export interface PlantSpeciesInfo {
-  id: string
+  cntntsNo: string
   koreanName: string
-  scientificName: string
+  scientificName?: string
   imageUrl?: string
   careInfo: CareInfo
 }

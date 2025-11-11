@@ -2,7 +2,7 @@
 
 interface PlantInfoProps {
   koreanName: string
-  scientificName: string
+  scientificName?: string
   className?: string
 }
 
@@ -10,7 +10,7 @@ export function PlantInfo({ koreanName, scientificName, className }: PlantInfoPr
   return (
     <div className={className}>
       <h3 className="font-semibold text-lg text-foreground/80">{koreanName}</h3>
-      <p className="text-sm text-muted-foreground italic">{scientificName}</p>
+      {scientificName && <p className="text-sm text-muted-foreground italic">{scientificName}</p>}
     </div>
   )
 }
