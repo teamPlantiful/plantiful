@@ -5,14 +5,35 @@ import Input from '@/components/common/Input';
 import { Card, CardContent, CardHeader } from '@/components/common/card'; 
 import { Leaf } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { signInWithPassword } from '@/app/apis/supabaseClient';
 
 export default function LoginForm() {
   const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  // 폼 이벤트 초기화 후 메인으로 돌아가기
-  const handleSubmit = (e: React.FormEvent) => {
+  // 폼 이벤트 및 기본값 초기화
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    router.push('/');
+    setErrorMsg('');
+    setLoading(true); 
+
+    const { data, error } = await signInWithPassword(email, password);
+
+    setLoading(false);
+
+    if (error) {
+      setErrorMsg(error.message);
+      return; // 로그인 실패 시 에러 메시지 표시
+    }
+
+    if (data?.session) {
+      console.log('로그인 성공:', data.session.user);
+      router.push('/'); // 로그인 성공 시 메인 페이지로 이동
+    }
   };
 
   return (
@@ -41,8 +62,10 @@ export default function LoginForm() {
                   htmlFor="email">이메일</label>
                 <Input 
                   id="email" 
-                  type="email" 
+                  type="email"
                   placeholder="name@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)} // 추후, 최적화 작업 필요.
                   required
                 />
               </div>
@@ -54,9 +77,15 @@ export default function LoginForm() {
                   id="password" 
                   type="password" 
                   placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
                 />
               </div>
+              
+              {errorMsg && (
+                <p className="text-red-500 text-sm text-center">{errorMsg}</p>
+              )}
             
               <Button 
                 type="submit" 
