@@ -39,23 +39,23 @@ export interface PlantCardInfo {
 // DB 스키마에 맞는 Plant 타입
 export interface Plant {
   id: string
-  user_id: string
-  cntnts_no: string
-  korean_name: string
-  scientific_name?: string | null
-  default_image_url?: string | null
-  cover_image_url?: string | null
+  userId: string
+  cntntsNo: string
+  koreanName: string
+  scientificName?: string | null
+  defaultImageUrl?: string | null
+  coverImageUrl?: string | null
   nickname: string
-  watering_interval_days: number
-  fertilizer_interval_days: number
-  repotting_interval_days: number
-  adopted_at: string
-  last_watered_at: string
-  next_watering_date?: string | null
-  light_demand_code?: string | null
-  water_cycle_code?: string | null
-  temperature_code?: string | null
-  humidity_code?: string | null
-  created_at: string
-  updated_at: string
+  wateringIntervalDays: number
+  fertilizerIntervalDays: number
+  repottingIntervalDays: number
+  adoptedAt: string
+  lastWateredAt: string
+  nextWateringDate?: string | null
+  lightDemandCode?: string | null
+  waterCycleCode?: string | null
+  temperatureCode?: string | null
+  humidityCode?: string | null
+  createdAt: string
+  updatedAt: string
 }
