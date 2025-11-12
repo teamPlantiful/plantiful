@@ -21,7 +21,8 @@ export interface PlantData {
   repottingInterval: number
   lastWateredDate: Date
   startDate: Date
-  image?: string
+  image?: string // 기본 이미지 URL (API에서 제공)
+  uploadedImage?: File // 사용자가 업로드한 이미지 파일
 }
 
 export interface PlantCardInfo {

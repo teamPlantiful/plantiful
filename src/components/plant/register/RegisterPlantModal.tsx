@@ -52,10 +52,6 @@ export const RegisterPlantModal = ({
     e.preventDefault()
     if (!selectedSpecies) return
 
-    // 이미지 우선순위: 사용자 업로드 > API 제공 > undefined
-    // TODO: Supabase에 업로드 후 URL로 변환 필요
-    const imageUrl = uploadedImage ? URL.createObjectURL(uploadedImage) : selectedSpecies.imageUrl
-
     onRegister({
       species: selectedSpecies,
       nickname: nickname || selectedSpecies.koreanName,
@@ -64,7 +60,8 @@ export const RegisterPlantModal = ({
       repottingInterval: parseInt(repottingInterval) * 30,
       lastWateredDate,
       startDate,
-      image: imageUrl,
+      image: selectedSpecies.imageUrl,
+      uploadedImage: uploadedImage || undefined,
     })
     handleClose()
 
