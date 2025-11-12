@@ -1,13 +1,16 @@
 import './globals.css'
+import { AuthProvider } from '@/providers/authProvider'
 import QueryProvider from '@/providers/query-provider'
 
 export default function RootLayout({children}: Readonly<{children: React.ReactNode}>) {
   return (
     <html lang="ko">
       <body>
-        <QueryProvider>
-          {children}
-        </QueryProvider>
+        <AuthProvider>
+          <QueryProvider>
+            {children}
+          </QueryProvider>
+        </AuthProvider>
       </body>
     </html>
   )
