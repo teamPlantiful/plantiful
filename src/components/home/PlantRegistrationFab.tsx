@@ -12,15 +12,15 @@ export default function PlantRegistrationFab() {
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false)
   const [selectedSpecies, setSelectedSpecies] = useState<PlantSpeciesInfo | null>(null)
 
-  const handlePlantSelect = (plant: PerenualPlant | { common_name: string }) => {
+  const handlePlantSelect = (plant: PerenualPlant | { commonName: string }) => {
     // PerenualPlant를 PlantSpeciesInfo로 변환
     const isPerenualPlant = 'id' in plant
     const perenualPlant = isPerenualPlant ? (plant as PerenualPlant) : null
 
     const plantSpecies: PlantSpeciesInfo = {
       cntntsNo: perenualPlant ? String(perenualPlant.id) : Date.now().toString(),
-      koreanName: plant.common_name,
-      scientificName: perenualPlant?.scientific_name[0] ?? '',
+      koreanName: plant.commonName,
+      scientificName: perenualPlant?.scientificName[0] ?? '',
       careInfo: {
         lightDemandCode: '055002',
         waterCycleCode: '053003',
