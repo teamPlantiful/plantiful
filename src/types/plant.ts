@@ -1,14 +1,15 @@
 export interface CareInfo {
-  sunlight: string
-  waterAmount: string
-  temperature: string
-  humidity: string
+  lightDemandCode?: string
+  waterCycleCode?: string
+  temperatureCode?: string
+  humidityCode?: string
 }
 
 export interface PlantSpeciesInfo {
-  id: string
+  cntntsNo: string
   koreanName: string
-  scientificName: string
+  scientificName?: string
+  imageUrl?: string
   careInfo: CareInfo
 }
 
@@ -21,4 +22,40 @@ export interface PlantData {
   lastWateredDate: Date
   startDate: Date
   image?: string
+}
+
+export interface PlantCardInfo {
+  id: string
+  nickname: string
+  speciesName?: string | null
+  coverImageUrl?: string | null
+  defaultImageUrl?: string | null
+  ddayWater: number
+  onWater: (id: string) => void
+  onClick: (id: string) => void
+  className?: string
+}
+
+// DB 스키마에 맞는 Plant 타입
+export interface Plant {
+  id: string
+  userId: string
+  cntntsNo: string
+  koreanName: string
+  scientificName?: string | null
+  defaultImageUrl?: string | null
+  coverImageUrl?: string | null
+  nickname: string
+  wateringIntervalDays: number
+  fertilizerIntervalDays: number
+  repottingIntervalDays: number
+  adoptedAt: string
+  lastWateredAt: string
+  nextWateringDate?: string | null
+  lightDemandCode?: string | null
+  waterCycleCode?: string | null
+  temperatureCode?: string | null
+  humidityCode?: string | null
+  createdAt: string
+  updatedAt: string
 }
