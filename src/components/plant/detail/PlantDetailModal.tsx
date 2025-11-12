@@ -10,34 +10,20 @@ import Input from '@/components/common/Input'
 import SelectBox from '@/components/common/select-box'
 import { CareGuideSection } from '@/components/shared/CareGuideSection'
 
-import type { CareInfo } from '@/types/plant'
+import type { Plant, CareInfo } from '@/types/plant'
 import { generateDayOptions, generateMonthOptions } from '@/utils/date'
 
 type TabKey = 'status' | 'settings'
 
-interface PlantDetail {
-  id: string
-  nickname: string
-  species_name?: string | null
-  speciesInfo?: { koreanName?: string; scientificName?: string }
-  dday_water: number
-  dday_fertilize: number
-  dday_repot: number
-  watering_interval_days: number
-  fertilizer_interval_days: number
-  repot_interval_days: number
-  last_watered_at?: string | null
-  adopted_at?: string | null
-  careInfo?: CareInfo
-}
-
-interface PlantDetailModalProps {
+export interface PlantDetailModalProps {
   open: boolean
   onClose: () => void
-  plant: PlantDetail
+  plant: Plant
   onDelete: () => void
   onSaveNickname?: (nextName: string) => void
   onSaveIntervals?: (next: { watering: number; fertilizer: number; repotting: number }) => void
+  confirmOnSave?: boolean
+  confirmOnDelete?: boolean
 }
 
 export default function PlantDetailModal({
@@ -47,9 +33,11 @@ export default function PlantDetailModal({
   onDelete,
   onSaveNickname,
   onSaveIntervals,
+  confirmOnSave = true,
+  confirmOnDelete = true,
 }: PlantDetailModalProps) {
-  const [editing, setEditing] = useState<boolean>(false)
-  const [nickname, setNickname] = useState<string>(plant.nickname)
+  const [editing, setEditing] = useState(false)
+  const [nickname, setNickname] = useState(plant.nickname)
   const [tab, setTab] = useState<TabKey>('status')
 
   const dayOptions = useMemo(() => generateDayOptions(60), [])
@@ -59,24 +47,28 @@ export default function PlantDetailModal({
   const clamp = (n: number, min: number) => (Number.isFinite(n) ? Math.max(min, n) : min)
   const daysToMonths = (days: number) => clamp(Math.ceil(days / 30), 1)
   const monthsToDays = (months: number) => clamp(months * 30, 30)
+
   // 설정 탭 선택 값(표시용): 물=일, 영/분=개월
   const [wateringInterval, setWateringInterval] = useState<string>('7')
   const [fertilizerIntervalMonth, setFertilizerIntervalMonth] = useState<string>('1')
   const [repottingIntervalMonth, setRepottingIntervalMonth] = useState<string>('12')
 
-  // 모달 열릴 때/plant 변경 시, interval 기반으로 동기화
+  const ddayWater = useMemo(() => {
+    if (!plant.nextWateringDate) return null
+    const diff = Math.floor((new Date(plant.nextWateringDate).getTime() - Date.now()) / 86400000)
+    return diff >= 0 ? diff : 0
+  }, [plant.nextWateringDate])
+
   useEffect(() => {
     if (!open) return
     setEditing(false)
     setNickname(plant.nickname)
 
-    // 물: 일
-    const w = clamp(plant.watering_interval_days, 1)
+    const w = clamp(plant.wateringIntervalDays, 1)
     setWateringInterval(String(w))
 
-    // 영양제/분갈이: 최소 1개월
-    const fM = daysToMonths(clamp(plant.fertilizer_interval_days, 30))
-    const rM = daysToMonths(clamp(plant.repot_interval_days, 30))
+    const fM = daysToMonths(clamp(plant.fertilizerIntervalDays, 30))
+    const rM = daysToMonths(clamp(plant.repottingIntervalDays, 30))
     setFertilizerIntervalMonth(String(fM))
     setRepottingIntervalMonth(String(rM))
   }, [open, plant])
@@ -84,7 +76,9 @@ export default function PlantDetailModal({
   const handleSaveNickname = (): void => {
     setEditing(false)
     const next = nickname.trim()
-    if (next && next !== plant.nickname) onSaveNickname?.(next)
+    if (next && next !== plant.nickname) {
+      if (!confirmOnSave || window.confirm('변경하시겠습니까?')) onSaveNickname?.(next)
+    }
   }
 
   // 저장은 모두 '일' 단위로 변환해서 상위에 전달
@@ -93,12 +87,30 @@ export default function PlantDetailModal({
     const fertilizerDays = monthsToDays(clamp(Number(fertilizerIntervalMonth) || 1, 1))
     const repottingDays = monthsToDays(clamp(Number(repottingIntervalMonth) || 1, 1))
 
-    onSaveIntervals?.({
-      watering: wateringDays,
-      fertilizer: fertilizerDays,
-      repotting: repottingDays,
-    })
+    if (!confirmOnSave || window.confirm('변경하시겠습니까?')) {
+      onSaveIntervals?.({
+        watering: wateringDays,
+        fertilizer: fertilizerDays,
+        repotting: repottingDays,
+      })
+    }
   }
+
+  const careInfo: CareInfo | undefined = useMemo(() => {
+    if (
+      !plant.lightDemandCode &&
+      !plant.waterCycleCode &&
+      !plant.temperatureCode &&
+      !plant.humidityCode
+    )
+      return undefined
+    return {
+      lightDemandCode: plant.lightDemandCode ?? undefined,
+      waterCycleCode: plant.waterCycleCode ?? undefined,
+      temperatureCode: plant.temperatureCode ?? undefined,
+      humidityCode: plant.humidityCode ?? undefined,
+    }
+  }, [plant.lightDemandCode, plant.waterCycleCode, plant.temperatureCode, plant.humidityCode])
 
   return (
     <Modal open={open} onClose={onClose} size="md" closeOnBackdrop className="animate-fade-in">
@@ -114,12 +126,7 @@ export default function PlantDetailModal({
                   className="flex-1 min-w-0"
                 />
               </div>
-              <Button
-                size="sm"
-                onClick={() => {
-                  if (window.confirm('변경하시겠습니까?')) handleSaveNickname()
-                }}
-              >
+              <Button size="sm" onClick={handleSaveNickname}>
                 저장
               </Button>
               <Button size="sm" variant="ghost" onClick={() => setEditing(false)}>
@@ -170,7 +177,7 @@ export default function PlantDetailModal({
           </button>
 
           <button
-            id="tab-status"
+            id="tab-settings"
             type="button"
             role="tab"
             aria-selected={tab === 'settings'}
@@ -199,7 +206,7 @@ export default function PlantDetailModal({
                   <Droplets className="h-5 w-5 text-secondary" />
                   <span className="font-medium">물주기</span>
                 </div>
-                <span className="text-sm font-semibold text-secondary">{`D-${plant.dday_water}`}</span>
+                <span className="text-sm font-semibold text-secondary">{`D-${ddayWater}`}</span>
               </div>
 
               {/* 영양제 */}
@@ -208,7 +215,7 @@ export default function PlantDetailModal({
                   <HeartPlus className="h-5 w-5 text-foreground" />
                   <span className="font-medium">영양제</span>
                 </div>
-                <span className="text-sm font-semibold">{`D-${plant.dday_fertilize}`}</span>
+                <span className="text-sm font-semibold">{`D-${fertilizerIntervalMonth}`}</span>
               </div>
 
               {/* 분갈이 */}
@@ -217,11 +224,11 @@ export default function PlantDetailModal({
                   <Sprout className="h-5 w-5 text-muted-foreground" />
                   <span className="font-medium">분갈이</span>
                 </div>
-                <span className="text-sm font-semibold text-muted-foreground">{`D-${plant.dday_repot}`}</span>
+                <span className="text-sm font-semibold text-muted-foreground">{`D-${repottingIntervalMonth}`}</span>
               </div>
             </div>
 
-            {plant.careInfo && <CareGuideSection careInfo={plant.careInfo} />}
+            {careInfo && <CareGuideSection careInfo={careInfo} />}
           </div>
         )}
 
@@ -262,12 +269,7 @@ export default function PlantDetailModal({
               />
             </div>
 
-            <Button
-              className="w-full mt-1"
-              onClick={() => {
-                if (window.confirm('변경하시겠습니까?')) handleSaveIntervals()
-              }}
-            >
+            <Button className="w-full mt-1" onClick={handleSaveIntervals}>
               주기 저장
             </Button>
           </div>
@@ -279,7 +281,7 @@ export default function PlantDetailModal({
           variant="destructive-outline"
           className="w-full"
           onClick={() => {
-            if (window.confirm('정말 삭제할까요?')) onDelete()
+            if (!confirmOnDelete || window.confirm('정말 삭제할까요?')) onDelete()
           }}
         >
           <Trash2 className="h-4 w-4 mr-2" />

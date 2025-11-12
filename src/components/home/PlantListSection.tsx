@@ -1,9 +1,12 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import PlantCard from '@/components/plant/detail/PlantCard'
 import { useGetPlants } from '@/hooks/queries/useGetPlants'
-
+import { useQueryClient } from '@tanstack/react-query'
+import { queryKeys } from '@/lib/queryKeys'
+import type { Plant } from '@/types/plant'
+import PlantDetailModal from '@/components/plant/detail/PlantDetailModal'
 interface PlantListSectionProps {
   search?: string
   sort?: 'water' | 'name' | 'recent'
@@ -11,6 +14,10 @@ interface PlantListSectionProps {
 
 export default function PlantListSection({ search = '', sort = 'water' }: PlantListSectionProps) {
   const { data: plants = [], isLoading } = useGetPlants()
+  const queryClient = useQueryClient()
+
+  const [open, setOpen] = useState(false)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
 
   const sortedPlants = useMemo(() => {
     // 1. 검색 필터링
@@ -42,19 +49,62 @@ export default function PlantListSection({ search = '', sort = 'water' }: PlantL
     })
   }, [plants, sort, search])
 
+  const selected = useMemo(
+    () => plants.find((p) => p.id === selectedId) ?? null,
+    [plants, selectedId]
+  )
+
+  const updatePlantsCache = (updater: (prev: Plant[]) => Plant[]) => {
+    queryClient.setQueryData<Plant[]>(queryKeys.plants.list(), (prev) => {
+      const safePrev = prev ?? []
+      return updater(safePrev)
+    })
+  }
+
   const handleCardClick = (id: string) => {
-    // TODO: 식물 상세 페이지 이동 구현
-    console.log('Plant clicked:', id)
+    setSelectedId(id)
+    setOpen(true)
   }
 
   const handleWater = async (id: string) => {
-    // TODO: Supabase에서 last_watered_at 업데이트
-    // const { error } = await supabase
-    //   .from('plants')
-    //   .update({ last_watered_at: new Date().toISOString() })
-    //   .eq('id', id)
+    const now = new Date().toISOString()
+    updatePlantsCache((prev) => prev.map((p) => (p.id === id ? { ...p, lastWateredAt: now } : p)))
+  }
+  // 모달 내의 엑션들
+  const handleSaveNickname = (nextName: string) => {
+    if (!selectedId) return
+    updatePlantsCache((prev) =>
+      prev.map((p) => (p.id === selectedId ? { ...p, nickname: nextName } : p))
+    )
+    setOpen(false)
+  }
 
-    console.log('Water plant:', id)
+  const handleSaveIntervals = (next: {
+    watering: number
+    fertilizer: number
+    repotting: number
+  }) => {
+    if (!selectedId) return
+
+    updatePlantsCache((prev) =>
+      prev.map((p) =>
+        p.id === selectedId
+          ? {
+              ...p,
+              wateringIntervalDays: next.watering,
+              fertilizerIntervalDays: next.fertilizer,
+              repottingIntervalDays: next.repotting,
+            }
+          : p
+      )
+    )
+    setOpen(false)
+  }
+
+  const handleDelete = () => {
+    if (!selectedId) return
+    updatePlantsCache((prev) => prev.filter((p) => p.id !== selectedId))
+    setOpen(false)
   }
 
   return (
@@ -93,6 +143,16 @@ export default function PlantListSection({ search = '', sort = 'water' }: PlantL
             )
           })}
         </section>
+      )}
+      {open && selected && (
+        <PlantDetailModal
+          open={open}
+          onClose={() => setOpen(false)}
+          plant={selected}
+          onDelete={handleDelete}
+          onSaveNickname={handleSaveNickname}
+          onSaveIntervals={handleSaveIntervals}
+        />
       )}
     </>
   )
