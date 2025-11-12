@@ -10,7 +10,7 @@ import PlantList from './PlantList'
 interface PlantSpeciesSearchModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSelect: (species: PerenualPlant | { common_name: string }) => void
+  onSelect: (species: PerenualPlant | { commonName: string }) => void
 }
 
 export default function PlantSpeciesSearchModal({
@@ -28,7 +28,7 @@ export default function PlantSpeciesSearchModal({
 
   const handleCustomSelect = () => {
     if (!customName.trim()) return
-    onSelect({ common_name: customName })
+    onSelect({ commonName: customName })
     setCustomName('')
   }
 
