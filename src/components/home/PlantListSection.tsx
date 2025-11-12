@@ -4,45 +4,29 @@ import { useMemo, useState } from 'react'
 import Input from '@/components/common/Input'
 import SelectBox from '@/components/common/select-box'
 import PlantCard from '@/components/plant/detail/PlantCard'
-import type { Plant } from '@/types/plant'
 import { Search } from 'lucide-react'
+import { useGetPlants } from '@/hooks/queries/useGetPlants'
 
 export default function PlantListSection() {
   const [sort, setSort] = useState('water')
-  const [plants, setPlants] = useState<Plant[]>([])
-
-  // TODO: Supabase에서 식물 데이터 fetch
-  // useEffect(() => {
-  //   const fetchPlants = async () => {
-  //     const { data } = await supabase
-  //       .from('plants')
-  //       .select('*')
-  //       .order('created_at', { ascending: false })
-  //     setPlants(data || [])
-  //   }
-  //   fetchPlants()
-  // }, [])
+  const { data: plants = [], isLoading } = useGetPlants()
 
   const sortedPlants = useMemo(() => {
     if (sort === 'name') {
       return [...plants].sort((a, b) => a.nickname.localeCompare(b.nickname))
     }
     if (sort === 'recent') {
-      return [...plants].sort((a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      return [...plants].sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       )
     }
     // 물주기 우선 정렬
     return [...plants].sort((a, b) => {
       const ddayA = a.nextWateringDate
-        ? Math.floor(
-            (new Date(a.nextWateringDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-          )
+        ? Math.floor((new Date(a.nextWateringDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
         : Infinity
       const ddayB = b.nextWateringDate
-        ? Math.floor(
-            (new Date(b.nextWateringDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-          )
+        ? Math.floor((new Date(b.nextWateringDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
         : Infinity
       return ddayA - ddayB
     })
@@ -95,7 +79,11 @@ export default function PlantListSection() {
       </section>
 
       {/* 식물 목록 */}
-      {sortedPlants.length === 0 ? (
+      {isLoading ? (
+        <section>
+          <p className="text-center text-muted-foreground">식물 목록을 불러오는 중...</p>
+        </section>
+      ) : sortedPlants.length === 0 ? (
         <section>
           <p className="text-center text-muted-foreground">아직 등록된 식물이 없습니다</p>
         </section>
