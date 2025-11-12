@@ -32,14 +32,12 @@ interface NongsaroResponse {
  * 특정 sType과 sText로 농사로 API를 검색하고 아이템 목록을 반환
  */
 async function searchNongsaro(
-  sType: 'sCntntsSj' | 'sPlntbneNm' | 'sPlntzrNm',
-  sText: string,
+  params: Record<string, string>,
   apiKey: string,
   parser: XMLParser
 ): Promise<NongsaroItem[]> {
-  const url = `http://api.nongsaro.go.kr/service/garden/gardenList?apiKey=${apiKey}&sType=${sType}&sText=${encodeURIComponent(
-    sText
-  )}`
+  const searchParams = new URLSearchParams(params)
+  const url = `http://api.nongsaro.go.kr/service/garden/gardenList?apiKey=${apiKey}&${searchParams.toString()}`
 
   try {
     const apiRes = await axios.get(url, {
@@ -61,7 +59,10 @@ async function searchNongsaro(
     }
     return []
   } catch (error) {
-    console.error(` ${sType} 검색 중 오류:`, error instanceof Error ? error.message : error)
+    console.error(
+      ` ${JSON.stringify(params)} 검색 중 오류:`,
+      error instanceof Error ? error.message : error
+    )
     return []
   }
 }
@@ -82,11 +83,28 @@ export async function GET(request: Request) {
   try {
     const parser = new XMLParser()
 
-    const results = await Promise.allSettled([
-      searchNongsaro('sCntntsSj', q, NONGSARO_API_KEY, parser), // 식물명
-      searchNongsaro('sPlntbneNm', q, NONGSARO_API_KEY, parser), // 학명
-      searchNongsaro('sPlntzrNm', q, NONGSARO_API_KEY, parser), // 영명
-    ])
+    const korConsonantRegex = /^[ㄱ-ㅎ]$/
+    const engConsonantRegex = /^[A-Z]$/i
+
+    let results: PromiseSettledResult<NongsaroItem[]>[]
+    if (korConsonantRegex.test(q)) {
+      // 1. 한글 자음 한 글자일 경우 (초성 검색)
+      results = await Promise.allSettled([
+        searchNongsaro({ wordType: 'cntntsSj', word: q }, NONGSARO_API_KEY, parser),
+      ])
+    } else if (engConsonantRegex.test(q)) {
+      // 2. 영어 알파벳 한 글자일 경우 (초성 검색)
+      results = await Promise.allSettled([
+        searchNongsaro({ wordType: 'plntbneNm', word: q.toUpperCase() }, NONGSARO_API_KEY, parser),
+      ])
+    } else {
+      // 3. 그 외 모든 경우 (일반 텍스트 검색)
+      results = await Promise.allSettled([
+        searchNongsaro({ sType: 'sCntntsSj', sText: q }, NONGSARO_API_KEY, parser), // 식물명
+        searchNongsaro({ sType: 'sPlntbneNm', sText: q }, NONGSARO_API_KEY, parser), // 학명
+        searchNongsaro({ sType: 'sPlntzrNm', sText: q }, NONGSARO_API_KEY, parser), // 영명
+      ])
+    }
 
     const allItems = results
       .filter(
