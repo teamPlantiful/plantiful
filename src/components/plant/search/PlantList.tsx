@@ -29,16 +29,14 @@ export default function PlantList({
           className="w-full cursor-pointer p-4 rounded-lg border border-border hover:bg-accent/50 transition-colors text-left flex items-center gap-3"
         >
           <img
-            src={
-              plant.default_image?.medium_url || 'https://placehold.co/48x48/EBF4E5/3B5935?text=?'
-            }
-            alt={plant.common_name}
+            src={plant.defaultImage?.mediumUrl || 'https://placehold.co/48x48/EBF4E5/3B5935?text=?'}
+            alt={plant.commonName}
             className="w-12 h-12 rounded-md object-cover bg-secondary/20"
           />
           <div>
-            <h3 className="font-semibold text-foreground">{plant.common_name}</h3>
+            <h3 className="font-semibold text-foreground">{plant.commonName}</h3>
             <p className="text-sm text-muted-foreground italic">
-              {plant.scientific_name.join(', ')}
+              {(plant.scientificName || []).join(', ')}
             </p>
           </div>
         </button>
