@@ -18,7 +18,7 @@ export default function PlantSpeciesSearchModal({
   onOpenChange,
   onSelect,
 }: PlantSpeciesSearchModalProps) {
-  const { searchQuery, setSearchQuery, plants, loading, error, defaultPlants } = usePlantSearch()
+  const { searchQuery, setSearchQuery, plants, loading, error } = usePlantSearch()
   const [customName, setCustomName] = useState('')
 
   const handleSelect = (plant: PerenualPlant) => {
@@ -57,7 +57,6 @@ export default function PlantSpeciesSearchModal({
             loading={loading}
             error={error}
             plants={plants}
-            defaultPlants={defaultPlants}
             searchQuery={searchQuery}
             onSelect={handleSelect}
           />
