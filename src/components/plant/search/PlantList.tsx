@@ -7,6 +7,7 @@ interface PlantListProps {
   loading: boolean
   error: string | null
   plants: PerenualPlant[]
+  defaultPlants: PerenualPlant[]
   searchQuery: string
   onSelect: (plant: PerenualPlant) => void
 }
@@ -15,6 +16,7 @@ export default function PlantList({
   loading,
   error,
   plants,
+  defaultPlants,
   searchQuery,
   onSelect,
 }: PlantListProps) {
@@ -27,14 +29,16 @@ export default function PlantList({
           className="w-full cursor-pointer p-4 rounded-lg border border-border hover:bg-accent/50 transition-colors text-left flex items-center gap-3"
         >
           <img
-            alt={plant.commonName}
-            src={plant.defaultImage?.mediumUrl || 'https://placehold.co/48x48/EBF4E5/3B5935?text=?'}
+            src={
+              plant.default_image?.medium_url || 'https://placehold.co/48x48/EBF4E5/3B5935?text=?'
+            }
+            alt={plant.common_name}
             className="w-12 h-12 rounded-md object-cover bg-secondary/20"
           />
           <div>
-            <h3 className="font-semibold text-foreground">{plant.commonName}</h3>
+            <h3 className="font-semibold text-foreground">{plant.common_name}</h3>
             <p className="text-sm text-muted-foreground italic">
-              {(plant.scientificName || []).join(', ')}
+              {plant.scientific_name.join(', ')}
             </p>
           </div>
         </button>
@@ -62,9 +66,6 @@ export default function PlantList({
       <p className="text-center text-muted-foreground pt-10">검색 결과가 없습니다.</p>
     )
   }
-  return(
-    <p className = "text-center text-muted-foreground pt-10">
-      검색어를 입력하여 식물을 찾아보세요
-    </p>
-  )
+
+  return renderList(defaultPlants)
 }
