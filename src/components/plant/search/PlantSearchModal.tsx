@@ -2,7 +2,8 @@
 
 import { Modal, ModalHeader, ModalContent } from '@/components/common/modal'
 import { useState } from 'react'
-import { usePlantSearch, PerenualPlant } from '@/hooks/usePlantSearch'
+import { usePlantSearch } from '@/hooks/usePlantSearch'
+import type { PlantSearchResult } from '@/types/plant'
 import PlantSearchInput from './PlantSearchInput'
 import PlantCustomInput from './PlantCustomInput'
 import PlantList from './PlantList'
@@ -10,7 +11,7 @@ import PlantList from './PlantList'
 interface PlantSpeciesSearchModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSelect: (species: PerenualPlant | { commonName: string }) => void
+  onSelect: (species: PlantSearchResult| { commonName: string }) => void
 }
 
 export default function PlantSpeciesSearchModal({
@@ -21,7 +22,7 @@ export default function PlantSpeciesSearchModal({
   const { searchQuery, setSearchQuery, plants, loading, error } = usePlantSearch()
   const [customName, setCustomName] = useState('')
 
-  const handleSelect = (plant: PerenualPlant) => {
+  const handleSelect = (plant: PlantSearchResult) => {
     onSelect(plant)
     setSearchQuery('')
   }
