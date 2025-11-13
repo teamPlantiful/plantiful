@@ -60,3 +60,10 @@ export interface Plant {
   createdAt: string
   updatedAt: string
 }
+//농사로 API 검색결과 목록 아이템 타입
+export interface PlantSearchResult {
+  id: number
+  commonName: string
+  scientificName: string[]
+  defaultImage?: { mediumUrl: string }
+}
