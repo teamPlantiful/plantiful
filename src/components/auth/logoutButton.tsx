@@ -12,7 +12,7 @@ export default function LogoutButton() {
   // 슈퍼베이스와 연동된 zustand를 이용해서 로그아웃 후 로그인 페이지로 돌아가는 핸들러
   const logout = async () => {
     await signOut();
-    router.push('/login');
+    router.replace('/login');
   };
 
   return (
