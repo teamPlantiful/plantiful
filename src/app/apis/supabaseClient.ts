@@ -15,13 +15,27 @@ export const signInWithPassword = async (
   })
 }
 
+export const signUp = async (
+  email: string,
+  password: string,
+  name: string
+): Promise<AuthResponse> => {
+  return await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: { name },
+    },
+  })
+}
+
 export const getCurrentUserId = async (): Promise<string> => {
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
   if (!user) {
-    throw new Error('User not authenticated')
+    throw new Error('인증되지 않은 유저입니다.')
   }
 
   return user.id
