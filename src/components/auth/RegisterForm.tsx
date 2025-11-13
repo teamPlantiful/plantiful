@@ -64,7 +64,13 @@ export default function RegisterForm() {
     // 회원가입 시 에러 발생하면 에러 메세지 출력
     if (signUpError) {
       setLoading(false);
-      setError(`회원가입 중 에러가 발생했습니다. ${signUpError.message}`);
+      // 중복 이메일 체크
+      if (signUpError.message === 'User already registered') {
+        setError('이미 등록된 이메일입니다.');
+      } else { // 기타 에러
+        setError(`회원가입 중 에러가 발생했습니다. ${signUpError.message}`);
+      }
+
       return;
     }
 
