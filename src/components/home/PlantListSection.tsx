@@ -1,27 +1,37 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import Input from '@/components/common/Input'
-import SelectBox from '@/components/common/select-box'
+import { useMemo } from 'react'
 import PlantCard from '@/components/plant/detail/PlantCard'
-import { Search } from 'lucide-react'
 import { useGetPlants } from '@/hooks/queries/useGetPlants'
 
-export default function PlantListSection() {
-  const [sort, setSort] = useState('water')
+interface PlantListSectionProps {
+  search?: string
+  sort?: 'water' | 'name' | 'recent'
+}
+
+export default function PlantListSection({ search = '', sort = 'water' }: PlantListSectionProps) {
   const { data: plants = [], isLoading } = useGetPlants()
 
   const sortedPlants = useMemo(() => {
+    // 1. 검색 필터링
+    let filtered = plants
+    if (search) {
+      filtered = plants.filter((plant) =>
+        plant.nickname.toLowerCase().includes(search.toLowerCase())
+      )
+    }
+
+    // 2. 정렬
     if (sort === 'name') {
-      return [...plants].sort((a, b) => a.nickname.localeCompare(b.nickname))
+      return [...filtered].sort((a, b) => a.nickname.localeCompare(b.nickname))
     }
     if (sort === 'recent') {
-      return [...plants].sort(
+      return [...filtered].sort(
         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       )
     }
     // 물주기 우선 정렬
-    return [...plants].sort((a, b) => {
+    return [...filtered].sort((a, b) => {
       const ddayA = a.nextWateringDate
         ? Math.floor((new Date(a.nextWateringDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
         : Infinity
@@ -30,7 +40,7 @@ export default function PlantListSection() {
         : Infinity
       return ddayA - ddayB
     })
-  }, [plants, sort])
+  }, [plants, sort, search])
 
   const handleCardClick = (id: string) => {
     // TODO: 식물 상세 페이지 이동 구현
@@ -49,35 +59,6 @@ export default function PlantListSection() {
 
   return (
     <>
-      {/* 검색 & 정렬 */}
-      <section className="space-y-2">
-        <div className="flex gap-2">
-          <div className="flex-1">
-            <Input
-              placeholder="식물 이름 검색"
-              leftIcon={<Search className="size-4" />}
-              aria-label="식물 검색"
-              className="h-11 pl-10 rounded-md"
-            />
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold text-foreground">내 식물들</h2>
-          <SelectBox
-            className="w-[140px]"
-            value={sort}
-            placeholder="정렬"
-            options={[
-              { value: 'water', label: '물주기 우선' },
-              { value: 'name', label: '이름순' },
-              { value: 'recent', label: '최근 등록순' },
-            ]}
-            onSelect={setSort}
-          />
-        </div>
-      </section>
-
       {/* 식물 목록 */}
       {isLoading ? (
         <section>

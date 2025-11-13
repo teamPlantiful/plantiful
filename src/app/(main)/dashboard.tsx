@@ -3,14 +3,17 @@
 import { useAuthStore } from '@/store/useAuthStore';
 import TodayPlantSection from '@/components/home/TodayPlantSection';
 import PlantListSection from '@/components/home/PlantListSection';
+import PlantFilterBar from '@/components/home/PlantFilterBar';
 import PlantRegistrationFab from '@/components/home/PlantRegistrationFab';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 
 export default function Dashboard() {
   const { user, loading } = useAuthStore();
   const router = useRouter();
+  const [search, setSearch] = useState('');
+  const [sort, setSort] = useState<'water' | 'name' | 'recent'>('water');
 
   useEffect(() => {
     // 로그인 안 되어있으면 로그인 페이지로 이동
@@ -33,10 +36,16 @@ export default function Dashboard() {
     <div>
       <div className="max-w-xl mx-auto p-4 space-y-6 md:space-y-8 animate-fade-in">
         <TodayPlantSection />
-        <PlantListSection />
+        <PlantFilterBar
+          search={search}
+          sort={sort}
+          onSearchChange={setSearch}
+          onSortChange={setSort}
+        />
+        <PlantListSection search={search} sort={sort} />
         <PlantRegistrationFab />
       </div>
     </div>
-    
+
   );
 }
