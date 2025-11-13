@@ -8,6 +8,7 @@ import { RegisterPlantModal } from '@/components/plant/register/RegisterPlantMod
 import { PerenualPlant } from '@/hooks/usePlantSearch'
 import type { PlantSpeciesInfo } from '@/types/plant'
 import { addCard } from '@/app/apis/supabaseApi'
+import { queryKeys } from '@/lib/queryKeys'
 
 export default function PlantRegistrationFab() {
   const queryClient = useQueryClient()
@@ -49,7 +50,7 @@ export default function PlantRegistrationFab() {
       setIsRegisterModalOpen(false)
       setSelectedSpecies(null)
       // 식물 목록 쿼리 무효화하여 자동 리페치
-      queryClient.invalidateQueries({ queryKey: ['plants'] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.plants.lists() })
     } catch (error) {
       console.error('식물 등록 실패:', error)
       alert('식물 등록에 실패했습니다. 다시 시도해주세요.')
