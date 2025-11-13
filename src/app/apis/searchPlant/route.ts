@@ -1,13 +1,8 @@
 import { NextResponse } from 'next/server'
 import { XMLParser } from 'fast-xml-parser'
 import axios from 'axios'
+import {PlantSearchResult} from '@/types/plant'
 
-export interface PerenualPlant {
-  id: number
-  commonName: string
-  scientificName: string[]
-  defaultImage?: { mediumUrl: string }
-}
 
 // --- 농사로 API 타입 ---
 interface NongsaroItem {
@@ -118,7 +113,7 @@ export async function GET(request: Request) {
     })
     const itemsList = Array.from(uniqueItems.values())
 
-    const plants: PerenualPlant[] = itemsList.map((item) => {
+    const plants: PlantSearchResult[] = itemsList.map((item) => {
       const thumbRaw = Array.isArray(item.rtnThumbFileUrl)
         ? item.rtnThumbFileUrl[0]
         : (item.rtnThumbFileUrl ?? '')
