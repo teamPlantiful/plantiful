@@ -5,19 +5,19 @@ import Button from '@/components/common/button'
 import Input from '@/components/common/Input'
 import SelectBox from '@/components/common/select-box'
 import { ArrowLeft } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { PlantSpeciesInfo, PlantData } from '@/types/plant'
 import ImageUpload from './ImageUpload'
 import { PlantInfo } from '../../shared/PlantInfo'
 import { DateSelect } from './DateSelect'
 import { CareGuideSection } from '../../shared/CareGuideSection'
 import { generateDayOptions, generateMonthOptions } from '@/utils/date'
+import { useAddPlant } from '@/hooks/queries/useAddPlant'
 
 interface RegisterPlantModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   selectedSpecies: PlantSpeciesInfo | null
-  onRegister: (data: Omit<PlantData, 'species'> & { species: PlantSpeciesInfo }) => void
   onBack: () => void
 }
 
@@ -28,9 +28,9 @@ export const RegisterPlantModal = ({
   open,
   onOpenChange,
   selectedSpecies,
-  onRegister,
   onBack,
 }: RegisterPlantModalProps) => {
+  const { mutate: addPlant, isPending } = useAddPlant()
   const [nickname, setNickname] = useState('')
   const [wateringInterval, setWateringInterval] = useState('7')
   const [fertilizerInterval, setFertilizerInterval] = useState('1')
@@ -52,7 +52,7 @@ export const RegisterPlantModal = ({
     e.preventDefault()
     if (!selectedSpecies) return
 
-    onRegister({
+    const plantData: PlantData = {
       species: selectedSpecies,
       nickname: nickname || selectedSpecies.koreanName,
       wateringInterval: parseInt(wateringInterval),
@@ -62,9 +62,22 @@ export const RegisterPlantModal = ({
       startDate,
       image: selectedSpecies.imageUrl,
       uploadedImage: uploadedImage || undefined,
-    })
-    handleClose()
+    }
 
+    addPlant(plantData, {
+      onSuccess: () => {
+        console.log('식물 등록 성공:', plantData)
+        onOpenChange(false)
+        resetForm()
+      },
+      onError: (error) => {
+        console.error('식물 등록 실패:', error)
+        alert('식물 등록에 실패했습니다. 다시 시도해주세요.')
+      },
+    })
+  }
+
+  const resetForm = () => {
     setNickname('')
     setWateringInterval('7')
     setFertilizerInterval('1')
@@ -73,6 +86,13 @@ export const RegisterPlantModal = ({
     setStartDate(new Date())
     setUploadedImage(null)
   }
+
+  // 모달이 닫힐 때 form 리셋
+  useEffect(() => {
+    if (!open && !isPending) {
+      resetForm()
+    }
+  }, [open, isPending])
 
   if (!selectedSpecies) return null
 
@@ -155,7 +175,7 @@ export const RegisterPlantModal = ({
 
           <CareGuideSection careInfo={selectedSpecies.careInfo} />
 
-          <Button type="submit" widthFull disabled={!isFormValid}>
+          <Button type="submit" widthFull disabled={!isFormValid} isLoading={isPending}>
             등록하기
           </Button>
         </form>
