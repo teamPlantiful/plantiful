@@ -41,7 +41,7 @@ export const RegisterPlantModal = ({
   selectedSpecies,
   onBack,
 }: RegisterPlantModalProps) => {
-  const { mutate: addPlant, isPending } = useAddPlant()
+  const { mutate: addPlant } = useAddPlant()
   const {
     register,
     control,
@@ -80,12 +80,11 @@ export const RegisterPlantModal = ({
       uploadedImage: data.uploadedImage || undefined,
     }
 
+    // 즉시 모달 닫고 백그라운드에서 업로드
+    onOpenChange(false)
+    reset()
+
     addPlant(plantData, {
-      onSuccess: () => {
-        console.log('식물 등록 성공:', plantData)
-        onOpenChange(false)
-        reset()
-      },
       onError: (error) => {
         console.error('식물 등록 실패:', error)
         alert('식물 등록에 실패했습니다. 다시 시도해주세요.')
@@ -95,10 +94,10 @@ export const RegisterPlantModal = ({
 
   // 모달이 닫힐 때 form 리셋
   useEffect(() => {
-    if (!open && !isPending) {
+    if (!open) {
       reset()
     }
-  }, [open, isPending, reset])
+  }, [open, reset])
 
   if (!selectedSpecies) return null
 
@@ -218,7 +217,7 @@ export const RegisterPlantModal = ({
 
           <CareGuideSection careInfo={selectedSpecies.careInfo} />
 
-          <Button type="submit" widthFull disabled={!isValid} isLoading={isPending}>
+          <Button type="submit" widthFull disabled={!isValid}>
             등록하기
           </Button>
         </form>
