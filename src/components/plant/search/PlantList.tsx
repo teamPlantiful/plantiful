@@ -1,14 +1,14 @@
 'use client'
 
 import { Loader2 } from 'lucide-react'
-import { PerenualPlant } from '@/hooks/usePlantSearch'
+import type { PlantSearchResult } from '@/types/plant'
 
 interface PlantListProps {
   loading: boolean
   error: string | null
-  plants: PerenualPlant[]
+  plants: PlantSearchResult[]
   searchQuery: string
-  onSelect: (plant: PerenualPlant) => void
+  onSelect: (plant: PlantSearchResult) => void
 }
 
 export default function PlantList({
@@ -18,7 +18,7 @@ export default function PlantList({
   searchQuery,
   onSelect,
 }: PlantListProps) {
-  const renderList = (list: PerenualPlant[]) => (
+  const renderList = (list: PlantSearchResult[]) => (
     <>
       {list.map((plant) => (
         <button
@@ -48,7 +48,7 @@ export default function PlantList({
         <Loader2 className="h-6 w-6 animate-spin text-primary" />
         <span className="ml-2">검색 중...</span>
       </div>
-    )
+    ) 
   }
 
   if (error) {
@@ -62,9 +62,7 @@ export default function PlantList({
       <p className="text-center text-muted-foreground pt-10">검색 결과가 없습니다.</p>
     )
   }
-  return(
-    <p className = "text-center text-muted-foreground pt-10">
-      검색어를 입력하여 식물을 찾아보세요
-    </p>
+  return (
+    <p className="text-center text-muted-foreground pt-10">검색어를 입력하여 식물을 찾아보세요</p>
   )
 }

@@ -5,8 +5,8 @@ import { useQueryClient } from '@tanstack/react-query'
 import Fab from '@/components/common/fab'
 import PlantSpeciesSearchModal from '@/components/plant/search/PlantSearchModal'
 import { RegisterPlantModal } from '@/components/plant/register/RegisterPlantModal'
-import { PerenualPlant } from '@/hooks/usePlantSearch'
-import type { PlantSpeciesInfo } from '@/types/plant'
+import type { PlantSpeciesInfo,PlantSearchResult } from '@/types/plant'
+
 import { addCard } from '@/app/apis/supabaseApi'
 import { queryKeys } from '@/lib/queryKeys'
 
@@ -16,15 +16,15 @@ export default function PlantRegistrationFab() {
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false)
   const [selectedSpecies, setSelectedSpecies] = useState<PlantSpeciesInfo | null>(null)
 
-  const handlePlantSelect = (plant: PerenualPlant | { commonName: string }) => {
+  const handlePlantSelect = (plant: PlantSearchResult | { commonName: string }) => {
     // PerenualPlant를 PlantSpeciesInfo로 변환
-    const isPerenualPlant = 'id' in plant
-    const perenualPlant = isPerenualPlant ? (plant as PerenualPlant) : null
+    const isSearchResult = 'id' in plant
+    const searchResult = isSearchResult ? (plant as PlantSearchResult) : null
 
     const plantSpecies: PlantSpeciesInfo = {
-      cntntsNo: perenualPlant ? String(perenualPlant.id) : Date.now().toString(),
+      cntntsNo: searchResult? String(searchResult.id) : Date.now().toString(),
       koreanName: plant.commonName,
-      scientificName: perenualPlant?.scientificName[0] ?? '',
+      scientificName: searchResult?.scientificName[0] ?? '',
       careInfo: {
         lightDemandCode: '055002',
         waterCycleCode: '053003',
