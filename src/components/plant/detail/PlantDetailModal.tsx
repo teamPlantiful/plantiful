@@ -45,7 +45,7 @@ export default function PlantDetailModal({
 
   // 설정 탭 선택 값(표시용): 물=일, 영/분=개월
   const [wateringInterval, setWateringInterval] = useState<string>('7')
-  const [fertilizerIntervalMonth, setFertilizerIntervalMonth] = useState<string>('1')
+  const [fertilizerIntervalMonth, setFertilizerIntervalMonth] = useState<string>('12')
   const [repottingIntervalMonth, setRepottingIntervalMonth] = useState<string>('12')
 
   const ddayWater = useMemo(() => {
@@ -67,6 +67,16 @@ export default function PlantDetailModal({
     setFertilizerIntervalMonth(String(fM))
     setRepottingIntervalMonth(String(rM))
   }, [open, plant])
+
+  const fertilizerIntervalDays = useMemo(
+    () => monthsToDays(clamp(Number(fertilizerIntervalMonth) || 1, 1)),
+    [fertilizerIntervalMonth]
+  )
+
+  const repottingIntervalDays = useMemo(
+    () => monthsToDays(clamp(Number(repottingIntervalMonth) || 1, 1)),
+    [repottingIntervalMonth]
+  )
 
   const handleSaveNickname = (): void => {
     setEditing(false)
@@ -210,7 +220,7 @@ export default function PlantDetailModal({
                   <HeartPlus className="h-5 w-5 text-foreground" />
                   <span className="font-medium">영양제</span>
                 </div>
-                <span className="text-sm font-semibold">{`D-${fertilizerIntervalMonth}`}</span>
+                <span className="text-sm font-semibold">{`D-${fertilizerIntervalDays}`}</span>
               </div>
 
               {/* 분갈이 */}
@@ -219,7 +229,7 @@ export default function PlantDetailModal({
                   <Sprout className="h-5 w-5 text-muted-foreground" />
                   <span className="font-medium">분갈이</span>
                 </div>
-                <span className="text-sm font-semibold text-muted-foreground">{`D-${repottingIntervalMonth}`}</span>
+                <span className="text-sm font-semibold text-muted-foreground">{`D-${repottingIntervalDays}`}</span>
               </div>
             </div>
 
