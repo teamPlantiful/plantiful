@@ -3,10 +3,11 @@
 import { useMemo, useState } from 'react'
 import PlantCard from '@/components/plant/detail/PlantCard'
 import { useGetPlants } from '@/hooks/queries/useGetPlants'
-import { useQueryClient } from '@tanstack/react-query'
-import { queryKeys } from '@/lib/queryKeys'
-import type { Plant } from '@/types/plant'
 import PlantDetailModal from '@/components/plant/detail/PlantDetailModal'
+import { useWaterPlant } from '@/hooks/mutations/useWaterPlant'
+import { useUpdatePlantIntervals } from '@/hooks/mutations/useUpdatePlantIntervals'
+import { useUpdatePlantNickname } from '@/hooks/mutations/useUpdatePlantNickname'
+import { useDeletePlant } from '@/hooks/mutations/useDeletePlant'
 interface PlantListSectionProps {
   search?: string
   sort?: 'water' | 'name' | 'recent'
@@ -14,10 +15,13 @@ interface PlantListSectionProps {
 
 export default function PlantListSection({ search = '', sort = 'water' }: PlantListSectionProps) {
   const { data: plants = [], isLoading } = useGetPlants()
-  const queryClient = useQueryClient()
 
   const [open, setOpen] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const { mutateAsync: waterPlant } = useWaterPlant()
+  const { mutateAsync: updateIntervals } = useUpdatePlantIntervals()
+  const { mutateAsync: updateNickname } = useUpdatePlantNickname()
+  const { mutateAsync: deletePlantMutation } = useDeletePlant()
 
   const sortedPlants = useMemo(() => {
     // 1. 검색 필터링
@@ -54,13 +58,6 @@ export default function PlantListSection({ search = '', sort = 'water' }: PlantL
     [plants, selectedId]
   )
 
-  const updatePlantsCache = (updater: (prev: Plant[]) => Plant[]) => {
-    queryClient.setQueryData<Plant[]>(queryKeys.plants.list(), (prev) => {
-      const safePrev = prev ?? []
-      return updater(safePrev)
-    })
-  }
-
   const handleCardClick = (id: string) => {
     setSelectedId(id)
     setOpen(true)
@@ -68,42 +65,41 @@ export default function PlantListSection({ search = '', sort = 'water' }: PlantL
 
   const handleWater = async (id: string) => {
     const now = new Date().toISOString()
-    updatePlantsCache((prev) => prev.map((p) => (p.id === id ? { ...p, lastWateredAt: now } : p)))
+    await waterPlant({ id, lastWateredAt: now })
   }
   // 모달 내의 엑션들
-  const handleSaveNickname = (nextName: string) => {
+  const handleSaveNickname = async (nextName: string) => {
     if (!selectedId) return
-    updatePlantsCache((prev) =>
-      prev.map((p) => (p.id === selectedId ? { ...p, nickname: nextName } : p))
-    )
+    const trimmed = nextName.trim()
+    if (!trimmed) {
+      setOpen(false)
+      return
+    }
+
+    await updateNickname({ id: selectedId, nickname: trimmed })
     setOpen(false)
   }
 
-  const handleSaveIntervals = (next: {
+  const handleSaveIntervals = async (next: {
     watering: number
     fertilizer: number
     repotting: number
   }) => {
     if (!selectedId) return
 
-    updatePlantsCache((prev) =>
-      prev.map((p) =>
-        p.id === selectedId
-          ? {
-              ...p,
-              wateringIntervalDays: next.watering,
-              fertilizerIntervalDays: next.fertilizer,
-              repottingIntervalDays: next.repotting,
-            }
-          : p
-      )
-    )
+    await updateIntervals({
+      id: selectedId,
+      wateringDays: next.watering,
+      fertilizerDays: next.fertilizer,
+      repottingDays: next.repotting,
+    })
+
     setOpen(false)
   }
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!selectedId) return
-    updatePlantsCache((prev) => prev.filter((p) => p.id !== selectedId))
+    await deletePlantMutation(selectedId)
     setOpen(false)
   }
 
