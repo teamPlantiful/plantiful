@@ -1,66 +1,9 @@
 import { NextResponse } from 'next/server'
 import { XMLParser } from 'fast-xml-parser'
 import axios from 'axios'
-import {PlantSearchResult} from '@/types/plant'
-
-
-// --- 농사로 API 타입 ---
-interface NongsaroItem {
-  cntntsNo: string
-  cntntsSj: string // 국명
-  plntbneNm?: string // 학명
-  plntzrNm?: string // 영명
-  rtnThumbFileUrl?: string | string[]
-}
-interface NongsaroBody {
-  items?: { item: NongsaroItem[] | NongsaroItem }
-}
-interface NongsaroResponse {
-  response?: {
-    header: { resultCode: unknown; resultMsg: unknown }
-    body: NongsaroBody
-  }
-}
-
-// --- 헬퍼 함수: API 호출 및 아이템 추출 ---
-/**
- * 특정 sType과 sText로 농사로 API를 검색하고 아이템 목록을 반환
- */
-async function searchNongsaro(
-  params: Record<string, string>,
-  apiKey: string,
-  parser: XMLParser
-): Promise<NongsaroItem[]> {
-  const searchParams = new URLSearchParams(params)
-  const url = `http://api.nongsaro.go.kr/service/garden/gardenList?apiKey=${apiKey}&${searchParams.toString()}`
-
-  try {
-    const apiRes = await axios.get(url, {
-      headers: { 'Cache-Control': 'no-cache', Pragma: 'no-cache', Expires: '0' },
-    })
-    const jsonData: NongsaroResponse = parser.parse(apiRes.data)
-
-    const header = jsonData.response?.header
-    const body = jsonData.response?.body
-    if (!header || !body) return []
-
-    const code =
-      typeof header.resultCode === 'string'
-        ? header.resultCode.trim()
-        : JSON.stringify(header.resultCode)
-
-    if (/^0+$|^INFO-0+$/.test(code) && body.items?.item) {
-      return Array.isArray(body.items.item) ? body.items.item : [body.items.item]
-    }
-    return []
-  } catch (error) {
-    console.error(
-      ` ${JSON.stringify(params)} 검색 중 오류:`,
-      error instanceof Error ? error.message : error
-    )
-    return []
-  }
-}
+import { PlantSearchResult } from '@/types/plant'
+import { NongsaroItem } from '@/types/nongsaro'
+import { searchNongsaro } from '@/utils/nongsaro'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
