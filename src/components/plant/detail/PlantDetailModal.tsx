@@ -12,10 +12,10 @@ import { CareGuideSection } from '@/components/shared/CareGuideSection'
 
 import type { Plant, CareInfo } from '@/types/plant'
 import { generateDayOptions, generateMonthOptions } from '@/utils/date'
+import { clamp, daysToMonths, monthsToDays } from '@/utils/generateDay'
 
 type TabKey = 'status' | 'settings'
-
-export interface PlantDetailModalProps {
+interface PlantDetailModalProps {
   open: boolean
   onClose: () => void
   plant: Plant
@@ -40,13 +40,8 @@ export default function PlantDetailModal({
   const [nickname, setNickname] = useState(plant.nickname)
   const [tab, setTab] = useState<TabKey>('status')
 
-  const dayOptions = useMemo(() => generateDayOptions(60), [])
-  const monthOptions = useMemo(() => generateMonthOptions(24), [])
-
-  // 월/일 변환 유틸
-  const clamp = (n: number, min: number) => (Number.isFinite(n) ? Math.max(min, n) : min)
-  const daysToMonths = (days: number) => clamp(Math.ceil(days / 30), 1)
-  const monthsToDays = (months: number) => clamp(months * 30, 30)
+  const DAY_MAX = generateDayOptions(60)
+  const MONTH_MAX = generateMonthOptions(24)
 
   // 설정 탭 선택 값(표시용): 물=일, 영/분=개월
   const [wateringInterval, setWateringInterval] = useState<string>('7')
@@ -244,7 +239,7 @@ export default function PlantDetailModal({
               <SelectBox
                 value={wateringInterval}
                 placeholder="주기 선택"
-                options={dayOptions.map((o) => ({ ...o, label: `${o.value}일마다` }))}
+                options={DAY_MAX.map((o) => ({ ...o, label: `${o.value}일마다` }))}
                 onSelect={setWateringInterval}
               />
             </div>
@@ -254,7 +249,7 @@ export default function PlantDetailModal({
               <SelectBox
                 value={fertilizerIntervalMonth}
                 placeholder="주기 선택"
-                options={monthOptions.map((o) => ({ ...o, label: `${o.value}개월마다` }))}
+                options={MONTH_MAX.map((o) => ({ ...o, label: `${o.value}개월마다` }))}
                 onSelect={setFertilizerIntervalMonth}
               />
             </div>
@@ -264,7 +259,7 @@ export default function PlantDetailModal({
               <SelectBox
                 value={repottingIntervalMonth}
                 placeholder="주기 선택"
-                options={monthOptions.map((o) => ({ ...o, label: `${o.value}개월마다` }))}
+                options={MONTH_MAX.map((o) => ({ ...o, label: `${o.value}개월마다` }))}
                 onSelect={setRepottingIntervalMonth}
               />
             </div>
