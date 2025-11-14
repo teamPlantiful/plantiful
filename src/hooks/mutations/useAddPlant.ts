@@ -12,13 +12,26 @@ export const useAddPlant = () => {
 
   return useMutation<Plant, Error, PlantData, MutationContext>({
     mutationFn: async (plantData: PlantData) => {
+      const formData = new FormData()
+
+      // 파일이 있으면 추가
+      if (plantData.uploadedImage) {
+        formData.append('file', plantData.uploadedImage)
+      }
+
+      // 나머지 데이터를 JSON으로 추가 (Date를 ISO string으로 변환)
+      const { uploadedImage, lastWateredDate, startDate, ...rest } = plantData
+      const dataToSend = {
+        ...rest,
+        lastWateredDate: lastWateredDate.toISOString(),
+        startDate: startDate.toISOString(),
+      }
+      formData.append('data', JSON.stringify(dataToSend))
+
       const response = await fetch('/apis/plants', {
         method: 'POST',
         credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(plantData),
+        body: formData,
       })
 
       if (!response.ok) {

@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { toDbFormat, fromDbFormat, prepareCardForInsert } from '@/utils/plant'
-import type { PlantData } from '@/types/plant'
 
 const TABLE_NAME = 'plants'
 const STORAGE_BUCKET = 'plant-images'
@@ -55,13 +54,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const plantData: PlantData = await request.json()
+    const formData = await request.formData()
+    const file = formData.get('file') as File | null
+    const dataString = formData.get('data') as string
+    const parsedData = JSON.parse(dataString)
+
+    // ISO string을 Date 객체로 변환
+    const plantData = {
+      ...parsedData,
+      lastWateredDate: new Date(parsedData.lastWateredDate),
+      startDate: new Date(parsedData.startDate),
+    }
 
     // 이미지 업로드 처리
     let coverImageUrl = plantData.image
-    if (plantData.uploadedImage) {
+    if (file) {
       // 파일 업로드
-      const file = plantData.uploadedImage
       const fileExt = file.name?.split('.').pop()
       const fileName = `${session.user.id}/${Date.now()}.${fileExt}`
 
