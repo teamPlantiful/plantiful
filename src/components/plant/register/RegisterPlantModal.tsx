@@ -14,6 +14,7 @@ import { DateSelect } from './DateSelect'
 import { CareGuideSection } from '../../shared/CareGuideSection'
 import { generateDayOptions, generateMonthOptions } from '@/utils/date'
 import { useAddPlant } from '@/hooks/mutations/useAddPlant'
+import cn from '@/lib/cn'
 
 interface FormData {
   nickname: string
@@ -102,13 +103,18 @@ export const RegisterPlantModal = ({
   if (!selectedSpecies) return null
 
   return (
-    <Modal open={open} onClose={handleClose} size="lg">
+    <Modal open={open} onClose={handleClose} size="md">
       <ModalHeader
         closable
+        className="pb-4"
         onClose={handleClose}
-        className="px-6 pt-6 pb-4"
         left={
-          <Button variant="ghost" size="icon" onClick={onBack} className="h-8 w-8">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onBack}
+            className="h-8 w-8 border border-border rounded-full mr-1"
+          >
             <ArrowLeft className="h-4 w-4" />
           </Button>
         }
@@ -116,10 +122,13 @@ export const RegisterPlantModal = ({
         <h2 className="text-lg font-semibold">새 식물 등록</h2>
       </ModalHeader>
 
-      <ModalContent className="flex flex-col pt-0 max-h-[75vh]">
+      <ModalContent className="flex flex-col max-h-[80vh] -mx-6 -mb-6 border-t border-border">
         <form onSubmit={onSubmit} className="flex flex-col flex-1 min-h-0">
           {/* 스크롤 가능 영역 */}
-          <div className="flex-1 overflow-y-auto space-y-5 p-3">
+          <div
+            className="flex-1 overflow-y-auto space-y-5 pl-6 pr-2 pt-5"
+            style={{ scrollbarGutter: 'stable' }}
+          >
             <div className="p-6 rounded-lg bg-secondary/10 border border-border">
               <div className="flex flex-col items-center gap-4">
                 <Controller
@@ -167,7 +176,7 @@ export const RegisterPlantModal = ({
               />
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
+            <div className={cn('grid grid-cols-3 gap-3', !selectedSpecies.careInfo && 'mb-5')}>
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-foreground/80">물주기</label>
                 <Controller
@@ -217,10 +226,12 @@ export const RegisterPlantModal = ({
               </div>
             </div>
 
-            {selectedSpecies.careInfo && <CareGuideSection careInfo={selectedSpecies.careInfo} />}
+            {selectedSpecies.careInfo && (
+              <CareGuideSection careInfo={selectedSpecies.careInfo} className="-mt-2" />
+            )}
           </div>
 
-          <div className="pt-5">
+          <div className="pt-5 px-6 pb-6 border-t border-border">
             <Button type="submit" widthFull disabled={!isValid}>
               등록하기
             </Button>

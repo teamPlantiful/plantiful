@@ -114,7 +114,7 @@ export function Modal({
         <Card
           ref={modalRef}
           className={cn(
-            'relative w-full mx-4 my-8 max-h-[90vh] pointer-events-auto',
+            'relative w-full mx-4 my-8 max-h-[90vh] pointer-events-auto p-6',
             sizeClasses[size],
             className
           )}
@@ -129,6 +129,15 @@ export function Modal({
   return createPortal(modalContent, document.body)
 }
 
-export { CardHeader as ModalHeader }
-export { CardContent as ModalContent }
-export { CardFooter as ModalFooter }
+// Modal 전용 Header/Content/Footer - 패딩 제거하고 CardHeader/Content/Footer 래핑
+export function ModalHeader({ className, ...props }: ComponentPropsWithRef<typeof CardHeader>) {
+  return <CardHeader className={cn('p-0', className)} {...props} />
+}
+
+export function ModalContent({ className, ...props }: ComponentPropsWithRef<typeof CardContent>) {
+  return <CardContent className={cn('p-0', className)} {...props} />
+}
+
+export function ModalFooter({ className, ...props }: ComponentPropsWithRef<typeof CardFooter>) {
+  return <CardFooter className={cn('p-0', className)} {...props} />
+}
