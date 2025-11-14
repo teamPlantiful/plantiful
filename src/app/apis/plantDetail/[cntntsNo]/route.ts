@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { XMLParser } from 'fast-xml-parser'
 import { getNongsaroDetail } from '@/utils/nongsaro'
 import type { NongsaroDetailItem } from '@/types/nongsaro'
@@ -38,10 +38,13 @@ function transformNongsaroDetail(detail: NongsaroDetailItem): Partial<PlantSpeci
   }
 }
 
-export async function GET(request: Request, context: { params: { cntntsNo: string } }) {
+export async function GET(
+  request: NextRequest,
+  context: { params: Promise<{ cntntsNo: string }> }
+) {
   const params = await context.params
 
-  const cntntsNo = params.cntntsNo
+  const { cntntsNo } = await context.params
 
   if (!cntntsNo) {
     return NextResponse.json({ error: 'cntntsNo가 필요합니다.' }, { status: 400 })
