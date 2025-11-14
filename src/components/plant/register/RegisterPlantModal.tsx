@@ -215,7 +215,7 @@ export const RegisterPlantModal = ({
             </div>
           </div>
 
-          <CareGuideSection careInfo={selectedSpecies.careInfo} />
+          {selectedSpecies.careInfo && <CareGuideSection careInfo={selectedSpecies.careInfo} />}
 
           <Button type="submit" widthFull disabled={!isValid}>
             등록하기
