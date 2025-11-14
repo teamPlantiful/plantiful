@@ -119,7 +119,7 @@ export default function PlantDetailModal({
 
   return (
     <Modal open={open} onClose={onClose} size="md" closeOnBackdrop className="animate-fade-in">
-      <ModalHeader closable onClose={onClose} className="py-4">
+      <ModalHeader closable onClose={onClose} className="pb-4">
         <div className="flex items-center gap-2 w-full">
           {editing ? (
             <>
@@ -140,7 +140,7 @@ export default function PlantDetailModal({
             </>
           ) : (
             <>
-              <span className="text-base font-semibold">{plant.nickname}</span>
+              <span className="text-lg font-semibold">{plant.nickname}</span>
               <Button
                 aria-label="이름 수정"
                 size="icon"
@@ -155,7 +155,7 @@ export default function PlantDetailModal({
         </div>
       </ModalHeader>
 
-      <ModalContent className="space-y-4 py-0">
+      <ModalContent className="space-y-4 pt-0 pb-0">
         {/* 탭 */}
         <div
           className="grid grid-cols-2 rounded-md border p-0.5 bg-secondary/10 border-secondary/20"
@@ -281,7 +281,7 @@ export default function PlantDetailModal({
         )}
       </ModalContent>
 
-      <ModalFooter className="py-4">
+      <ModalFooter className="pt-4">
         <Button
           variant="destructive-outline"
           className="w-full"

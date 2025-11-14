@@ -32,7 +32,7 @@ export function DateSelect({ label, value, onChange }: DateSelectProps) {
         isOpen={isOpen}
         onClose={setIsOpen}
         content={<Calendar value={value} onChange={handleDateChange} />}
-        side="bottom"
+        side="top"
         align="start"
         className="block"
       >

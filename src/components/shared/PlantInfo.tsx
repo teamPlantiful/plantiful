@@ -9,7 +9,7 @@ interface PlantInfoProps {
 export function PlantInfo({ koreanName, scientificName, className }: PlantInfoProps) {
   return (
     <div className={className}>
-      <h3 className="font-semibold text-lg text-foreground/80">{koreanName}</h3>
+      <h3 className="font-semibold text-md text-foreground/80">{koreanName}</h3>
       {scientificName && <p className="text-sm text-muted-foreground italic">{scientificName}</p>}
     </div>
   )

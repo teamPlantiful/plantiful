@@ -24,18 +24,12 @@ export default function PlantRegistrationFab() {
 
       setSelectedSpecies(detail)
     }
-    // 2) 직접 입력한 경우 → 이름만 등록
+    // 2) 직접 입력한 경우
     else {
       const manualPlant: PlantSpeciesInfo = {
         cntntsNo: Date.now().toString(),
         koreanName: plant.commonName,
         scientificName: '',
-        careInfo: {
-          lightDemandCode: undefined,
-          waterCycleCode: undefined,
-          temperatureCode: undefined,
-          humidityCode: undefined,
-        },
       }
 
       setSelectedSpecies(manualPlant)

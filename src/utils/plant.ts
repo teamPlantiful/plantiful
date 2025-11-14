@@ -29,10 +29,10 @@ export const prepareCardForInsert = (plantData: PlantData, userId: string): Part
     adoptedAt: startDate.toISOString(),
     lastWateredAt: lastWateredDate.toISOString(),
     nextWateringDate: nextWateringDate.toISOString(),
-    lightDemandCode: species.careInfo.lightDemandCode || null,
-    waterCycleCode: species.careInfo.waterCycleCode || null,
-    temperatureCode: species.careInfo.temperatureCode || null,
-    humidityCode: species.careInfo.humidityCode || null,
+    lightDemandCode: species.careInfo?.lightDemandCode || null,
+    waterCycleCode: species.careInfo?.waterCycleCode || null,
+    temperatureCode: species.careInfo?.temperatureCode || null,
+    humidityCode: species.careInfo?.humidityCode || null,
   }
 }
 
