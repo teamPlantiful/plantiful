@@ -38,7 +38,6 @@ export default function RegisterForm() {
 
     // 기본 닉네임 식집사 설정
     const userName = name.trim() === '' ? '식집사' : name;
-    const welcomeMessage = name.trim() === '' ? '환영합니다, 새로운 식집사님!' : `환영합니다, 새로운 식집사, ${userName}님!`;
     
     // 이메일 유효성 검사
     if (!validateEmail(email)) {
@@ -85,7 +84,6 @@ export default function RegisterForm() {
     }
 
     // 로그인 성공 시, 메인 페이지로 이동
-    alert(welcomeMessage);
     router.replace('/');
   };
 
