@@ -1,26 +1,24 @@
 'use client'
 
 import { Loader2 } from 'lucide-react'
-import { PerenualPlant } from '@/hooks/usePlantSearch'
+import type { PlantSearchResult } from '@/types/plant'
 
 interface PlantListProps {
   loading: boolean
   error: string | null
-  plants: PerenualPlant[]
-  defaultPlants: PerenualPlant[]
+  plants: PlantSearchResult[]
   searchQuery: string
-  onSelect: (plant: PerenualPlant) => void
+  onSelect: (plant: PlantSearchResult) => void
 }
 
 export default function PlantList({
   loading,
   error,
   plants,
-  defaultPlants,
   searchQuery,
   onSelect,
 }: PlantListProps) {
-  const renderList = (list: PerenualPlant[]) => (
+  const renderList = (list: PlantSearchResult[]) => (
     <>
       {list.map((plant) => (
         <button
@@ -29,16 +27,14 @@ export default function PlantList({
           className="w-full cursor-pointer p-4 rounded-lg border border-border hover:bg-accent/50 transition-colors text-left flex items-center gap-3"
         >
           <img
-            src={
-              plant.default_image?.medium_url || 'https://placehold.co/48x48/EBF4E5/3B5935?text=?'
-            }
-            alt={plant.common_name}
+            alt={plant.commonName}
+            src={plant.defaultImage?.mediumUrl || 'https://placehold.co/48x48/EBF4E5/3B5935?text=?'}
             className="w-12 h-12 rounded-md object-cover bg-secondary/20"
           />
           <div>
-            <h3 className="font-semibold text-foreground">{plant.common_name}</h3>
+            <h3 className="font-semibold text-foreground">{plant.commonName}</h3>
             <p className="text-sm text-muted-foreground italic">
-              {plant.scientific_name.join(', ')}
+              {(plant.scientificName || []).join(', ')}
             </p>
           </div>
         </button>
@@ -52,7 +48,7 @@ export default function PlantList({
         <Loader2 className="h-6 w-6 animate-spin text-primary" />
         <span className="ml-2">검색 중...</span>
       </div>
-    )
+    ) 
   }
 
   if (error) {
@@ -66,6 +62,7 @@ export default function PlantList({
       <p className="text-center text-muted-foreground pt-10">검색 결과가 없습니다.</p>
     )
   }
-
-  return renderList(defaultPlants)
+  return (
+    <p className="text-center text-muted-foreground pt-10">검색어를 입력하여 식물을 찾아보세요</p>
+  )
 }

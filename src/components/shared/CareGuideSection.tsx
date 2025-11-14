@@ -3,14 +3,8 @@
 import { ChevronDown } from 'lucide-react'
 import { useState } from 'react'
 import cn from '@/lib/cn'
-import Button from '../common/button'
-
-interface CareInfo {
-  sunlight: string
-  waterAmount: string
-  temperature: string
-  humidity: string
-}
+import { CareInfo } from '@/types/plant'
+import { PlantCodeMapper } from '@/utils/plantCodeMapper'
 
 interface CareGuideSectionProps {
   careInfo: CareInfo
@@ -32,20 +26,20 @@ export function CareGuideSection({ careInfo, className }: CareGuideSectionProps)
       {isOpen && (
         <div className="p-4 rounded-lg bg-accent/20 text-foreground/80 border-2 border-dashed space-y-2 text-sm font-medium">
           <div className="flex justify-between">
-            <span>햇빛:</span>
-            <span>{careInfo.sunlight}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>물주는 양:</span>
-            <span>{careInfo.waterAmount}</span>
+            <span>광도:</span>
+            <span>{PlantCodeMapper.getLightDemand(careInfo.lightDemandCode)}</span>
           </div>
           <div className="flex justify-between">
             <span>온도:</span>
-            <span>{careInfo.temperature}</span>
+            <span>{PlantCodeMapper.getTemperature(careInfo.temperatureCode)}</span>
           </div>
           <div className="flex justify-between">
             <span>습도:</span>
-            <span>{careInfo.humidity}</span>
+            <span>{PlantCodeMapper.getHumidity(careInfo.humidityCode)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>물주기:</span>
+            <span>{PlantCodeMapper.getWaterCycle(careInfo.waterCycleCode)}</span>
           </div>
         </div>
       )}

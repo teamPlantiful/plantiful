@@ -145,6 +145,7 @@
   --plant-healthy: hsl(103 43% 55%);
   --plant-weak: hsl(45 90% 60%);
   --plant-dead: hsl(30 30% 40%);
+}
 
   /* Manual Dark Mode Toggle Support (when implemented) */
   .dark {
@@ -198,4 +199,4 @@
       @apply bg-background text-foreground;
     }
   }
-}
+

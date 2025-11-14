@@ -1,29 +1,12 @@
 import { useState, useEffect } from 'react'
-
-export interface PerenualPlant {
-  id: number
-  common_name: string
-  scientific_name: string[]
-  default_image?: { medium_url: string }
-}
-
-const API_KEY = process.env.NEXT_PUBLIC_PERENUAL_API_KEY
+import { PlantSearchResult } from '@/types/plant'
+import axios from 'axios'
 
 export const usePlantSearch = () => {
   const [searchQuery, setSearchQuery] = useState('')
-  const [plants, setPlants] = useState<PerenualPlant[]>([])
+  const [plants, setPlants] = useState<PlantSearchResult[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  const defaultPlants: PerenualPlant[] = [
-    { id: 1, common_name: '몬스테라', scientific_name: ['Monstera deliciosa'] },
-    {
-      id: 2,
-      common_name: '스킨답서스 (황금빛 포토스)',
-      scientific_name: ['Epipremnum aureum'],
-    },
-    { id: 3, common_name: '산세베리아', scientific_name: ['Sansevieria trifasciata'] },
-  ]
 
   useEffect(() => {
     if (!searchQuery.trim()) {
@@ -35,13 +18,16 @@ export const usePlantSearch = () => {
       setLoading(true)
       setError(null)
       try {
-        const API_URL = `https://perenual.com/api/species-list?key=${API_KEY}&q=${searchQuery}`
-        const response = await fetch(API_URL)
-        if (!response.ok) throw new Error(`API 오류: ${response.statusText}`)
-        const data = await response.json()
-        setPlants(data.data || [])
+        const API_URL = `/apis/searchPlant?q=${searchQuery}`
+        const response = await axios.get<{ plants?: PlantSearchResult[] }>(API_URL)
+
+        setPlants(response.data.plants || [])
       } catch (err) {
-        setError(err instanceof Error ? err.message : '검색 중 오류 발생')
+        if (axios.isAxiosError(err)) {
+          setError(err.message)
+        } else {
+          setError('검색 중 오류 발생')
+        }
         setPlants([])
       } finally {
         setLoading(false)
@@ -57,6 +43,5 @@ export const usePlantSearch = () => {
     plants,
     loading,
     error,
-    defaultPlants,
   }
 }

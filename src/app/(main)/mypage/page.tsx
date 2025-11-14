@@ -2,10 +2,12 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Leaf, User, Lock, LogOut } from 'lucide-react'
+import { ArrowLeft, Leaf, User, Lock } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/common/card'
 import Button from '@/components/common/button'
 import Input from '@/components/common/Input'
+import LogoutButton from '@/components/auth/logoutButton'
+
 
 export default function Page() {
   const [nickname, setNickname] = useState('식집사')
@@ -124,15 +126,7 @@ export default function Page() {
         <div className="my-6" />
 
         {/* 로그아웃 기능 */}
-        <Link href="/auth">
-          <Button
-            variant="outline"
-            className="w-full border-destructive bg-destructive-foreground text-destructive hover:bg-destructive/10"
-          >
-            <LogOut className="h-4 w-4 mr-2" />
-            로그아웃
-          </Button>
-        </Link>
+          <LogoutButton />
       </main>
     </div>
   )
