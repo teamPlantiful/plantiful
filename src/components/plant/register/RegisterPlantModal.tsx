@@ -116,110 +116,115 @@ export const RegisterPlantModal = ({
         <h2 className="text-lg font-semibold">새 식물 등록</h2>
       </ModalHeader>
 
-      <ModalContent className="flex-1 max-h-[75vh] overflow-y-auto custom-scrollbar px-6 pt-0 pb-0">
-        <form onSubmit={onSubmit} className="space-y-5 pb-6">
-          <div className="p-6 rounded-lg bg-secondary/10 border border-border">
-            <div className="flex flex-col items-center gap-4">
-              <Controller
-                name="uploadedImage"
-                control={control}
-                render={({ field }) => <ImageUpload onImageChange={field.onChange} />}
-              />
-              <PlantInfo
-                koreanName={selectedSpecies.koreanName}
-                scientificName={selectedSpecies.scientificName}
-                className="text-center"
-              />
-            </div>
-          </div>
-
-          <Input
-            className="bg-card"
-            label="닉네임"
-            placeholder={selectedSpecies.koreanName}
-            {...register('nickname')}
-          />
-
-          <div className="grid grid-cols-2 gap-3">
-            <Controller
-              name="startDate"
-              control={control}
-              render={({ field }) => (
-                <DateSelect
-                  label="처음 함께한 날짜"
-                  value={field.value}
-                  onChange={field.onChange}
+      <ModalContent className="flex flex-col pt-0 max-h-[75vh]">
+        <form onSubmit={onSubmit} className="flex flex-col flex-1 min-h-0">
+          {/* 스크롤 가능 영역 */}
+          <div className="flex-1 overflow-y-auto space-y-5 p-3">
+            <div className="p-6 rounded-lg bg-secondary/10 border border-border">
+              <div className="flex flex-col items-center gap-4">
+                <Controller
+                  name="uploadedImage"
+                  control={control}
+                  render={({ field }) => <ImageUpload onImageChange={field.onChange} />}
                 />
-              )}
-            />
-            <Controller
-              name="lastWateredDate"
-              control={control}
-              render={({ field }) => (
-                <DateSelect
-                  label="마지막 물 준 날짜"
-                  value={field.value}
-                  onChange={field.onChange}
+                <PlantInfo
+                  koreanName={selectedSpecies.koreanName}
+                  scientificName={selectedSpecies.scientificName}
+                  className="text-center"
                 />
-              )}
+              </div>
+            </div>
+
+            <Input
+              className="bg-card"
+              label="닉네임"
+              placeholder={selectedSpecies.koreanName}
+              {...register('nickname')}
             />
+
+            <div className="grid grid-cols-2 gap-3">
+              <Controller
+                name="startDate"
+                control={control}
+                render={({ field }) => (
+                  <DateSelect
+                    label="처음 함께한 날짜"
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
+              <Controller
+                name="lastWateredDate"
+                control={control}
+                render={({ field }) => (
+                  <DateSelect
+                    label="마지막 물 준 날짜"
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-foreground/80">물주기</label>
+                <Controller
+                  name="wateringInterval"
+                  control={control}
+                  render={({ field }) => (
+                    <SelectBox
+                      value={field.value}
+                      placeholder="선택"
+                      options={dayOptions}
+                      onSelect={field.onChange}
+                    />
+                  )}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-foreground/80">영양제</label>
+                <Controller
+                  name="fertilizerInterval"
+                  control={control}
+                  render={({ field }) => (
+                    <SelectBox
+                      value={field.value}
+                      placeholder="선택"
+                      options={monthOptions}
+                      onSelect={field.onChange}
+                    />
+                  )}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-foreground/80">분갈이</label>
+                <Controller
+                  name="repottingInterval"
+                  control={control}
+                  render={({ field }) => (
+                    <SelectBox
+                      value={field.value}
+                      placeholder="선택"
+                      options={monthOptions}
+                      onSelect={field.onChange}
+                    />
+                  )}
+                />
+              </div>
+            </div>
+
+            {selectedSpecies.careInfo && <CareGuideSection careInfo={selectedSpecies.careInfo} />}
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-foreground/80">물주기</label>
-              <Controller
-                name="wateringInterval"
-                control={control}
-                render={({ field }) => (
-                  <SelectBox
-                    value={field.value}
-                    placeholder="선택"
-                    options={dayOptions}
-                    onSelect={field.onChange}
-                  />
-                )}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-foreground/80">영양제</label>
-              <Controller
-                name="fertilizerInterval"
-                control={control}
-                render={({ field }) => (
-                  <SelectBox
-                    value={field.value}
-                    placeholder="선택"
-                    options={monthOptions}
-                    onSelect={field.onChange}
-                  />
-                )}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-foreground/80">분갈이</label>
-              <Controller
-                name="repottingInterval"
-                control={control}
-                render={({ field }) => (
-                  <SelectBox
-                    value={field.value}
-                    placeholder="선택"
-                    options={monthOptions}
-                    onSelect={field.onChange}
-                  />
-                )}
-              />
-            </div>
+          <div className="pt-5">
+            <Button type="submit" widthFull disabled={!isValid}>
+              등록하기
+            </Button>
           </div>
-
-          {selectedSpecies.careInfo && <CareGuideSection careInfo={selectedSpecies.careInfo} />}
-
-          <Button type="submit" widthFull disabled={!isValid}>
-            등록하기
-          </Button>
         </form>
       </ModalContent>
     </Modal>

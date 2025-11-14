@@ -1,7 +1,7 @@
 'use client'
 
 import { ChevronDown } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import cn from '@/lib/cn'
 import { CareInfo } from '@/types/plant'
 import { PlantCodeMapper } from '@/utils/plantCodeMapper'
@@ -13,6 +13,16 @@ interface CareGuideSectionProps {
 
 export function CareGuideSection({ careInfo, className }: CareGuideSectionProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const contentRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (isOpen && contentRef.current) {
+      // 약간의 딜레이 후 스크롤 다운
+      setTimeout(() => {
+        contentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      }, 100)
+    }
+  }, [isOpen])
 
   return (
     <div className={cn('w-full border-none', className)}>
@@ -24,7 +34,10 @@ export function CareGuideSection({ careInfo, className }: CareGuideSectionProps)
       </div>
 
       {isOpen && (
-        <div className="p-4 rounded-lg bg-accent/20 text-foreground/80 border-2 border-dashed space-y-2 text-sm font-medium">
+        <div
+          ref={contentRef}
+          className="p-4 rounded-lg bg-accent/20 text-foreground/80 border-2 border-dashed space-y-2 text-sm font-medium"
+        >
           <div className="flex justify-between">
             <span>광도:</span>
             <span>{PlantCodeMapper.getLightDemand(careInfo.lightDemandCode)}</span>
