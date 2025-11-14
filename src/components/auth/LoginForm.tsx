@@ -5,35 +5,67 @@ import Input from '@/components/common/Input';
 import { Card, CardContent, CardHeader } from '@/components/common/card'; 
 import { Leaf } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { signInWithPassword } from '@/app/apis/supabaseClient';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export default function LoginForm() {
   const router = useRouter();
+  const { session, loading } = useAuthStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [loginLoading, setLoginLoading] = useState(false);
+
+  // 이미 로그인된 경우, 자동으로 홈으로.
+  useEffect(() => {
+    if (!loading && session) {
+      router.replace('/');
+    }
+  }, [session, loading, router]);
+
+  // 이메일 양식
+  const validateEmail = (email: string) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
+
+  // 비밀번호 양식
+  const validatePassword = (password: string) => {
+    return password.length >= 8;
+  };
 
   // 폼 이벤트 및 기본값 초기화
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMsg('');
-    setLoading(true); 
-
-    const { data, error } = await signInWithPassword(email, password);
-
-    setLoading(false);
-
-    if (error) {
-      setErrorMsg(error.message);
-      return; // 로그인 실패 시 에러 메시지 표시
+    setError('');
+    // 이메일 유효성 검사
+    if (!validateEmail(email)) {
+      setError('올바른 이메일 형식을 입력해주세요.');
+      return;
+    }
+    // 비밀번호 유효성 검사
+    if (!validatePassword(password)) {
+      setError('비밀번호는 8자 이상이어야 합니다.');
+      return;
     }
 
-    if (data?.session) {
-      console.log('로그인 성공:', data.session.user);
-      router.push('/'); // 로그인 성공 시 메인 페이지로 이동
+    setLoginLoading(true);
+    const { error: loginError } = await signInWithPassword(email, password);
+    setLoginLoading(false);
+
+    if (loginError) {
+      // 이메일 또는 비밀번호 불일치 시
+      if (loginError.message.includes('Invalid login credentials')) {
+        setError('이메일 또는 비밀번호가 올바르지 않습니다.');
+        return;
+      }
+      // 기타 에러
+      setError('로그인 중 문제가 발생했습니다.');
+      return;
     }
+
+    router.replace('/')
   };
 
   return (
@@ -56,10 +88,13 @@ export default function LoginForm() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="pb-2">
+              {/* 이메일 입력 */}
+              <div className="pb-1">
                 <label 
                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  htmlFor="email">이메일</label>
+                  htmlFor="email"
+                >이메일
+                </label>
                 <Input 
                   id="email" 
                   type="email"
@@ -69,6 +104,7 @@ export default function LoginForm() {
                   required
                 />
               </div>
+              {/* 비밀번호 입력 */}
               <div className="pb-3">
                 <label 
                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -82,15 +118,17 @@ export default function LoginForm() {
                   required
                 />
               </div>
-              
-              {errorMsg && (
-                <p className="text-red-500 text-sm text-center">{errorMsg}</p>
+              {/* 에러 메세지 */}
+              {error && (
+                <p className="text-red-500 text-sm text-center">{error}</p>
               )}
-            
+              {/* 로그인 버튼 */}
               <Button 
                 type="submit" 
                 className="w-full bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-              >로그인</Button>
+                disabled={loading}
+              >{loginLoading ? '로그인 중...' : '로그인'}
+              </Button>
 
               <div className="relative my-3">
                 <div className="absolute inset-0 flex items-center">
