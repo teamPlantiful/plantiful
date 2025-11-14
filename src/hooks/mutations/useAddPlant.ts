@@ -1,5 +1,4 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { addCard } from '@/app/apis/supabaseApi'
 import { queryKeys } from '@/lib/queryKeys'
 import type { PlantData, Plant } from '@/types/plant'
 
@@ -12,7 +11,21 @@ export const useAddPlant = () => {
   const queryClient = useQueryClient()
 
   return useMutation<Plant, Error, PlantData, MutationContext>({
-    mutationFn: addCard,
+    mutationFn: async (plantData: PlantData) => {
+      const response = await fetch('/apis/plants', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(plantData),
+      })
+
+      if (!response.ok) {
+        throw new Error('식물 등록에 실패했습니다')
+      }
+
+      return response.json()
+    },
     onMutate: async (newPlant) => {
       // 진행 중인 리페치 취소
       await queryClient.cancelQueries({ queryKey: queryKeys.plants.list() })
