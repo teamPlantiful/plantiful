@@ -13,7 +13,7 @@ import { PlantInfo } from '../../shared/PlantInfo'
 import { DateSelect } from './DateSelect'
 import { CareGuideSection } from '../../shared/CareGuideSection'
 import { generateDayOptions, generateMonthOptions } from '@/utils/date'
-import { useAddPlant } from '@/hooks/queries/useAddPlant'
+import { useAddPlant } from '@/hooks/mutations/useAddPlant'
 
 interface FormData {
   nickname: string

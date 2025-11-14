@@ -1,5 +1,3 @@
-'use client'
-
 import { Leaf, User } from 'lucide-react'
 import Link from 'next/link'
 
