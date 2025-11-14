@@ -12,27 +12,52 @@ export default function LoginForm() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // 이메일 양식
+  const validateEmail = (email: string) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
+
+  // 비밀번호 양식
+  const validatePassword = (password: string) => {
+    return password.length >= 8;
+  };
 
   // 폼 이벤트 및 기본값 초기화
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMsg('');
-    setLoading(true); 
+    setError('');
+    // 이메일 유효성 검사
+    if (!validateEmail(email)) {
+      setError('올바른 이메일 형식을 입력해주세요.');
+      return;
+    }
+    // 비밀번호 유효성 검사
+    if (!validatePassword(password)) {
+      setError('비밀번호는 8자 이상이어야 합니다.');
+      return;
+    }
 
-    const { data, error } = await signInWithPassword(email, password);
-
+    setLoading(true);
+    const { data, error: loginError } = await signInWithPassword(email, password);
     setLoading(false);
 
-    if (error) {
-      setErrorMsg(error.message);
-      return; // 로그인 실패 시 에러 메시지 표시
+    if (loginError) {
+      // 이메일 또는 비밀번호 불일치 시
+      if (loginError.message.includes('Invalid login credentials')) {
+        setError('이메일 또는 비밀번호가 올바르지 않습니다.');
+        return;
+      }
+      // 기타 에러
+      setError('로그인 중 문제가 발생했습니다.');
+      return;
     }
 
     if (data?.session) {
-      console.log('로그인 성공:', data.session.user);
-      router.push('/'); // 로그인 성공 시 메인 페이지로 이동
+      router.replace('/'); // 로그인 성공 시 메인 페이지로 이동
     }
   };
 
@@ -56,10 +81,13 @@ export default function LoginForm() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="pb-2">
+              {/* 이메일 입력 */}
+              <div className="pb-1">
                 <label 
                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  htmlFor="email">이메일</label>
+                  htmlFor="email"
+                >이메일
+                </label>
                 <Input 
                   id="email" 
                   type="email"
@@ -69,6 +97,7 @@ export default function LoginForm() {
                   required
                 />
               </div>
+              {/* 비밀번호 입력 */}
               <div className="pb-3">
                 <label 
                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -82,15 +111,17 @@ export default function LoginForm() {
                   required
                 />
               </div>
-              
-              {errorMsg && (
-                <p className="text-red-500 text-sm text-center">{errorMsg}</p>
+              {/* 에러 메세지 */}
+              {error && (
+                <p className="text-red-500 text-sm text-center">{error}</p>
               )}
-            
+              {/* 로그인 버튼 */}
               <Button 
                 type="submit" 
                 className="w-full bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-              >로그인</Button>
+                disabled={loading}
+              >{loading ? '로그인 중...' : '로그인'}
+              </Button>
 
               <div className="relative my-3">
                 <div className="absolute inset-0 flex items-center">
