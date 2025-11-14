@@ -6,7 +6,9 @@ export const useGetPlants = () => {
   return useQuery<Plant[], Error>({
     queryKey: queryKeys.plants.list(),
     queryFn: async () => {
-      const response = await fetch('/apis/plants')
+      const response = await fetch('/apis/plants', {
+        credentials: 'include',
+      })
 
       if (!response.ok) {
         throw new Error('식물 목록을 불러오는데 실패했습니다')

@@ -1,9 +1,7 @@
-import { createClient, type AuthResponse } from '@supabase/supabase-js'
+import { createClient } from '@/utils/supabase/client'
+import type { AuthResponse } from '@supabase/supabase-js'
 
-export const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+export const supabase = createClient()
 
 export const signInWithPassword = async (
   email: string,

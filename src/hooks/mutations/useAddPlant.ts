@@ -14,6 +14,7 @@ export const useAddPlant = () => {
     mutationFn: async (plantData: PlantData) => {
       const response = await fetch('/apis/plants', {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
