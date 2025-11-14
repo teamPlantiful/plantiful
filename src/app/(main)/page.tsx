@@ -1,11 +1,11 @@
 import Header from '@/components/Header'
-import Dashboard from './dashboard'
+import DashboardClient from './dashboard-client'
 
 export default function Home() {
   return (
     <>
       <Header />
-      <Dashboard />
+      <DashboardClient />
     </>
   )
 }

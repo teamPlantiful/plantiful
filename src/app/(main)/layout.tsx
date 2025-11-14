@@ -1,13 +1,7 @@
+'use client'
 
-import { ReactNode } from 'react'
+import QueryProvider from '@/providers/queryProvider'
 
-export default function HomePage({ children }: { children: ReactNode }) {
-
-  return (
-    <div className="min-h-screen bg-background">
-      <main>
-        {children}
-      </main>
-    </div>
-  )
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  return <QueryProvider>{children}</QueryProvider>
 }

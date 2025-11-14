@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 
-export default function Dashboard() {
+export default function DashboardClient() {
   const { user, loading } = useAuthStore();
   const router = useRouter();
   const [search, setSearch] = useState('');
