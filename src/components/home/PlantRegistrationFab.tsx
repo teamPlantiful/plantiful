@@ -11,23 +11,36 @@ export default function PlantRegistrationFab() {
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false)
   const [selectedSpecies, setSelectedSpecies] = useState<PlantSpeciesInfo | null>(null)
 
-  const handlePlantSelect = (plant: PlantSearchResult | { commonName: string }) => {
+  const handlePlantSelect = async (plant: PlantSearchResult | { commonName: string }) => {
     const isSearchResult = 'id' in plant
-    const searchResult = isSearchResult ? (plant as PlantSearchResult) : null
 
-    const plantSpecies: PlantSpeciesInfo = {
-      cntntsNo: searchResult ? String(searchResult.id) : Date.now().toString(),
-      koreanName: plant.commonName,
-      scientificName: searchResult?.scientificName[0] ?? '',
-      careInfo: {
-        lightDemandCode: '055002',
-        waterCycleCode: '053003',
-        temperatureCode: '082002',
-        humidityCode: '083002',
-      },
+    // 1) 농사로 검색 결과인 경우 → 상세 API 호출
+    if (isSearchResult) {
+      const cntntsNo = String(plant.id)
+
+      // 상세 API 요청
+      const res = await fetch(`/apis/plantDetail/${cntntsNo}`)
+      const detail: PlantSpeciesInfo = await res.json()
+
+      setSelectedSpecies(detail)
+    }
+    // 2) 직접 입력한 경우 → 이름만 등록
+    else {
+      const manualPlant: PlantSpeciesInfo = {
+        cntntsNo: Date.now().toString(),
+        koreanName: plant.commonName,
+        scientificName: '',
+        careInfo: {
+          lightDemandCode: undefined,
+          waterCycleCode: undefined,
+          temperatureCode: undefined,
+          humidityCode: undefined,
+        },
+      }
+
+      setSelectedSpecies(manualPlant)
     }
 
-    setSelectedSpecies(plantSpecies)
     setIsSearchModalOpen(false)
     setIsRegisterModalOpen(true)
   }
