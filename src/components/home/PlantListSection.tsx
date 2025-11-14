@@ -1,9 +1,13 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import PlantCard from '@/components/plant/detail/PlantCard'
 import { useGetPlants } from '@/hooks/queries/useGetPlants'
-
+import PlantDetailModal from '@/components/plant/detail/PlantDetailModal'
+import { useWaterPlant } from '@/hooks/mutations/useWaterPlant'
+import { useUpdatePlantIntervals } from '@/hooks/mutations/useUpdatePlantIntervals'
+import { useUpdatePlantNickname } from '@/hooks/mutations/useUpdatePlantNickname'
+import { useDeletePlant } from '@/hooks/mutations/useDeletePlant'
 interface PlantListSectionProps {
   search?: string
   sort?: 'water' | 'name' | 'recent'
@@ -11,6 +15,13 @@ interface PlantListSectionProps {
 
 export default function PlantListSection({ search = '', sort = 'water' }: PlantListSectionProps) {
   const { data: plants = [], isLoading } = useGetPlants()
+
+  const [open, setOpen] = useState(false)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const { mutateAsync: waterPlant } = useWaterPlant()
+  const { mutateAsync: updateIntervals } = useUpdatePlantIntervals()
+  const { mutateAsync: updateNickname } = useUpdatePlantNickname()
+  const { mutateAsync: deletePlantMutation } = useDeletePlant()
 
   const sortedPlants = useMemo(() => {
     // 1. 검색 필터링
@@ -42,19 +53,54 @@ export default function PlantListSection({ search = '', sort = 'water' }: PlantL
     })
   }, [plants, sort, search])
 
+  const selected = useMemo(
+    () => plants.find((p) => p.id === selectedId) ?? null,
+    [plants, selectedId]
+  )
+
   const handleCardClick = (id: string) => {
-    // TODO: 식물 상세 페이지 이동 구현
-    console.log('Plant clicked:', id)
+    setSelectedId(id)
+    setOpen(true)
   }
 
   const handleWater = async (id: string) => {
-    // TODO: Supabase에서 last_watered_at 업데이트
-    // const { error } = await supabase
-    //   .from('plants')
-    //   .update({ last_watered_at: new Date().toISOString() })
-    //   .eq('id', id)
+    const now = new Date().toISOString()
+    await waterPlant({ id, lastWateredAt: now })
+  }
+  // 모달 내의 엑션들
+  const handleSaveNickname = async (nextName: string) => {
+    if (!selectedId) return
+    const trimmed = nextName.trim()
+    if (!trimmed) {
+      setOpen(false)
+      return
+    }
 
-    console.log('Water plant:', id)
+    await updateNickname({ id: selectedId, nickname: trimmed })
+    setOpen(false)
+  }
+
+  const handleSaveIntervals = async (next: {
+    watering: number
+    fertilizer: number
+    repotting: number
+  }) => {
+    if (!selectedId) return
+
+    await updateIntervals({
+      id: selectedId,
+      wateringDays: next.watering,
+      fertilizerDays: next.fertilizer,
+      repottingDays: next.repotting,
+    })
+
+    setOpen(false)
+  }
+
+  const handleDelete = async () => {
+    if (!selectedId) return
+    await deletePlantMutation(selectedId)
+    setOpen(false)
   }
 
   return (
@@ -93,6 +139,16 @@ export default function PlantListSection({ search = '', sort = 'water' }: PlantL
             )
           })}
         </section>
+      )}
+      {open && selected && (
+        <PlantDetailModal
+          open={open}
+          onClose={() => setOpen(false)}
+          plant={selected}
+          onDelete={handleDelete}
+          onSaveNickname={handleSaveNickname}
+          onSaveIntervals={handleSaveIntervals}
+        />
       )}
     </>
   )
