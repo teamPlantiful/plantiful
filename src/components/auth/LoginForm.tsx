@@ -5,15 +5,24 @@ import Input from '@/components/common/Input';
 import { Card, CardContent, CardHeader } from '@/components/common/card'; 
 import { Leaf } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { signInWithPassword } from '@/app/apis/supabaseClient';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export default function LoginForm() {
   const router = useRouter();
+  const { session, loading } = useAuthStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loginLoading, setLoginLoading] = useState(false);
+
+  // 이미 로그인된 경우, 자동으로 홈으로.
+  useEffect(() => {
+    if (!loading && session) {
+      router.replace('/');
+    }
+  }, [session, loading, router]);
 
   // 이메일 양식
   const validateEmail = (email: string) => {
@@ -41,9 +50,9 @@ export default function LoginForm() {
       return;
     }
 
-    setLoading(true);
-    const { data, error: loginError } = await signInWithPassword(email, password);
-    setLoading(false);
+    setLoginLoading(true);
+    const { error: loginError } = await signInWithPassword(email, password);
+    setLoginLoading(false);
 
     if (loginError) {
       // 이메일 또는 비밀번호 불일치 시
@@ -56,9 +65,7 @@ export default function LoginForm() {
       return;
     }
 
-    if (data?.session) {
-      router.replace('/'); // 로그인 성공 시 메인 페이지로 이동
-    }
+    router.replace('/')
   };
 
   return (
@@ -120,7 +127,7 @@ export default function LoginForm() {
                 type="submit" 
                 className="w-full bg-destructive hover:bg-destructive/90 text-destructive-foreground"
                 disabled={loading}
-              >{loading ? '로그인 중...' : '로그인'}
+              >{loginLoading ? '로그인 중...' : '로그인'}
               </Button>
 
               <div className="relative my-3">
