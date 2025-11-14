@@ -88,6 +88,9 @@ export function Popover({
       let top = 0
       let left = 0
 
+      // content의 너비를 트리거 너비와 맞춤
+      contentRef.current.style.minWidth = `${trigger.width}px`
+
       // 기본 위치 계산
       if (side === 'bottom') {
         top = trigger.bottom + sideOffset
