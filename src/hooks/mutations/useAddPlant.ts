@@ -132,5 +132,9 @@ export const useAddPlant = () => {
         img.src = data.coverImageUrl
       }
     },
+    onSettled: () => {
+      // 성공/실패 관계없이 서버와 동기화
+      queryClient.invalidateQueries({ queryKey: queryKeys.plants.list() })
+    },
   })
 }
