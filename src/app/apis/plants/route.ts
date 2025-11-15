@@ -12,10 +12,10 @@ export async function GET() {
 
     // 인증 확인
     const {
-      data: { session },
-    } = await supabase.auth.getSession()
+      data: { user },
+    } = await supabase.auth.getUser()
 
-    if (!session) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -23,7 +23,7 @@ export async function GET() {
     const { data, error } = await supabase
       .from(TABLE_NAME)
       .select('*')
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false })
 
     if (error) throw error
@@ -47,10 +47,10 @@ export async function POST(request: Request) {
 
     // 인증 확인
     const {
-      data: { session },
-    } = await supabase.auth.getSession()
+      data: { user },
+    } = await supabase.auth.getUser()
 
-    if (!session) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
     if (file) {
       // 파일 업로드
       const fileExt = file.name?.split('.').pop()
-      const fileName = `${session.user.id}/${Date.now()}.${fileExt}`
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`
 
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from(STORAGE_BUCKET)
@@ -93,7 +93,7 @@ export async function POST(request: Request) {
     // 데이터 준비
     const plantToInsert = prepareCardForInsert(
       { ...plantData, image: coverImageUrl },
-      session.user.id
+      user.id
     )
     const dbPlant = toDbFormat(plantToInsert)
 
