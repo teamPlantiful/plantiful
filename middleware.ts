@@ -17,10 +17,6 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          response = NextResponse.next({
-            request,
-          })
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options)
           )
@@ -30,17 +26,17 @@ export async function middleware(request: NextRequest) {
   )
 
   const {
-    data: { session },
-  } = await supabase.auth.getSession()
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  // 인증이 필요한 경로인데 세션이 없으면 로그인 페이지로
-  if (!session && !request.nextUrl.pathname.startsWith('/login') && !request.nextUrl.pathname.startsWith('/register')) {
+  // 인증이 필요한 경로인데 사용자가 없으면 로그인 페이지로
+  if (!user && !request.nextUrl.pathname.startsWith('/login') && !request.nextUrl.pathname.startsWith('/register')) {
     const redirectUrl = new URL('/login', request.url)
     return NextResponse.redirect(redirectUrl)
   }
 
-  // 로그인/회원가입 페이지인데 세션이 있으면 홈으로
-  if (session && (request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/register'))) {
+  // 로그인/회원가입 페이지인데 사용자가 있으면 홈으로
+  if (user && (request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/register'))) {
     const redirectUrl = new URL('/', request.url)
     return NextResponse.redirect(redirectUrl)
   }

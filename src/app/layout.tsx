@@ -1,17 +1,11 @@
 import './globals.css'
-import { createClient } from '@/utils/supabase/server'
 import { AuthProvider } from '@/providers/authProvider'
 
-export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const supabase = await createClient()
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ko">
       <body>
-        <AuthProvider initialSession={session}>{children}</AuthProvider>
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   )

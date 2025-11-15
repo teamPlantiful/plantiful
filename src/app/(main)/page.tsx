@@ -17,10 +17,10 @@ export default async function Home() {
 
       // 인증 확인
       const {
-        data: { session },
-      } = await supabase.auth.getSession()
+        data: { user },
+      } = await supabase.auth.getUser()
 
-      if (!session) {
+      if (!user) {
         return []
       }
 
@@ -28,7 +28,7 @@ export default async function Home() {
       const { data, error } = await supabase
         .from('plants')
         .select('*')
-        .eq('user_id', session.user.id)
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false })
 
       if (error) {

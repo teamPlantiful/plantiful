@@ -3,26 +3,20 @@
 import { useEffect } from 'react'
 import { supabase } from '@/app/apis/supabaseClient'
 import { useAuthStore } from '@/store/useAuthStore'
-import type { Session } from '@supabase/supabase-js'
 
-export function AuthProvider({
-  children,
-  initialSession,
-}: {
-  children: React.ReactNode
-  initialSession: Session | null
-}) {
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { setUser, setSession, setLoading } = useAuthStore()
 
-  // 초기 세션 설정
+  // 초기 세션 확인 및 auth 상태 변화 감지
   useEffect(() => {
-    setUser(initialSession?.user ?? null)
-    setSession(initialSession ?? null)
-    setLoading(false)
-  }, [initialSession, setUser, setSession, setLoading])
+    // 초기 세션 가져오기
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null)
+      setSession(session ?? null)
+      setLoading(false)
+    })
 
-  // auth 상태 변화 감지
-  useEffect(() => {
+    // auth 상태 변화 감지
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -31,7 +25,7 @@ export function AuthProvider({
     })
 
     return () => subscription.unsubscribe()
-  }, [setUser, setSession])
+  }, [setUser, setSession, setLoading])
 
   return <>{children}</>
 }
