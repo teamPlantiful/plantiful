@@ -6,8 +6,7 @@ import { ArrowLeft, Leaf, User, Lock } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/common/card'
 import Button from '@/components/common/button'
 import Input from '@/components/common/Input'
-import LogoutButton from '@/components/auth/logoutButton'
-
+import LogoutButton from '@/components/auth/LogoutButton'
 
 export default function Page() {
   const [nickname, setNickname] = useState('식집사')
@@ -126,7 +125,7 @@ export default function Page() {
         <div className="my-6" />
 
         {/* 로그아웃 기능 */}
-          <LogoutButton />
+        <LogoutButton />
       </main>
     </div>
   )

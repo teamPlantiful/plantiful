@@ -5,24 +5,15 @@ import Input from '@/components/common/Input';
 import { Card, CardContent, CardHeader } from '@/components/common/card'; 
 import { Leaf } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { signInWithPassword } from '@/app/apis/supabaseClient';
-import { useAuthStore } from '@/store/useAuthStore';
 
 export default function LoginForm() {
   const router = useRouter();
-  const { session, loading } = useAuthStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loginLoading, setLoginLoading] = useState(false);
-
-  // 이미 로그인된 경우, 자동으로 홈으로.
-  useEffect(() => {
-    if (!loading && session) {
-      router.replace('/');
-    }
-  }, [session, loading, router]);
 
   // 이메일 양식
   const validateEmail = (email: string) => {
@@ -123,10 +114,10 @@ export default function LoginForm() {
                 <p className="text-red-500 text-sm text-center">{error}</p>
               )}
               {/* 로그인 버튼 */}
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-full bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-                disabled={loading}
+                disabled={loginLoading}
               >{loginLoading ? '로그인 중...' : '로그인'}
               </Button>
 
