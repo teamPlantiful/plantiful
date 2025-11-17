@@ -70,10 +70,10 @@ export const useAddPlant = () => {
         nextWateringDate: new Date(
           newPlant.lastWateredDate.getTime() + newPlant.wateringInterval * 24 * 60 * 60 * 1000
         ).toISOString(),
-        lightDemandCode: newPlant.species.careInfo.lightDemandCode || null,
-        waterCycleCode: newPlant.species.careInfo.waterCycleCode || null,
-        temperatureCode: newPlant.species.careInfo.temperatureCode || null,
-        humidityCode: newPlant.species.careInfo.humidityCode || null,
+        lightDemandCode: newPlant.species.careInfo?.lightDemandCode || null,
+        waterCycleCode: newPlant.species.careInfo?.waterCycleCode || null,
+        temperatureCode: newPlant.species.careInfo?.temperatureCode || null,
+        humidityCode: newPlant.species.careInfo?.humidityCode || null,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       }

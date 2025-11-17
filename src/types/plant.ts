@@ -10,7 +10,7 @@ export interface PlantSpeciesInfo {
   koreanName: string
   scientificName?: string
   imageUrl?: string
-  careInfo: CareInfo
+  careInfo?: CareInfo
 }
 
 export interface PlantData {

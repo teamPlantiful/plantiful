@@ -11,7 +11,7 @@ import PlantList from './PlantList'
 interface PlantSpeciesSearchModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSelect: (species: PlantSearchResult| { commonName: string }) => void
+  onSelect: (species: PlantSearchResult | { commonName: string }) => void
 }
 
 export default function PlantSpeciesSearchModal({
@@ -41,14 +41,14 @@ export default function PlantSpeciesSearchModal({
       size="md"
       className="flex flex-col max-h-[85vh]"
     >
-      <ModalHeader className="px-4 py-3" closable onClose={() => onOpenChange(false)}>
-        <h2 className="text-base font-semibold">식물 종류 선택</h2>
+      <ModalHeader className="pb-4" closable onClose={() => onOpenChange(false)}>
+        <h2 className="text-lg font-semibold">식물 종류 선택</h2>
       </ModalHeader>
 
-      <ModalContent className="pt-2">
+      <ModalContent className="pt-0 pb-0">
         <PlantSearchInput value={searchQuery} onChange={setSearchQuery} />
 
-        <div className="h-[400px] overflow-y-auto mt-4 px-4 pb-4 space-y-2">
+        <div className="h-[400px] overflow-y-auto mt-4 space-y-2">
           <PlantCustomInput
             value={customName}
             onChange={setCustomName}
