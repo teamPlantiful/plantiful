@@ -77,7 +77,7 @@ export const RegisterPlantModal = ({
       repottingInterval: parseInt(data.repottingInterval) * 30,
       lastWateredDate: data.lastWateredDate,
       startDate: data.startDate,
-      image: selectedSpecies.imageUrl||undefined,
+      image: selectedSpecies.imageUrl || undefined,
       uploadedImage: data.uploadedImage || undefined,
     }
 
@@ -132,12 +132,7 @@ export const RegisterPlantModal = ({
                   <Controller
                     name="uploadedImage"
                     control={control}
-                    render={({ field }) => (
-                      <ImageUpload
-                        initialImageUrl={selectedSpecies.imageUrl || null}
-                        onImageChange={field.onChange}
-                      />
-                    )}
+                    render={({ field }) => <ImageUpload onImageChange={field.onChange} />}
                   />
                   <PlantInfo
                     commonName={selectedSpecies.commonName}
