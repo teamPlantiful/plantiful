@@ -21,6 +21,7 @@ export default function PlantRegistrationFab() {
       // 상세 API 요청
       const res = await fetch(`/apis/plantDetail/${cntntsNo}`)
       const detail: PlantSpeciesInfo = await res.json()
+      detail.commonName=plant.commonName
 
       setSelectedSpecies(detail)
     }
@@ -28,7 +29,7 @@ export default function PlantRegistrationFab() {
     else {
       const manualPlant: PlantSpeciesInfo = {
         cntntsNo: Date.now().toString(),
-        koreanName: plant.commonName,
+        commonName: plant.commonName,
         scientificName: '',
       }
 

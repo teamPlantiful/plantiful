@@ -32,7 +32,7 @@ function transformNongsaroDetail(detail: NongsaroDetailItem): Partial<PlantSpeci
 
   return {
     cntntsNo: detail.cntntsNo,
-    koreanName: detail.distbNm,
+    commonName: detail.distbNm,
     scientificName: detail.plntbneNm || '',
     careInfo,
   }
