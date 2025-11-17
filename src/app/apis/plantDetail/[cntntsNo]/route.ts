@@ -19,7 +19,10 @@ function inferLightCode(nm: string | undefined): string | undefined {
   return undefined
 }
 
-function transformNongsaroDetail(detail: NongsaroDetailItem): Partial<PlantSpeciesInfo> {
+function transformNongsaroDetail(
+  detail: NongsaroDetailItem,
+  imageUrl: string | null
+): Partial<PlantSpeciesInfo> {
   const lightCode =
     normalizeCode(detail.lighttdemanddoCode) || // 코드가 있으면 코드 우선
     inferLightCode(detail.lighttdemanddoCodeNm) // 없으면 문자열 보고 추론
@@ -35,6 +38,7 @@ function transformNongsaroDetail(detail: NongsaroDetailItem): Partial<PlantSpeci
     commonName: detail.distbNm,
     scientificName: detail.plntbneNm || '',
     careInfo,
+    imageUrl,
   }
 }
 
@@ -68,8 +72,9 @@ export async function GET(
     if (!rawDetail) {
       return NextResponse.json({ error: '상세 정보를 찾을 수 없습니다.' }, { status: 404 })
     }
+    const imageUrl = request.nextUrl.searchParams.get('imageUrl') || null
 
-    const plantSpeciesInfo = transformNongsaroDetail(rawDetail)
+    const plantSpeciesInfo = transformNongsaroDetail(rawDetail, imageUrl)
 
     return NextResponse.json(plantSpeciesInfo)
   } catch (err) {
