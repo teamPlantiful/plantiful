@@ -9,7 +9,7 @@ export interface PlantSpeciesInfo {
   cntntsNo: string
   commonName: string
   scientificName?: string
-  imageUrl?: string
+  imageUrl?: string | null
   careInfo?: CareInfo
 }
 

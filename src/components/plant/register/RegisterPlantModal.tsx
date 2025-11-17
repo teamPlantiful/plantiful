@@ -132,7 +132,12 @@ export const RegisterPlantModal = ({
                   <Controller
                     name="uploadedImage"
                     control={control}
-                    render={({ field }) => <ImageUpload onImageChange={field.onChange} />}
+                    render={({ field }) => (
+                      <ImageUpload
+                        initialImageUrl={selectedSpecies.imageUrl || null}
+                        onImageChange={field.onChange}
+                      />
+                    )}
                   />
                   <PlantInfo
                     commonName={selectedSpecies.commonName}
