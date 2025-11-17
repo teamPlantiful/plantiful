@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/queryKeys'
 import type { PlantData, Plant } from '@/types/plant'
+import { addPlantAction } from '@/app/apis/plants/actions'
 
 interface MutationContext {
   previousPlants?: Plant[]
@@ -28,17 +29,8 @@ export const useAddPlant = () => {
       }
       formData.append('data', JSON.stringify(dataToSend))
 
-      const response = await fetch('/apis/plants', {
-        method: 'POST',
-        credentials: 'include',
-        body: formData,
-      })
-
-      if (!response.ok) {
-        throw new Error('식물 등록에 실패했습니다')
-      }
-
-      return response.json()
+      // Server Action 호출
+      return await addPlantAction(formData)
     },
     onMutate: async (newPlant) => {
       // 진행 중인 리페치 취소
