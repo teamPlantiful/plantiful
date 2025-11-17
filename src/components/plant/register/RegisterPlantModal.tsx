@@ -77,7 +77,7 @@ export const RegisterPlantModal = ({
       repottingInterval: parseInt(data.repottingInterval) * 30,
       lastWateredDate: data.lastWateredDate,
       startDate: data.startDate,
-      image: selectedSpecies.imageUrl,
+      image: selectedSpecies.imageUrl||undefined,
       uploadedImage: data.uploadedImage || undefined,
     }
 
