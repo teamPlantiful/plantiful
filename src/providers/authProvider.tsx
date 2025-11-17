@@ -1,24 +1,31 @@
-'use client';
+'use client'
 
-import { useEffect } from 'react';
-import { supabase } from '@/app/apis/supabaseClient';
-import { useAuthStore } from '@/store/useAuthStore';
+import { useEffect } from 'react'
+import { supabase } from '@/app/apis/supabaseClient'
+import { useAuthStore } from '@/store/useAuthStore'
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { setUser, setSession, checkSession } = useAuthStore();
+  const { setUser, setSession, setLoading } = useAuthStore()
 
+  // 초기 세션 확인 및 auth 상태 변화 감지
   useEffect(() => {
-    // 새로고침 시 세션 복구
-    checkSession();
+    // 초기 세션 가져오기
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null)
+      setSession(session ?? null)
+      setLoading(false)
+    })
 
-    // 슈퍼베이스와 연동해 로그인 / 로그아웃 감지
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      setSession(session ?? null);
-    });
+    // auth 상태 변화 감지
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+      setSession(session ?? null)
+    })
 
-    return () => subscription.unsubscribe();
-  }, [setUser, setSession, checkSession]);
+    return () => subscription.unsubscribe()
+  }, [setUser, setSession, setLoading])
 
-  return <>{children}</>;
+  return <>{children}</>
 }

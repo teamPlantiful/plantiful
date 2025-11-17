@@ -9,6 +9,7 @@ interface AuthState {
   loading: boolean;
   setUser: (user: User | null) => void;
   setSession: (session: Session | null) => void;
+  setLoading: (loading: boolean) => void;
   checkSession: () => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -21,6 +22,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   setUser: (user) => set({ user }),
   setSession: (session) => set({ session }),
+  setLoading: (loading) => set({ loading }),
 
   // 게정 상태 체크
   checkSession: async () => {
