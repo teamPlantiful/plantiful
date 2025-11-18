@@ -21,8 +21,8 @@ export default function DashboardClient() {
           onSortChange={setSort}
         />
         <PlantListSection search={search} sort={sort} />
-        <PlantRegistrationFab />
       </div>
+      <PlantRegistrationFab />
     </div>
   )
 }
