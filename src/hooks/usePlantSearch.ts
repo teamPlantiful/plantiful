@@ -11,7 +11,11 @@ export const usePlantSearch = () => {
   const { original, chosung } = normalizeSearch(debouncedQuery)
   const isEmpty = !original || original.length < 1
 
-  const { data, isFetching, error } = useQuery({
+  const {
+    data,
+    isFetching,
+    error: queryError,
+  } = useQuery({
     queryKey: ['plant-search', original, chosung],
     enabled: !isEmpty,
     queryFn: async () => {
@@ -24,6 +28,8 @@ export const usePlantSearch = () => {
     retry: 1,
   })
 
+  const error =
+    queryError instanceof Error ? queryError.message : queryError ? String(queryError) : null
   return {
     searchQuery,
     setSearchQuery,
