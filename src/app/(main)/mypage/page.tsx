@@ -1,16 +1,32 @@
-'use client'
-
-import { useState } from 'react'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import { createClient } from '@/utils/supabase/server'
 import { ArrowLeft, Leaf, User, Lock } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/common/card'
 import Button from '@/components/common/button'
-import Input from '@/components/common/Input'
-import LogoutButton from '@/components/auth/LogoutButton'
+import UpdateProfilesForm from '@/components/auth/UpdateProfileForm'
 import UpdatePasswordForm from '@/components/auth/UpdatePasswordForm'
+import LogoutButton from '@/components/auth/LogoutButton'
 
-export default function Page() {
-  const [nickname, setNickname] = useState('식집사')
+export default async function Page() {
+
+  const supabase = await createClient()
+
+  // 로그인한 유저 정보 불러옴
+  const { data: { user } } = await supabase.auth.getUser()
+  console.log('User:', user);
+  // 로그인 유저만 마이페이지 진입 가능
+  if (!user) {
+    redirect('/login')
+  }
+  // Supabase DB에서 닉네임 읽어오기
+  const { data: profileData } = await supabase
+    .from('profiles')
+    .select('name')
+    .eq('id', user.id)
+    .single()
+  // 현재 닉네임 표시를 Props를 통해 컴포넌트에 전달
+  const currentUserName = profileData?.name
 
   return (
     <div className="min-h-screen bg-background">
@@ -40,28 +56,7 @@ export default function Page() {
             </div>
           </CardHeader>
           <CardContent className="pt-0 space-y-4">
-            <div className="space-y-2">
-              <label
-                htmlFor="nickname"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                닉네임
-              </label>
-              <div className="pt-2 flex gap-2">
-                <div className="flex-1">
-                  <Input
-                    id="nickname"
-                    value={nickname}
-                    onChange={(e) => setNickname(e.target.value)}
-                    placeholder="닉네임을 입력하세요"
-                    size="sm"
-                  />
-                </div>
-                <Button variant="default" size="sm" className="bg-primary hover:bg-primary/90">
-                  저장
-                </Button>
-              </div>
-            </div>
+            <UpdateProfilesForm initialUserName={currentUserName}/>
           </CardContent>
         </Card>
         {/* 비밀번호 변경 구역 */}
@@ -77,7 +72,6 @@ export default function Page() {
           </CardContent>
         </Card>
         <div className="my-6" />
-
         {/* 로그아웃 기능 */}
         <LogoutButton />
       </main>
