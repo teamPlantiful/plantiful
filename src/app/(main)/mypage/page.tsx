@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader } from '@/components/common/card'
 import Button from '@/components/common/button'
 import Input from '@/components/common/Input'
 import LogoutButton from '@/components/auth/LogoutButton'
+import UpdatePasswordForm from '@/components/auth/UpdatePasswordForm'
 
 export default function Page() {
   const [nickname, setNickname] = useState('식집사')
@@ -72,54 +73,7 @@ export default function Page() {
             </div>
           </CardHeader>
           <CardContent className="pt-0 space-y-4">
-            <div className="space-y-2">
-              <label
-                htmlFor="current-password"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                현재 비밀번호
-              </label>
-              <Input
-                size="sm"
-                id="current-password"
-                type="password"
-                placeholder="••••••••"
-                className="mt-2"
-              />
-            </div>
-            <div className="space-y-2">
-              <label
-                htmlFor="new-password"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                새 비밀번호
-              </label>
-              <Input
-                size="sm"
-                id="new-password"
-                type="password"
-                placeholder="••••••••"
-                className="mt-2"
-              />
-            </div>
-            <div className="space-y-2">
-              <label
-                htmlFor="confirm-password"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                새 비밀번호 확인
-              </label>
-              <Input
-                size="sm"
-                id="confirm-password"
-                type="password"
-                placeholder="••••••••"
-                className="mt-2"
-              />
-            </div>
-            <Button variant="default" className="w-full bg-primary hover:bg-primary/90">
-              비밀번호 변경
-            </Button>
+            <UpdatePasswordForm />
           </CardContent>
         </Card>
         <div className="my-6" />
