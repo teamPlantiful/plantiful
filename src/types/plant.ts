@@ -7,9 +7,9 @@ export interface CareInfo {
 
 export interface PlantSpeciesInfo {
   cntntsNo: string
-  koreanName: string
+  commonName: string
   scientificName?: string
-  imageUrl?: string
+  imageUrl?: string | null
   careInfo?: CareInfo
 }
 
@@ -42,7 +42,7 @@ export interface Plant {
   id: string
   userId: string
   cntntsNo: string
-  koreanName: string
+  commonName: string
   scientificName?: string | null
   defaultImageUrl?: string | null
   coverImageUrl?: string | null

@@ -71,13 +71,13 @@ export const RegisterPlantModal = ({
 
     const plantData: PlantData = {
       species: selectedSpecies,
-      nickname: data.nickname || selectedSpecies.koreanName,
+      nickname: data.nickname || selectedSpecies.commonName,
       wateringInterval: parseInt(data.wateringInterval),
       fertilizerInterval: parseInt(data.fertilizerInterval) * 30,
       repottingInterval: parseInt(data.repottingInterval) * 30,
       lastWateredDate: data.lastWateredDate,
       startDate: data.startDate,
-      image: selectedSpecies.imageUrl,
+      image: selectedSpecies.imageUrl || undefined,
       uploadedImage: data.uploadedImage || undefined,
     }
 
@@ -135,7 +135,7 @@ export const RegisterPlantModal = ({
                     render={({ field }) => <ImageUpload onImageChange={field.onChange} />}
                   />
                   <PlantInfo
-                    koreanName={selectedSpecies.koreanName}
+                    commonName={selectedSpecies.commonName}
                     scientificName={selectedSpecies.scientificName}
                     className="text-center"
                   />
@@ -145,7 +145,7 @@ export const RegisterPlantModal = ({
               <Input
                 className="bg-card"
                 label="닉네임"
-                placeholder={selectedSpecies.koreanName}
+                placeholder={selectedSpecies.commonName}
                 {...register('nickname')}
               />
 
