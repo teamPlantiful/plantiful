@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/queryKeys'
 import type { PlantData, Plant } from '@/types/plant'
-import { addPlantAction } from '@/app/apis/plants/actions'
+import addPlantAction from '@/app/actions/plant/addPlantAction'
 
 interface MutationContext {
   previousPlants?: Plant[]

@@ -52,7 +52,10 @@ export default function PlantRegistrationFab() {
 
   return (
     <>
-      <Fab onClick={() => setIsSearchModalOpen(true)} />
+      <Fab
+        onClick={() => setIsSearchModalOpen(true)}
+        className="fixed right-[calc((100vw-57rem)/2-1rem)] max-md:right-6 max-lg:right-8 "
+      />
       <PlantSpeciesSearchModal
         open={isSearchModalOpen}
         onOpenChange={setIsSearchModalOpen}
