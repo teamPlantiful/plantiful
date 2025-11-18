@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader } from '@/components/common/card'
 import Button from '@/components/common/button'
 import Input from '@/components/common/Input'
 import LogoutButton from '@/components/auth/LogoutButton'
-import UpdatePasswordForm from '@/components/auth/updatePasswordForm'
+import UpdatePasswordForm from '@/components/auth/UpdatePasswordForm'
 
 export default function Page() {
   const [nickname, setNickname] = useState('식집사')
