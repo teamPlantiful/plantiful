@@ -35,7 +35,7 @@ function transformNongsaroDetail(
 
   return {
     cntntsNo: detail.cntntsNo,
-    commonName: detail.distbNm,
+    koreanName: detail.distbNm,
     scientificName: detail.plntbneNm || '',
     careInfo,
     imageUrl,
