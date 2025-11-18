@@ -8,7 +8,7 @@ import type { Plant } from '@/types/plant'
 const TABLE_NAME = 'plants'
 const STORAGE_BUCKET = 'plant-images'
 
-export async function addPlantAction(formData: FormData): Promise<Plant> {
+export default async function addPlantAction(formData: FormData): Promise<Plant> {
   const supabase = await createClient()
 
   // Middleware가 인증을 보장하므로 user는 항상 존재
