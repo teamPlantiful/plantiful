@@ -25,7 +25,7 @@ export default function PlantRegistrationFab() {
       )
 
       const detail: PlantSpeciesInfo = await res.json()
-      detail.commonName = plant.commonName
+      detail.koreanName = plant.commonName
 
       setSelectedSpecies(detail)
     }
@@ -33,7 +33,7 @@ export default function PlantRegistrationFab() {
     else {
       const manualPlant: PlantSpeciesInfo = {
         cntntsNo: Date.now().toString(),
-        commonName: plant.commonName,
+        koreanName: plant.commonName,
         scientificName: '',
         imageUrl: null,
       }
