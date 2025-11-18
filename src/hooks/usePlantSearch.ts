@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react'
 import { PlantSearchResult } from '@/types/plant'
 import axios from 'axios'
+import useDebounce from './useDebounce'
 
 export const usePlantSearch = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [plants, setPlants] = useState<PlantSearchResult[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const debouncedQuery = useDebounce(searchQuery, 300)
 
   useEffect(() => {
-    if (!searchQuery.trim()) {
+    if (!debouncedQuery.trim()) {
       setPlants([])
       return
     }
@@ -18,7 +20,7 @@ export const usePlantSearch = () => {
       setLoading(true)
       setError(null)
       try {
-        const API_URL = `/apis/searchPlant?q=${searchQuery}`
+        const API_URL = `/apis/searchPlant?q=${debouncedQuery}`
         const response = await axios.get<{ plants?: PlantSearchResult[] }>(API_URL)
 
         setPlants(response.data.plants || [])
@@ -35,7 +37,7 @@ export const usePlantSearch = () => {
     }
 
     fetchPlants()
-  }, [searchQuery])
+  }, [debouncedQuery])
 
   return {
     searchQuery,
