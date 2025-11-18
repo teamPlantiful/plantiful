@@ -24,7 +24,11 @@ export default function PlantModel() {
       <Suspense fallback={null}>
         <Model />
       </Suspense>
-      <OrbitControls enableZoom={false} />
+      <OrbitControls
+        enableZoom={false}
+        enablePan={false}
+        makeDefault
+      />
     </Canvas>
   )
 }
