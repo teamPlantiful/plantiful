@@ -97,7 +97,8 @@ export default function UpdatePasswordForm() {
       variant="default"
       className="w-full bg-primary hover:bg-primary/90"
       type="submit"
-    >비밀번호 변경                
+      disabled={isPending}
+    >{isPending ? '변경 중...' : '비밀번호 변경'}                
     </Button>
     {msg && (
       <p className={`mt-2 text-sm ${msg.includes('성공') ? 'text-green-600' : 'text-red-600'}`}>
