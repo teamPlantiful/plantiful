@@ -1,4 +1,5 @@
 import { Card, CardContent } from '@/components/common/card'
+import PlantModel from './PlantModel'
 
 export default function TodayPlantSection() {
   return (
@@ -11,7 +12,7 @@ export default function TodayPlantSection() {
       <Card className="overflow-hidden rounded-(--radius-lg) border-0">
         <CardContent className="p-0">
           <div className="w-full h-80 grid place-items-center rounded-[calc(var(--radius-lg)-2px)] bg-linear-to-b from-[hsl(103_43%_92%)] to-[hsl(60_10%_98%)]">
-            <span className="text-sm text-muted-foreground">3D 이미지 박스</span>
+            <PlantModel />
           </div>
         </CardContent>
       </Card>
