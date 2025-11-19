@@ -11,7 +11,7 @@ export const useUpdatePlantNickname = () => {
   const queryClient = useQueryClient()
 
   return useMutation<Plant, Error, UpdateNicknameVariables>({
-    mutationFn: ({ id, nickname }) => updatePlantNicknameAction({ id, nickname }),
+    mutationFn: updatePlantNicknameAction,
 
     onSuccess: (updatedPlant) => {
       queryClient.setQueryData<Plant[]>(queryKeys.plants.list(), (prev = []) =>

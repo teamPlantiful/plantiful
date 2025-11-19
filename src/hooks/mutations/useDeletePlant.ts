@@ -7,7 +7,7 @@ export const useDeletePlant = () => {
   const queryClient = useQueryClient()
 
   return useMutation<string, Error, string>({
-    mutationFn: (id) => deletePlantAction(id),
+    mutationFn: deletePlantAction,
 
     onSuccess: (deletedId) => {
       queryClient.setQueryData<Plant[]>(queryKeys.plants.list(), (prev = []) =>
