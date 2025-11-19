@@ -48,21 +48,22 @@ export default function PlantList({
         <Loader2 className="h-6 w-6 animate-spin text-primary" />
         <span className="ml-2">검색 중...</span>
       </div>
-    ) 
+    )
   }
 
   if (error) {
-    return <p className="text-center text-destructive pt-10">{error}</p>
-  }
-
-  if (searchQuery) {
-    return plants.length > 0 ? (
-      renderList(plants)
-    ) : (
-      <p className="text-center text-muted-foreground pt-10">검색 결과가 없습니다.</p>
+    return (
+      <p className="text-center text-destructive pt-10">
+        {error ? '검색 도중 문제가 발생했습니다' : null}
+      </p>
     )
   }
-  return (
-    <p className="text-center text-muted-foreground pt-10">검색어를 입력하여 식물을 찾아보세요</p>
+
+  return plants.length > 0 ? (
+    renderList(plants)
+  ) : (
+    <p className="text-center text-muted-foreground pt-10">
+      {searchQuery ? `'${searchQuery}'에 대한 ` : ''}검색 결과가 없습니다.
+    </p>
   )
 }

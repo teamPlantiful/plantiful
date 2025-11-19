@@ -12,11 +12,11 @@ import type {
  * 특정 sType과 sText로 농사로 API를 검색하고 아이템 목록을 반환
  */
 export async function searchNongsaro(
-  params: Record<string, string>,
+  params: Record<string, string | number>,
   apiKey: string,
   parser: XMLParser
 ): Promise<NongsaroItem[]> {
-  const searchParams = new URLSearchParams(params)
+  const searchParams = new URLSearchParams(Object.entries(params).map(([k, v]) => [k, String(v)]))
   const url = `http://api.nongsaro.go.kr/service/garden/gardenList?apiKey=${apiKey}&${searchParams.toString()}`
 
   try {
