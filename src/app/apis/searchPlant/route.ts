@@ -2,95 +2,66 @@ import { NextResponse } from 'next/server'
 import { XMLParser } from 'fast-xml-parser'
 import axios from 'axios'
 import { PlantSearchResult } from '@/types/plant'
-import { NongsaroItem } from '@/types/nongsaro'
 import { searchNongsaro } from '@/utils/nongsaro'
+
+const PAGE_SIZE = 20
+const parser = new XMLParser()
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
-  const q = searchParams.get('q')
-
-  if (!q) {
-    return NextResponse.json({ error: '검색어가 필요합니다.' }, { status: 400 })
-  }
+  const q = searchParams.get('q') ?? ''
+  const page = Number(searchParams.get('page') ?? 1)
 
   const NONGSARO_API_KEY = process.env.NONGSARO_API_KEY
   if (!NONGSARO_API_KEY) {
-    return NextResponse.json({ error: 'API 키가 설정되지 않았습니다.' }, { status: 500 })
+    return NextResponse.json({ error: 'API 키가 없습니다.' }, { status: 500 })
   }
 
   try {
-    const parser = new XMLParser()
+    const safeQuery = q.trim()
 
-    const korConsonantRegex = /^[ㄱ-ㅎ]$/
-    const engConsonantRegex = /^[A-Z]$/i
-
-    let results: PromiseSettledResult<NongsaroItem[]>[]
-    if (korConsonantRegex.test(q)) {
-      // 1. 한글 자음 한 글자일 경우 (초성 검색)
-      results = await Promise.allSettled([
-        searchNongsaro({ wordType: 'cntntsSj', word: q }, NONGSARO_API_KEY, parser),
-      ])
-    } else if (engConsonantRegex.test(q)) {
-      // 2. 영어 알파벳 한 글자일 경우 (초성 검색)
-      results = await Promise.allSettled([
-        searchNongsaro({ wordType: 'plntbneNm', word: q.toUpperCase() }, NONGSARO_API_KEY, parser),
-      ])
-    } else {
-      // 3. 그 외 모든 경우 (일반 텍스트 검색)
-      results = await Promise.allSettled([
-        searchNongsaro({ sType: 'sCntntsSj', sText: q }, NONGSARO_API_KEY, parser), // 식물명
-        searchNongsaro({ sType: 'sPlntbneNm', sText: q }, NONGSARO_API_KEY, parser), // 학명
-        searchNongsaro({ sType: 'sPlntzrNm', sText: q }, NONGSARO_API_KEY, parser), // 영명
-      ])
+    let searchArgs: Record<string, string | number> = {
+      pageNo: page,
+      numOfRows: PAGE_SIZE,
     }
 
-    const allItems = results
-      .filter(
-        (result): result is PromiseFulfilledResult<NongsaroItem[]> => result.status === 'fulfilled'
-      )
-      .flatMap((result) => result.value)
+    if (safeQuery !== '') {
+      searchArgs.sType = 'sCntntsSj'
+      searchArgs.sText = safeQuery
 
-    const uniqueItems = new Map<string, NongsaroItem>()
-    allItems.forEach((item) => {
-      uniqueItems.set(item.cntntsNo, item) // cntntsNo (ID)를 기준으로 중복 제거
-    })
-    const itemsList = Array.from(uniqueItems.values())
+      if (/^[A-Z]$/i.test(safeQuery)) {
+        searchArgs.sType = 'sPlntbneNm'
+        searchArgs.sText = safeQuery.toUpperCase()
+      }
+    }
 
-    const plants: PlantSearchResult[] = itemsList.map((item) => {
-      const thumbRaw = Array.isArray(item.rtnThumbFileUrl)
+    const items = await searchNongsaro(searchArgs, NONGSARO_API_KEY, parser)
+
+    const totalCount = items.length >= PAGE_SIZE ? (page + 1) * PAGE_SIZE : page * PAGE_SIZE
+    const totalPage = Math.ceil(totalCount / PAGE_SIZE)
+    const plants: PlantSearchResult[] = items.map((item) => {
+      const raw = Array.isArray(item.rtnThumbFileUrl)
         ? item.rtnThumbFileUrl[0]
-        : (item.rtnThumbFileUrl ?? '')
-      const thumb = thumbRaw.includes('|') ? thumbRaw.split('|')[0] : thumbRaw
-
-      // 국명 + 영명 조합
-      const commonName = item.plntzrNm ? `${item.cntntsSj} (${item.plntzrNm})` : item.cntntsSj
-
-      // 학명을 배열로 변환
-      const scientificName = item.plntbneNm ? [item.plntbneNm] : []
+        : item.rtnThumbFileUrl || ''
+      const thumb = raw.includes('|') ? raw.split('|')[0] : raw
 
       return {
-        id: parseInt(item.cntntsNo, 10),
-        commonName: commonName,
-        scientificName: scientificName,
-        defaultImage: {
-          mediumUrl: thumb || 'https://placehold.co/300x300/e2e8f0/e2e8f0?text=+', // camelCase
-        },
+        id: Number(item.cntntsNo),
+        commonName: item.plntzrNm ? `${item.cntntsSj} (${item.plntzrNm})` : item.cntntsSj,
+        scientificName: item.plntbneNm ? [item.plntbneNm] : [],
+        defaultImage: { mediumUrl: thumb },
       }
     })
 
-    if (plants.length === 0) {
-      console.log(`검색 결과 없음: "${q}"`)
-      return NextResponse.json({ plants: [], message: '검색 결과가 없습니다.' }, { status: 200 })
-    }
-
-    return NextResponse.json({ plants, message: '검색 완료' }, { status: 200 })
-  } catch (err) {
-    let message = '알 수 없는 오류'
-    if (axios.isAxiosError(err)) {
-      message = `Axios Error: ${err.message}`
-    } else if (err instanceof Error) {
-      message = err.message
-    }
-    return NextResponse.json({ error: message }, { status: 500 })
+    return NextResponse.json(
+      {
+        items: plants,
+        pageNo: page,
+        totalPage,
+      },
+      { status: 200 }
+    )
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message || '알 수 없는 오류' }, { status: 500 })
   }
 }
