@@ -1,13 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { Plant } from '@/types/plant'
 import { queryKeys } from '@/lib/queryKeys'
-import { deletePlant } from '@/app/apis/supabaseApi'
+import { deletePlantAction } from '@/app/actions/plant/deletePlantAction'
 
 export const useDeletePlant = () => {
   const queryClient = useQueryClient()
 
   return useMutation<string, Error, string>({
-    mutationFn: (id) => deletePlant(id),
+    mutationFn: (id) => deletePlantAction(id),
 
     onSuccess: (deletedId) => {
       queryClient.setQueryData<Plant[]>(queryKeys.plants.list(), (prev = []) =>
