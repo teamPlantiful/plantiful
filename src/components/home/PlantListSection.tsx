@@ -8,6 +8,7 @@ import { useWaterPlant } from '@/hooks/mutations/useWaterPlant'
 import { useUpdatePlantIntervals } from '@/hooks/mutations/useUpdatePlantIntervals'
 import { useUpdatePlantNickname } from '@/hooks/mutations/useUpdatePlantNickname'
 import { useDeletePlant } from '@/hooks/mutations/useDeletePlant'
+import { normalizeSearch } from '@/utils/normalizeSearch'
 interface PlantListSectionProps {
   search?: string
   sort?: 'water' | 'name' | 'recent'
@@ -24,12 +25,18 @@ export default function PlantListSection({ search = '', sort = 'water' }: PlantL
   const { mutateAsync: deletePlantMutation } = useDeletePlant()
 
   const sortedPlants = useMemo(() => {
-    // 1. 검색 필터링
+    // 1. 검색 필터링 (완성형 + 초성 둘 다 지원)
+    const { original: searchWord, chosung: searchCho } = normalizeSearch(search)
     let filtered = plants
-    if (search) {
-      filtered = plants.filter((plant) =>
-        plant.nickname.toLowerCase().includes(search.toLowerCase())
-      )
+
+    if (searchWord || searchCho) {
+      filtered = plants.filter((plant) => {
+        const nickname = plant.nickname ?? ''
+        const { original: nickWord, chosung: nickCho } = normalizeSearch(nickname)
+        const matchFull = !!searchWord && !!nickWord && nickWord.includes(searchWord)
+        const matchCho = !!searchCho && !!nickCho && nickCho.startsWith(searchCho)
+        return matchFull || matchCho
+      })
     }
 
     // 2. 정렬

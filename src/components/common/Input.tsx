@@ -1,5 +1,3 @@
-'use client'
-
 import * as React from 'react'
 import cn from '@/lib/cn'
 
@@ -34,6 +32,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     ref
   ) => {
     const inputId = id ?? name
+    const inputName = name
 
     const sizes: Record<Size, string> = {
       sm: 'h-9 text-sm px-3',
@@ -66,6 +65,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
           <input
             id={inputId}
+            name={inputName}
             ref={ref}
             className={cn(
               'w-full file:hidden outline-none placeholder:text-muted-foreground',
