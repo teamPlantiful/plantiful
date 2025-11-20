@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { Modal, ModalHeader, ModalContent } from '@/components/common/modal'
 import type { PlantSearchResult } from '@/types/plant'
-import { useInfinitePlantSearch } from '@/hooks/useInfinitePlantSearch'
+import { useInfinitePlantSearch } from '@/hooks/queries/useInfinitePlantSearch'
 import PlantSearchInput from './PlantSearchInput'
 import PlantCustomInput from './PlantCustomInput'
 import PlantList from './PlantList'
