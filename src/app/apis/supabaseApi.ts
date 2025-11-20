@@ -1,5 +1,6 @@
 import type { Plant, PlantData } from '@/types/plant'
 import { toDbFormat, fromDbFormat, prepareCardForInsert } from '@/utils/plant'
+import { toDateOnlyISO, addDays } from '@/utils/date'
 import { supabase, getCurrentUserId } from './supabaseClient'
 
 const TABLE_NAME = 'plants'
@@ -105,10 +106,24 @@ export const updatePlantIntervals = async (params: {
 export const updateWateredAt = async (id: string, lastWateredAt: string): Promise<Plant> => {
   const userId = await getCurrentUserId()
 
+  // 먼저 식물 정보를 가져와서 watering_interval_days를 확인
+  const { data: plant, error: fetchError } = await supabase
+    .from(TABLE_NAME)
+    .select('watering_interval_days')
+    .eq('id', id)
+    .eq('user_id', userId)
+    .single()
+
+  if (fetchError) throw fetchError
+
+  // 유틸 함수 사용: 날짜 정규화 및 계산
+  const nextWateringDate = addDays(lastWateredAt, plant.watering_interval_days)
+
   const { data, error } = await supabase
     .from(TABLE_NAME)
     .update({
-      last_watered_at: lastWateredAt,
+      last_watered_at: toDateOnlyISO(lastWateredAt),
+      next_watering_date: toDateOnlyISO(nextWateringDate),
     })
     .eq('id', id)
     .eq('user_id', userId)
