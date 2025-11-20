@@ -65,7 +65,17 @@ export async function GET(request: Request) {
       totalPage,
     })
   } catch (error) {
-    const message = error instanceof Error ? error.message : '알 수 없는 오류'
+    console.error('[Nongsaro API Error]', error)
+
+    let message = '서버 처리 중 오류 발생'
+    if (error instanceof SyntaxError) {
+      message = '농사로 API 응답 파싱 중 오류가 발생했습니다.'
+    } else if (error instanceof TypeError) {
+      message = '잘못된 요청 값이 전달되었습니다.'
+    } else if (error instanceof Error) {
+      message = error.message || '예기치 못한 오류가 발생했습니다.'
+    }
+
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }
