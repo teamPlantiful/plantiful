@@ -85,7 +85,7 @@ export default function PlantSpeciesSearchModal({
       </ModalHeader>
 
       <ModalContent className="pt-0 pb-0">
-        <PlantSearchInput value={searchQuery} onChange={setSearchQuery} autoFocus={false} />
+        <PlantSearchInput value={searchQuery} onChange={setSearchQuery} />
 
         {/* 스크롤 영역 */}
         <div ref={setScrollContainer} className="h-[400px] overflow-y-auto mt-4 space-y-2">
