@@ -1,36 +1,37 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { getSupabaseClient } from '@/utils/supabase/clientOnly';
-import Button from '@/components/common/button';
+import { useState } from 'react'
+import { createClient } from '@/utils/supabase/client'
+import Image from 'next/image'
+import Button from '@/components/common/button'
 
 export default function LoginOAuthForm() {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false)
 
-  const handleSocialLogin = async (provider: 'google' /* | 'kakao' */) => {
-    setLoading(true);
-    const supabase = getSupabaseClient();
+  const handleSocialLogin = async (provider: 'google') => {
+    setLoading(true)
+    const supabase = createClient()
+
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/`, // 최종 리다이렉트. Supabase에 등록 필요
+          redirectTo: `${window.location.origin}/`,
         },
-      });
+      })
 
       if (error) {
-        console.error('OAuth 로그인 오류:', error.message);
-        return;
+        console.error('OAuth 로그인 오류:', error.message)
+        return
       }
 
       if (data?.url) {
-        // Supabase OAuth 페이지로 이동
-        window.location.href = data.url;
+        window.location.href = data.url
       }
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <div className="space-y-3">
@@ -39,6 +40,12 @@ export default function LoginOAuthForm() {
         onClick={() => handleSocialLogin('google')}
         disabled={loading}
       >
+        <Image 
+          src="/google-logo.png"
+          alt="Google"
+          width={18}
+          height={18}
+        />
         {loading ? '로그인 중...' : 'Google로 로그인'}
       </Button>
       {/* 
@@ -51,5 +58,5 @@ export default function LoginOAuthForm() {
       </Button>
       */}
     </div>
-  );
+  )
 }
