@@ -14,28 +14,22 @@ export function useInfinitePlantSearch(query: string) {
   return useInfiniteQuery<PagedPlantResult>({
     queryKey: ['plant-search', safeQuery],
     initialPageParam: 1,
-
     queryFn: async ({ pageParam }) => {
-      console.log(`Fetching page: ${pageParam}`) // 요청 로그
-      const res = await axios.get('/apis/searchPlant', {
+      const { data } = await axios.get('/apis/searchPlant', {
         params: {
           page: pageParam,
-          q: safeQuery || undefined,
+          q: safeQuery,
         },
       })
-      return res.data as PagedPlantResult
+
+      return data
+    },
+    getNextPageParam: (lastPage) => {
+      if (lastPage.pageNo < lastPage.totalPage) {
+        return lastPage.pageNo + 1
+      }
+      return undefined
     },
 
-    getNextPageParam: (lastPage, allPages) => {
-      // 서버에서 온 데이터 확인용 로그
-      console.log('Page Check:', {
-        currentPage: lastPage.pageNo,
-        totalPage: lastPage.totalPage,
-        hasNext: lastPage.pageNo < lastPage.totalPage,
-      })
-
-      // 다음 페이지가 있으면 +1, 없으면 undefined
-      return lastPage.pageNo < lastPage.totalPage ? lastPage.pageNo + 1 : undefined
-    },
   })
 }
