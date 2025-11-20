@@ -14,10 +14,13 @@ export const useWaterPlant = () => {
   return useMutation<Plant, Error, WaterPlantVariables>({
     mutationFn: ({ id, lastWateredAt }) => updateWateredAt(id, lastWateredAt),
 
-    onSuccess: (updatedPlant) => {
-      queryClient.setQueryData<Plant[]>(queryKeys.plants.list(), (prev = []) =>
-        prev.map((p) => (p.id === updatedPlant.id ? updatedPlant : p))
-      )
+    onSuccess: () => {
+      // 식물 목록 쿼리를 무효화하여 최신 데이터를 다시 가져옴
+      queryClient.invalidateQueries({ queryKey: queryKeys.plants.list() })
+    },
+
+    onError: (error) => {
+      console.error('물주기 실패:', error)
     },
   })
 }
