@@ -11,20 +11,31 @@ interface PlantListProps {
   onSelect: (plant: PlantSearchResult) => void
 }
 
-export default function PlantList({
-  loading,
-  error,
-  plants,
-  searchQuery,
-  onSelect,
-}: PlantListProps) {
-  const renderList = (list: PlantSearchResult[]) => (
+export default function PlantList({ loading, error, plants, onSelect }: PlantListProps) {
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-40">
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        <span className="ml-2 text-muted-foreground">검색 중...</span>
+      </div>
+    )
+  }
+
+  if (error) {
+    return <p className="text-center text-destructive pt-10">{error}</p>
+  }
+
+  if (plants.length === 0) {
+    return <p className="text-center text-muted-foreground pt-10">검색 결과가 없습니다.</p>
+  }
+
+  return (
     <>
-      {list.map((plant) => (
+      {plants.map((plant) => (
         <button
           key={plant.id}
           onClick={() => onSelect(plant)}
-          className="w-full cursor-pointer p-4 rounded-lg border border-border hover:bg-accent/50 transition-colors text-left flex items-center gap-3"
+          className="w-full flex items-center gap-3 p-4 text-left rounded-lg border border-border hover:bg-accent/50 transition-colors"
         >
           <img
             alt={plant.commonName}
@@ -40,30 +51,5 @@ export default function PlantList({
         </button>
       ))}
     </>
-  )
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-40">
-        <Loader2 className="h-6 w-6 animate-spin text-primary" />
-        <span className="ml-2">검색 중...</span>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <p className="text-center text-destructive pt-10">
-        {error ? '검색 도중 문제가 발생했습니다' : null}
-      </p>
-    )
-  }
-
-  return plants.length > 0 ? (
-    renderList(plants)
-  ) : (
-    <p className="text-center text-muted-foreground pt-10">
-      {searchQuery ? `'${searchQuery}'에 대한 ` : ''}검색 결과가 없습니다.
-    </p>
   )
 }
