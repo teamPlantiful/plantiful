@@ -15,7 +15,7 @@ export default function PlantSearchInput({ value, onChange }: PlantSearchInputPr
       <Input
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="식물 이름 검색..."
+        placeholder="식물 이름을 검색하세요"
         size="md"
         className="pl-10 bg-muted/30 border-none"
       />
