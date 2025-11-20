@@ -2,6 +2,7 @@
 
 import Button from '@/components/common/button';
 import Input from '@/components/common/Input';
+import LoginOAuthForm from '@/components/auth/LoginOAuthForm';
 import { Card, CardContent, CardHeader } from '@/components/common/card'; 
 import { Leaf } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -120,6 +121,7 @@ export default function LoginForm() {
                 disabled={loginLoading}
               >{loginLoading ? '로그인 중...' : '로그인'}
               </Button>
+              <LoginOAuthForm />
 
               <div className="relative my-3">
                 <div className="absolute inset-0 flex items-center">
