@@ -1,12 +1,12 @@
 'use client'
 
-import { Modal, ModalHeader, ModalContent } from '@/components/common/modal'
 import { useState, useRef, useEffect, useMemo } from 'react'
+import { Modal, ModalHeader, ModalContent } from '@/components/common/modal'
 import type { PlantSearchResult } from '@/types/plant'
+import { useInfinitePlantSearch } from '@/hooks/useInfinitePlantSearch'
 import PlantSearchInput from './PlantSearchInput'
 import PlantCustomInput from './PlantCustomInput'
 import PlantList from './PlantList'
-import { useInfinitePlantSearch } from '@/hooks/useInfinitePlantSearch'
 
 interface PlantSpeciesSearchModalProps {
   open: boolean
@@ -25,71 +25,70 @@ export default function PlantSpeciesSearchModal({
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, error } =
     useInfinitePlantSearch(searchQuery)
 
-  const scrollRef = useRef<HTMLDivElement | null>(null)
-  const loadMoreRef = useRef<HTMLDivElement | null>(null)
+  const [scrollContainer, setScrollContainer] = useState<HTMLDivElement | null>(null)
+  const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null)
 
-  const isFetchingRef = useRef(isFetchingNextPage)
-
-  useEffect(() => {
-    isFetchingRef.current = isFetchingNextPage
-  }, [isFetchingNextPage])
+  const plants = useMemo(() => {
+    return data?.pages.flatMap((p) => p.items) ?? []
+  }, [data])
 
   useEffect(() => {
-    if (!scrollRef.current || !loadMoreRef.current) return
-    if (!hasNextPage) return
+    if (!scrollContainer || !loadMoreTriggerRef.current) return
 
     const observer = new IntersectionObserver(
       (entries) => {
         const target = entries[0]
-        if (target.isIntersecting && !isFetchingRef.current) {
-          console.log('마지막')
+        if (target.isIntersecting && hasNextPage && !isFetchingNextPage) {
           fetchNextPage()
         }
       },
       {
-        root: scrollRef.current,
+        root: scrollContainer,
+        rootMargin: '200px',
         threshold: 0,
-        rootMargin: '1000px',
       }
     )
 
-    observer.observe(loadMoreRef.current)
+    observer.observe(loadMoreTriggerRef.current)
+
     return () => observer.disconnect()
-  }, [hasNextPage, fetchNextPage])
+  }, [scrollContainer, hasNextPage, isFetchingNextPage, fetchNextPage])
 
-  const plants = useMemo(() => {
-    const allItems = data?.pages.flatMap((p) => p.items) ?? []
-
-    return Array.from(new Map(allItems.map((item) => [item.id, item])).values())
-  }, [data])
+  // 핸들러
+  const handleClose = () => {
+    onOpenChange(false)
+    setSearchQuery('')
+    setCustomName('')
+  }
 
   const handleSelect = (plant: PlantSearchResult) => {
     onSelect(plant)
-    setSearchQuery('')
+    handleClose()
   }
 
   const handleCustomSelect = () => {
     if (!customName.trim()) return
     onSelect({ commonName: customName })
-    setCustomName('')
+    handleClose()
   }
 
   return (
     <Modal
       open={open}
-      onClose={() => onOpenChange(false)}
+      onClose={handleClose}
       closeOnBackdrop
       size="md"
       className="flex flex-col max-h-[85vh]"
     >
-      <ModalHeader className="pb-4" closable onClose={() => onOpenChange(false)}>
+      <ModalHeader className="pb-4" closable onClose={handleClose}>
         <h2 className="text-lg font-semibold">식물 종류 선택</h2>
       </ModalHeader>
 
       <ModalContent className="pt-0 pb-0">
-        <PlantSearchInput value={searchQuery} onChange={setSearchQuery} />
+        <PlantSearchInput value={searchQuery} onChange={setSearchQuery} autoFocus={false} />
 
-        <div ref={scrollRef} className="h-[400px] overflow-y-auto mt-4 space-y-2">
+        {/* 스크롤 영역 */}
+        <div ref={setScrollContainer} className="h-[400px] overflow-y-auto mt-4 space-y-2">
           <PlantCustomInput
             value={customName}
             onChange={setCustomName}
@@ -104,15 +103,16 @@ export default function PlantSpeciesSearchModal({
             onSelect={handleSelect}
           />
 
+          {/* 무한 스크롤  */}
           <div
-            ref={loadMoreRef}
+            ref={loadMoreTriggerRef}
             className="h-12 w-full flex items-center justify-center text-gray-400 text-sm"
           >
             {isFetchingNextPage
               ? '데이터를 불러오는 중입니다...'
               : hasNextPage
-                ? ''
-                : '더 이상 결과가 없습니다'}
+                ? '스크롤하여 더보기'
+                : '더 이상 결과가 없습니다.'}
           </div>
         </div>
       </ModalContent>
