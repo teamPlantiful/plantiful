@@ -1,11 +1,14 @@
 import Header from '@/components/Header'
 import DashboardClient from './dashboard-client'
+import { Suspense } from 'react'
 
 export default function Home() {
   return (
     <>
       <Header />
-      <DashboardClient />
+      <Suspense fallback={null}>
+        <DashboardClient />
+      </Suspense>
     </>
   )
 }
