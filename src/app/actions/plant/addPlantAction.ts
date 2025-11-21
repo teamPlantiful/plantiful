@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/utils/supabase/server'
+import { requireAuth } from '@/utils/supabase/helpers'
 import { toDbFormat, fromDbFormat, prepareCardForInsert } from '@/utils/plant'
 import { revalidatePath } from 'next/cache'
 import type { Plant } from '@/types/plant'
@@ -9,16 +9,7 @@ const TABLE_NAME = 'plants'
 const STORAGE_BUCKET = 'plant-images'
 
 export default async function addPlantAction(formData: FormData): Promise<Plant> {
-  const supabase = await createClient()
-
-  // Middleware가 인증을 보장하므로 user는 항상 존재
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    throw new Error('Unauthorized')
-  }
+  const { user, supabase } = await requireAuth()
 
   try {
     const file = formData.get('file') as File | null
