@@ -28,8 +28,10 @@ const PlantFilterBar: React.FC<PlantFilterBarProps> = ({
   const debouncedSearch = useDebounce(innerSearch, 300)
 
   useEffect(() => {
+    if (debouncedSearch === search) return
+
     onSearchChange(debouncedSearch)
-  }, [debouncedSearch, onSearchChange])
+  }, [debouncedSearch, onSearchChange, search])
 
   const handleSortChange = (value: string) => {
     onSortChange(value as 'water' | 'name' | 'recent')
@@ -57,9 +59,9 @@ const PlantFilterBar: React.FC<PlantFilterBarProps> = ({
           value={sort}
           placeholder="정렬"
           options={[
+            { value: 'recent', label: '최근 등록순' },
             { value: 'water', label: '물주기 우선' },
             { value: 'name', label: '이름순' },
-            { value: 'recent', label: '최근 등록순' },
           ]}
           onSelect={handleSortChange}
         />
