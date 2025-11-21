@@ -24,7 +24,7 @@ export default function DashboardClient() {
         return
       }
 
-      await fetch('/apis/auth/create-profile', { method: 'POST' })
+      await fetch('/apis/auth/profile', { method: 'POST' })
     }
 
     profiling()
