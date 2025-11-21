@@ -81,7 +81,7 @@ function Model({ state }: ModelProps) {
   }, [state])
 
   return (
-    <group rotation={[0, Math.PI / 5, 0]} position={[0, -0.9, 0]} scale={1.2}>
+    <group rotation={[0, Math.PI / 5, 0]} position={[0, -0.9, 0]} scale={1.1}>
       <primitive object={model.scene} />
     </group>
   )
