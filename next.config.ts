@@ -1,9 +1,14 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  /* config options here */
   images: {
-    domains: ['nongsaro.go.kr'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'nongsaro.go.kr',
+        pathname: '/**',
+      },
+    ],
   },
 }
 
