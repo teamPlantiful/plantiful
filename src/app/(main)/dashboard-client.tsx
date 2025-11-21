@@ -5,6 +5,7 @@ import PlantListSection from '@/components/home/PlantListSection'
 import PlantFilterBar from '@/components/home/PlantFilterBar'
 import PlantRegistrationFab from '@/components/home/PlantRegistrationFab'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useGetPlants } from '@/hooks/queries/useGetPlants'
 
 type SortKey = 'water' | 'name' | 'recent'
 
@@ -12,6 +13,8 @@ export default function DashboardClient() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const pathname = usePathname()
+
+  const { data: plants = [], isLoading } = useGetPlants()
 
   // 1) URL에서 현재 값
   const search = searchParams.get('q') ?? ''
@@ -38,15 +41,15 @@ export default function DashboardClient() {
   }
   return (
     <div>
-      <div className="max-w-180 mx-auto p-4 space-y-6 md:space-y-8 animate-fade-in">
-        <TodayPlantSection />
+      <div className="max-w-190 mx-auto p-4 space-y-6 md:space-y-8 animate-fade-in">
+        <TodayPlantSection plants={plants} />
         <PlantFilterBar
           search={search}
           sort={sort}
           onSearchChange={(value) => setParams({ q: value })}
           onSortChange={(value) => setParams({ sort: value })}
         />
-        <PlantListSection search={search} sort={sort} />
+        <PlantListSection plants={plants} isLoading={isLoading} search={search} sort={sort} />
       </div>
       <PlantRegistrationFab />
     </div>
