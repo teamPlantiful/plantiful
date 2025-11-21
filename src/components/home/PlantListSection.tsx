@@ -20,7 +20,7 @@ export default function PlantListSection({ search = '', sort = 'water' }: PlantL
 
   const [open, setOpen] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const { mutateAsync: waterPlant } = useWaterPlant()
+  const { mutateAsync: waterPlant, isPending } = useWaterPlant()
   const { mutateAsync: updateIntervals } = useUpdatePlantIntervals()
   const { mutateAsync: updateNickname } = useUpdatePlantNickname()
   const { mutateAsync: deletePlantMutation } = useDeletePlant()
@@ -67,8 +67,21 @@ export default function PlantListSection({ search = '', sort = 'water' }: PlantL
     setSelectedId(id)
     setOpen(true)
   }
-
+  //물주기
   const handleWater = async (id: string) => {
+    const plant = plants.find((p) => p.id === id)
+    if (!plant) return
+
+    const today = new Date().toISOString().slice(0, 10)
+    const lastWateredDate = plant.lastWateredAt?.slice(0, 10) ?? null
+
+    if (lastWateredDate === today) {
+      alert('오늘은 이미 물을 줬어요')
+      return
+    }
+
+    if (isPending) return
+
     const now = new Date().toISOString()
     await waterPlant({ id, lastWateredAt: now })
   }
