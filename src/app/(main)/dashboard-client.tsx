@@ -14,7 +14,7 @@ export default function DashboardClient() {
 
   return (
     <div>
-      <div className="max-w-180 mx-auto p-4 space-y-6 md:space-y-8 animate-fade-in">
+      <div className="max-w-190 mx-auto p-4 space-y-6 md:space-y-8 animate-fade-in">
         <TodayPlantSection plants={plants} />
         <PlantFilterBar
           search={search}
