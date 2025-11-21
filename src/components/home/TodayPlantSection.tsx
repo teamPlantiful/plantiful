@@ -3,14 +3,16 @@
 import { useMemo } from 'react'
 import { Card, CardContent } from '@/components/common/card'
 import PlantModel from './PlantModel'
-import { useGetPlants } from '@/hooks/queries/useGetPlants'
 import { calculateDday } from '@/utils/date'
+import type { Plant } from '@/types/plant'
 
 type PlantState = 'normal' | 'thirsty'
 
-export default function TodayPlantSection() {
-  const { data: plants = [] } = useGetPlants()
+interface TodayPlantSectionProps {
+  plants: Plant[]
+}
 
+export default function TodayPlantSection({ plants }: TodayPlantSectionProps) {
   // 물주기가 가장 급한 식물 선택
   const urgentPlant = useMemo(() => {
     if (plants.length === 0) return null
