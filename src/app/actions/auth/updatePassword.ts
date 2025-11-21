@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/utils/supabase/server'
+import { requireAuth } from '@/utils/supabase/helpers'
 
 export default async function updatePassword(formData: FormData) {
   const newPassword = formData.get('newPassword')?.toString()
@@ -26,12 +26,11 @@ export default async function updatePassword(formData: FormData) {
     return { error: '설정할 비밀번호가 일치하지 않습니다.' }
   }
 
-  const supabase = await createClient()
-  const user = (await supabase.auth.getUser()).data.user
-  if (!user?.email) return { error: '사용자 정보를 불러 오지 못했습니다.' }
+  const { user, supabase } = await requireAuth()
+  if (!user.email) return { error: '사용자 정보를 불러 오지 못했습니다.' }
   // 현재 비밀번호가 일치하는 지 검증
   const { error: signInError } = await supabase.auth.signInWithPassword({
-    email: (await supabase.auth.getUser()).data.user?.email!,
+    email: user.email,
     password: currentPassword,
   })
 

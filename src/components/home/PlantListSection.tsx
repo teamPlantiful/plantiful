@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from 'react'
 import PlantCard from '@/components/plant/detail/PlantCard'
-import { useGetPlants } from '@/hooks/queries/useGetPlants'
 import PlantDetailModal from '@/components/plant/detail/PlantDetailModal'
 import { useWaterPlant } from '@/hooks/mutations/useWaterPlant'
 import { useUpdatePlantIntervals } from '@/hooks/mutations/useUpdatePlantIntervals'
@@ -10,14 +9,21 @@ import { useUpdatePlantNickname } from '@/hooks/mutations/useUpdatePlantNickname
 import { useDeletePlant } from '@/hooks/mutations/useDeletePlant'
 import { normalizeSearch } from '@/utils/normalizeSearch'
 import { calculateDday } from '@/utils/date'
+import type { Plant } from '@/types/plant'
+
 interface PlantListSectionProps {
+  plants: Plant[]
+  isLoading: boolean
   search?: string
   sort?: 'water' | 'name' | 'recent'
 }
 
-export default function PlantListSection({ search = '', sort = 'water' }: PlantListSectionProps) {
-  const { data: plants = [], isLoading } = useGetPlants()
-
+export default function PlantListSection({
+  plants,
+  isLoading,
+  search = '',
+  sort = 'water',
+}: PlantListSectionProps) {
   const [open, setOpen] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const { mutateAsync: waterPlant } = useWaterPlant()
@@ -76,13 +82,8 @@ export default function PlantListSection({ search = '', sort = 'water' }: PlantL
   const handleSaveNickname = async (nextName: string) => {
     if (!selectedId) return
     const trimmed = nextName.trim()
-    if (!trimmed) {
-      setOpen(false)
-      return
-    }
-
+    if (!trimmed) return
     await updateNickname({ id: selectedId, nickname: trimmed })
-    setOpen(false)
   }
 
   const handleSaveIntervals = async (next: {
@@ -98,8 +99,6 @@ export default function PlantListSection({ search = '', sort = 'water' }: PlantL
       fertilizerDays: next.fertilizer,
       repottingDays: next.repotting,
     })
-
-    setOpen(false)
   }
 
   const handleDelete = async () => {
