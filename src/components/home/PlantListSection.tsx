@@ -9,6 +9,7 @@ import { useUpdatePlantIntervals } from '@/hooks/mutations/useUpdatePlantInterva
 import { useUpdatePlantNickname } from '@/hooks/mutations/useUpdatePlantNickname'
 import { useDeletePlant } from '@/hooks/mutations/useDeletePlant'
 import { normalizeSearch } from '@/utils/normalizeSearch'
+import { calculateDday } from '@/utils/date'
 interface PlantListSectionProps {
   search?: string
   sort?: 'water' | 'name' | 'recent'
@@ -48,14 +49,11 @@ export default function PlantListSection({ search = '', sort = 'water' }: PlantL
         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       )
     }
+
     // 물주기 우선 정렬
     return [...filtered].sort((a, b) => {
-      const ddayA = a.nextWateringDate
-        ? Math.floor((new Date(a.nextWateringDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-        : Infinity
-      const ddayB = b.nextWateringDate
-        ? Math.floor((new Date(b.nextWateringDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-        : Infinity
+      const ddayA = a.nextWateringDate ? calculateDday(a.nextWateringDate) : Infinity
+      const ddayB = b.nextWateringDate ? calculateDday(b.nextWateringDate) : Infinity
       return ddayA - ddayB
     })
   }, [plants, sort, search])
@@ -124,11 +122,7 @@ export default function PlantListSection({ search = '', sort = 'water' }: PlantL
       ) : (
         <section className="grid gap-3 grid-cols-1 md:grid-cols-2">
           {sortedPlants.map((p) => {
-            const ddayWater = p.nextWateringDate
-              ? Math.floor(
-                  (new Date(p.nextWateringDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-                )
-              : 0
+            const ddayWater = p.nextWateringDate ? calculateDday(p.nextWateringDate) : 0
 
             return (
               <PlantCard

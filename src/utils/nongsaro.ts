@@ -8,26 +8,40 @@ import type {
   NongsaroDetailBody,
   NongsaroDetailResponse,
 } from '@/types/nongsaro'
+
 /**
  * 특정 sType과 sText로 농사로 API를 검색하고 아이템 목록을 반환
  */
 export async function searchNongsaro(
-  params: Record<string, string>,
+  params: Record<string, string | number>,
   apiKey: string,
   parser: XMLParser
-): Promise<NongsaroItem[]> {
-  const searchParams = new URLSearchParams(params)
+): Promise<{
+  items: NongsaroItem[]
+  totalCount: number
+  pageNo: number
+  numOfRows: number
+}> {
+  const searchParams = new URLSearchParams(Object.entries(params).map(([k, v]) => [k, String(v)]))
+
   const url = `http://api.nongsaro.go.kr/service/garden/gardenList?apiKey=${apiKey}&${searchParams.toString()}`
 
   try {
     const apiRes = await axios.get(url, {
-      headers: { 'Cache-Control': 'no-cache', Pragma: 'no-cache', Expires: '0' },
+      headers: {
+        'Cache-Control': 'no-cache',
+        Pragma: 'no-cache',
+        Expires: '0',
+      },
     })
-    const jsonData: NongsaroResponse = parser.parse(apiRes.data)
 
+    const jsonData: NongsaroResponse = parser.parse(apiRes.data)
     const header = jsonData.response?.header
     const body = jsonData.response?.body
-    if (!header || !body) return []
+
+    if (!header || !body) {
+      return { items: [], totalCount: 0, pageNo: 1, numOfRows: 20 }
+    }
 
     const code =
       typeof header.resultCode === 'string'
@@ -35,15 +49,19 @@ export async function searchNongsaro(
         : JSON.stringify(header.resultCode)
 
     if (/^0+$|^INFO-0+$/.test(code) && body.items?.item) {
-      return Array.isArray(body.items.item) ? body.items.item : [body.items.item]
+      const items = Array.isArray(body.items.item) ? body.items.item : [body.items.item]
+
+      const totalCount = Number((body as any).totalCount ?? 0)
+      const pageNo = Number((body as any).pageNo ?? 1)
+      const numOfRows = Number((body as any).numOfRows ?? 20)
+
+      return { items, totalCount, pageNo, numOfRows }
     }
-    return []
+
+    return { items: [], totalCount: 0, pageNo: 1, numOfRows: 20 }
   } catch (error) {
-    console.error(
-      ` ${JSON.stringify(params)} 검색 중 오류:`,
-      error instanceof Error ? error.message : error
-    )
-    return []
+    console.error('검색 오류:', error)
+    return { items: [], totalCount: 0, pageNo: 1, numOfRows: 20 }
   }
 }
 
@@ -59,12 +77,17 @@ export async function getNongsaroDetail(
 
   try {
     const apiRes = await axios.get(url, {
-      headers: { 'Cache-Control': 'no-cache', Pragma: 'no-cache', Expires: '0' },
+      headers: {
+        'Cache-Control': 'no-cache',
+        Pragma: 'no-cache',
+        Expires: '0',
+      },
     })
-    const jsonData: NongsaroDetailResponse = parser.parse(apiRes.data)
 
+    const jsonData: NongsaroDetailResponse = parser.parse(apiRes.data)
     const header = jsonData.response?.header
     const body = jsonData.response?.body
+
     if (!header || !body) return null
 
     const code =
@@ -72,11 +95,12 @@ export async function getNongsaroDetail(
         ? header.resultCode.trim()
         : JSON.stringify(header.resultCode)
 
-    // 상세 API는 body.items.item이 아닌 body.item을 반환합니다.
+    // 상세 API는 body.items.item이 아닌 body.item을 반환
     if (/^0+$|^INFO-0+$/.test(code) && body.item) {
       const item = Array.isArray(body.item) ? body.item[0] : body.item
       return item
     }
+
     return null
   } catch (error) {
     console.error(`[${cntntsNo}] 상세 정보 로드 중 오류:`, error)
