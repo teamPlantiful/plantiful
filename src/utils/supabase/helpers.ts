@@ -12,7 +12,7 @@ export async function requireAuth() {
   } = await supabase.auth.getUser()
 
   if (error || !user) {
-    throw new Error('Unauthorized: 사용자 정보를 불러올 수 없습니다.')
+    throw new Error('Unauthorized')
   }
 
   return { user, supabase }
