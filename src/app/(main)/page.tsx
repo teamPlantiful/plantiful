@@ -2,6 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import Header from '@/components/Header'
 import DashboardClient from './dashboard-client'
+import { Suspense } from 'react'
 
 export default async function Home() {
   const supabase = await createClient()
@@ -17,7 +18,9 @@ export default async function Home() {
   return (
     <>
       <Header />
-      <DashboardClient />
+      <Suspense fallback={null}>
+        <DashboardClient />
+      </Suspense>
     </>
   )
 }
