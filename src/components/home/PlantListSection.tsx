@@ -76,13 +76,8 @@ export default function PlantListSection({ search = '', sort = 'water' }: PlantL
   const handleSaveNickname = async (nextName: string) => {
     if (!selectedId) return
     const trimmed = nextName.trim()
-    if (!trimmed) {
-      setOpen(false)
-      return
-    }
-
+    if (!trimmed) return
     await updateNickname({ id: selectedId, nickname: trimmed })
-    setOpen(false)
   }
 
   const handleSaveIntervals = async (next: {
@@ -98,8 +93,6 @@ export default function PlantListSection({ search = '', sort = 'water' }: PlantL
       fertilizerDays: next.fertilizer,
       repottingDays: next.repotting,
     })
-
-    setOpen(false)
   }
 
   const handleDelete = async () => {
