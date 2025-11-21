@@ -1,8 +1,6 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
-import { getSupabaseClient } from '@/utils/supabase/client'
+import { useState } from 'react'
 import TodayPlantSection from '@/components/home/TodayPlantSection'
 import PlantListSection from '@/components/home/PlantListSection'
 import PlantFilterBar from '@/components/home/PlantFilterBar'
@@ -13,24 +11,6 @@ export default function DashboardClient() {
   const [search, setSearch] = useState('')
   const [sort, setSort] = useState<'water' | 'name' | 'recent'>('water')
   const { data: plants = [], isLoading } = useGetPlants()
-
-  const supabase = getSupabaseClient()
-  const router = useRouter()
-
-  useEffect(() => {
-    async function profiling() {
-      const { data: { session } } = await supabase.auth.getSession()
-
-      if (!session) {
-        router.replace('/login')
-        return
-      }
-
-      await fetch('/apis/auth/profile', { method: 'POST' })
-    }
-
-    profiling()
-  }, [supabase, router])
 
   return (
     <div>
