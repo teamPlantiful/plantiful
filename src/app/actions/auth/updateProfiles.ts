@@ -1,18 +1,10 @@
 'use server'
 
-import { createClient } from '@/utils/supabase/server'
-
+import { requireAuth } from '@/utils/supabase/helpers'
 
 export default async function updateProfiles(formData: FormData) {
   const newUserName = formData.get('userName')?.toString()
-  const supabase = await createClient()
-
-  // 로그인 유저 확인
-  const { data: { user }, error: userError } = await supabase.auth.getUser()
-
-  if (!user || userError) {
-    return { error: '사용자 정보를 불러오지 못했습니다.' }
-  }
+  const { user, supabase } = await requireAuth()
 
   // DB 업데이트
   const { error } = await supabase
