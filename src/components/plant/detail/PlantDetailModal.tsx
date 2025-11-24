@@ -264,6 +264,7 @@ export default function PlantDetailModal({
                 fertilizer: fertilizerDays,
                 repotting: repottingDays,
               })
+              setTab('status')
             }}
           >
             <input type="hidden" name="id" value={plant.id} />
