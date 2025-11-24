@@ -14,6 +14,10 @@ import type { Plant, CareInfo } from '@/types/plant'
 import { generateDayOptions, generateMonthOptions } from '@/utils/date'
 import { clamp, daysToMonths, monthsToDays } from '@/utils/generateDay'
 
+import { updatePlantNicknameAction } from '@/app/actions/plant/updatePlantNicknameAction'
+import { updatePlantIntervalsAction } from '@/app/actions/plant/updatePlantIntervalsAction'
+import { deletePlantAction } from '@/app/actions/plant/deletePlantAction'
+
 type TabKey = 'status' | 'settings'
 interface PlantDetailModalProps {
   open: boolean
@@ -78,29 +82,6 @@ export default function PlantDetailModal({
     [repottingIntervalMonth]
   )
 
-  const handleSaveNickname = (): void => {
-    setEditing(false)
-    const next = nickname.trim()
-    if (next && next !== plant.nickname) {
-      if (!confirmOnSave || window.confirm('변경하시겠습니까?')) onSaveNickname?.(next)
-    }
-  }
-
-  // 저장은 모두 '일' 단위로 변환해서 상위에 전달
-  const handleSaveIntervals = (): void => {
-    const wateringDays = clamp(Number(wateringInterval) || 1, 1)
-    const fertilizerDays = monthsToDays(clamp(Number(fertilizerIntervalMonth) || 1, 1))
-    const repottingDays = monthsToDays(clamp(Number(repottingIntervalMonth) || 1, 1))
-
-    if (!confirmOnSave || window.confirm('변경하시겠습니까?')) {
-      onSaveIntervals?.({
-        watering: wateringDays,
-        fertilizer: fertilizerDays,
-        repotting: repottingDays,
-      })
-    }
-  }
-
   const careInfo: CareInfo | undefined = useMemo(() => {
     if (
       !plant.lightDemandCode &&
@@ -122,25 +103,51 @@ export default function PlantDetailModal({
       <ModalHeader closable onClose={onClose} className="pb-4">
         <div className="flex items-center gap-2 w-full">
           {editing ? (
-            <>
+            <form
+              action={updatePlantNicknameAction}
+              className="flex w-full items-center gap-2"
+              onSubmit={(e) => {
+                if (confirmOnSave && !window.confirm('변경하시겠습니까?')) {
+                  e.preventDefault()
+                  return
+                }
+
+                const next = nickname.trim()
+
+                if (next && next !== plant.nickname) {
+                  onSaveNickname?.(next)
+                }
+
+                setEditing(false)
+              }}
+            >
+              <input type="hidden" name="id" value={plant.id} />
               <div className="w-full min-w-0">
                 <Input
+                  name="nickname"
                   value={nickname}
                   onChange={(e) => setNickname(e.target.value)}
                   size="sm"
                   className="flex-1 min-w-0"
                 />
               </div>
-              <Button size="sm" onClick={handleSaveNickname}>
+              <Button size="sm" type="submit">
                 저장
               </Button>
-              <Button size="sm" variant="ghost" onClick={() => setEditing(false)}>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  setNickname(plant.nickname)
+                  setEditing(false)
+                }}
+              >
                 취소
               </Button>
-            </>
+            </form>
           ) : (
             <>
-              <span className="text-lg font-semibold">{plant.nickname}</span>
+              <span className="text-lg font-semibold">{nickname}</span>
               <Button
                 aria-label="이름 수정"
                 size="icon"
@@ -238,12 +245,32 @@ export default function PlantDetailModal({
         )}
 
         {tab === 'settings' && (
-          <div
+          <form
             id="panel-settings"
             role="tabpanel"
             aria-labelledby="tab-settings"
             className="space-y-4"
+            action={updatePlantIntervalsAction}
+            onSubmit={(e) => {
+              if (confirmOnSave && !window.confirm('변경하시겠습니까?')) {
+                e.preventDefault()
+              }
+              const wateringDays = clamp(Number(wateringInterval) || 1, 1)
+              const fertilizerDays = monthsToDays(clamp(Number(fertilizerIntervalMonth) || 1, 1))
+              const repottingDays = monthsToDays(clamp(Number(repottingIntervalMonth) || 1, 1))
+
+              onSaveIntervals?.({
+                watering: wateringDays,
+                fertilizer: fertilizerDays,
+                repotting: repottingDays,
+              })
+            }}
           >
+            <input type="hidden" name="id" value={plant.id} />
+            <input type="hidden" name="wateringInterval" value={wateringInterval} />
+            <input type="hidden" name="fertilizerIntervalMonth" value={fertilizerIntervalMonth} />
+            <input type="hidden" name="repottingIntervalMonth" value={repottingIntervalMonth} />
+
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground/80">물주기 주기</label>
               <SelectBox
@@ -274,24 +301,38 @@ export default function PlantDetailModal({
               />
             </div>
 
-            <Button className="w-full mt-1" onClick={handleSaveIntervals}>
+            <Button className="w-full mt-1" type="submit">
               주기 저장
             </Button>
-          </div>
+          </form>
         )}
       </ModalContent>
 
       <ModalFooter className="pt-4">
-        <Button
-          variant="destructive-outline"
+        <form
+          action={deletePlantAction}
           className="w-full"
-          onClick={() => {
-            if (!confirmOnDelete || window.confirm('정말 삭제할까요?')) onDelete()
+          onSubmit={(e) => {
+            if (confirmOnDelete && !window.confirm('정말 삭제할까요?')) {
+              e.preventDefault()
+              return
+            }
+            // ✅ 서버 액션은 진행하고, 클라 상태는 onDelete로 정리
+            onDelete()
           }}
         >
-          <Trash2 className="h-4 w-4 mr-2" />
-          삭제하기
-        </Button>
+          <input type="hidden" name="id" value={plant.id} />
+          <Button
+            variant="destructive-outline"
+            className="w-full"
+            onClick={() => {
+              if (!confirmOnDelete || window.confirm('정말 삭제할까요?')) onDelete()
+            }}
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            삭제하기
+          </Button>
+        </form>
       </ModalFooter>
     </Modal>
   )

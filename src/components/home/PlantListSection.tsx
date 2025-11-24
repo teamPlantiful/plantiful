@@ -1,12 +1,8 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import PlantCard from '@/components/plant/detail/PlantCard'
 import PlantDetailModal from '@/components/plant/detail/PlantDetailModal'
-import { useWaterPlant } from '@/hooks/mutations/useWaterPlant'
-import { useUpdatePlantIntervals } from '@/hooks/mutations/useUpdatePlantIntervals'
-import { useUpdatePlantNickname } from '@/hooks/mutations/useUpdatePlantNickname'
-import { useDeletePlant } from '@/hooks/mutations/useDeletePlant'
 import { normalizeSearch } from '@/utils/normalizeSearch'
 import { calculateDday } from '@/utils/date'
 import type { Plant } from '@/types/plant'
@@ -26,18 +22,18 @@ export default function PlantListSection({
 }: PlantListSectionProps) {
   const [open, setOpen] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const { mutateAsync: waterPlant } = useWaterPlant()
-  const { mutateAsync: updateIntervals } = useUpdatePlantIntervals()
-  const { mutateAsync: updateNickname } = useUpdatePlantNickname()
-  const { mutateAsync: deletePlantMutation } = useDeletePlant()
+  const [clientPlants, setClientPlants] = useState<Plant[]>(plants)
 
+  useEffect(() => {
+    setClientPlants(plants)
+  }, [plants])
   const sortedPlants = useMemo(() => {
     // 1. 검색 필터링 (완성형 + 초성 둘 다 지원)
     const { original: searchWord, chosung: searchCho } = normalizeSearch(search)
-    let filtered = plants
+    let filtered = clientPlants
 
     if (searchWord || searchCho) {
-      filtered = plants.filter((plant) => {
+      filtered = clientPlants.filter((plant) => {
         const nickname = plant.nickname ?? ''
         const { original: nickWord, chosung: nickCho } = normalizeSearch(nickname)
         const matchFull = !!searchWord && !!nickWord && nickWord.includes(searchWord)
@@ -62,11 +58,11 @@ export default function PlantListSection({
       const ddayB = b.nextWateringDate ? calculateDday(b.nextWateringDate) : Infinity
       return ddayA - ddayB
     })
-  }, [plants, sort, search])
+  }, [clientPlants, sort, search])
 
   const selected = useMemo(
-    () => plants.find((p) => p.id === selectedId) ?? null,
-    [plants, selectedId]
+    () => clientPlants.find((p) => p.id === selectedId) ?? null,
+    [clientPlants, selectedId]
   )
 
   const handleCardClick = (id: string) => {
@@ -74,16 +70,32 @@ export default function PlantListSection({
     setOpen(true)
   }
 
-  const handleWater = async (id: string) => {
-    const now = new Date().toISOString()
-    await waterPlant({ id, lastWateredAt: now })
+  const handleWater = (id: string) => {
+    setClientPlants((prev) =>
+      prev.map((p) => {
+        if (p.id !== id) return p
+
+        const now = Date.now()
+        const nextWateringDate = new Date(
+          now + p.wateringIntervalDays * 24 * 60 * 60 * 1000
+        ).toISOString()
+
+        return {
+          ...p,
+          lastWateredAt: new Date(now).toISOString(),
+          nextWateringDate,
+        }
+      })
+    )
   }
   // 모달 내의 엑션들
   const handleSaveNickname = async (nextName: string) => {
     if (!selectedId) return
     const trimmed = nextName.trim()
     if (!trimmed) return
-    await updateNickname({ id: selectedId, nickname: trimmed })
+    setClientPlants((prev) =>
+      prev.map((p) => (p.id === selectedId ? { ...p, nickname: trimmed } : p))
+    )
   }
 
   const handleSaveIntervals = async (next: {
@@ -91,22 +103,29 @@ export default function PlantListSection({
     fertilizer: number
     repotting: number
   }) => {
-    if (!selectedId) return
+    const now = Date.now()
+    const nextWateringDate = new Date(now + next.watering * 24 * 60 * 60 * 1000).toISOString()
 
-    await updateIntervals({
-      id: selectedId,
-      wateringDays: next.watering,
-      fertilizerDays: next.fertilizer,
-      repottingDays: next.repotting,
-    })
+    setClientPlants((prev) =>
+      prev.map((p) =>
+        p.id === selectedId
+          ? {
+              ...p,
+              wateringIntervalDays: next.watering,
+              fertilizerIntervalDays: next.fertilizer,
+              repottingIntervalDays: next.repotting,
+              nextWateringDate,
+            }
+          : p
+      )
+    )
   }
 
   const handleDelete = async () => {
     if (!selectedId) return
-    await deletePlantMutation(selectedId)
+    setClientPlants((prev) => prev.filter((p) => p.id !== selectedId))
     setOpen(false)
   }
-
   return (
     <>
       {/* 식물 목록 */}

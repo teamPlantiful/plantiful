@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, MouseEvent, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { Droplets } from 'lucide-react'
 import Button from '@/components/common/button'
 import { Card } from '@/components/common/card'
 import cn from '@/lib/cn'
 import type { PlantCardInfo } from '@/types/plant'
+import { updateWaterPlantAction } from '@/app/actions/plant/updateWaterPlantAction'
 
 export default function PlantCard({
   id,
@@ -26,13 +27,6 @@ export default function PlantCard({
   )
 
   const handleCardClick = () => onClick(id)
-
-  const handleWater = (e: MouseEvent) => {
-    e.stopPropagation()
-    setIsWatering(true)
-    onWater(id)
-    setTimeout(() => setIsWatering(false), 600)
-  }
 
   const ddayVariant = useMemo<'urgent' | 'warning' | 'normal'>(() => {
     if ((ddayWater = 0)) return 'urgent'
@@ -88,19 +82,28 @@ export default function PlantCard({
         </div>
 
         {/* 물주기 버튼 */}
-        <Button
-          aria-label="물주기"
-          title="물주기"
-          size="icon"
-          variant="ghost"
-          onClick={handleWater}
-          className={cn(
-            'h-10 w-10 shrink-0 rounded-full transition-all hover:bg-secondary/20 hover:text-secondary',
-            isWatering && 'animate-water-drop'
-          )}
-        >
-          <Droplets className="h-5 w-5" />
-        </Button>
+        <form action={updateWaterPlantAction} onSubmit={(e) => {}}>
+          <input type="hidden" name="id" value={id} />
+          <Button
+            type="submit"
+            aria-label="물주기"
+            title="물주기"
+            size="icon"
+            variant="ghost"
+            onClick={(e) => {
+              e.stopPropagation()
+              onWater?.(id)
+              setIsWatering(true)
+              setTimeout(() => setIsWatering(false), 600)
+            }}
+            className={cn(
+              'h-10 w-10 shrink-0 rounded-full transition-all hover:bg-secondary/20 hover:text-secondary',
+              isWatering && 'animate-water-drop'
+            )}
+          >
+            <Droplets className="h-5 w-5" />
+          </Button>
+        </form>
       </div>
     </Card>
   )
