@@ -73,9 +73,8 @@ export default function LoginAuthForm() {
         <Input 
           id="email" 
           name="email"
-          type="email"
+          type="text"
           placeholder="name@example.com"
-          required
         />
       </div>
       {/* 비밀번호 입력 */}
@@ -91,7 +90,6 @@ export default function LoginAuthForm() {
           name="password"
           type="password" 
           placeholder="••••••••"
-          required
         />
       </div>
       {/* 에러 메세지 */}
