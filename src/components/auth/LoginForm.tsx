@@ -1,8 +1,8 @@
-import LoginAuthForm from '@/components/auth/LoginAuthForm';
-import LoginOAuthForm from '@/components/auth/LoginOAuthForm';
-import { Card, CardContent, CardHeader } from '@/components/common/card'; 
-import { Leaf } from 'lucide-react';
-import Link from 'next/link';
+import LoginAuthForm from '@/components/auth/LoginAuthForm'
+import LoginOAuthForm from '@/components/auth/LoginOAuthForm'
+import { Card, CardContent, CardHeader } from '@/components/common/card'
+import { Leaf } from 'lucide-react'
+import Link from 'next/link'
 
 export default function LoginForm() {
 
