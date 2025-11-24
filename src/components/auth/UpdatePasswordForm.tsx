@@ -3,7 +3,7 @@
 import updatePassword from '@/app/actions/auth/updatePassword'
 import { useState, useTransition } from 'react'
 import Button from '@/components/common/button'
-import Input from '@/components/common/Input'
+import Input from '@/components/common/input'
 
 export default function UpdatePasswordForm() {
   const [msg, setMsg] = useState<string | null>(null)

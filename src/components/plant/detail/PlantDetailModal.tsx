@@ -6,7 +6,7 @@ import cn from '@/lib/cn'
 
 import { Modal, ModalHeader, ModalContent, ModalFooter } from '@/components/common/modal'
 import Button from '@/components/common/button'
-import Input from '@/components/common/Input'
+import Input from '@/components/common/input'
 import SelectBox from '@/components/common/select-box'
 import { CareGuideSection } from '@/components/shared/CareGuideSection'
 
