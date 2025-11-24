@@ -2,27 +2,18 @@
 
 import type { Plant } from '@/types/plant'
 import { fromDbFormat } from '@/utils/plant'
-import { createClient } from '@/utils/supabase/server'
+import { requireAuth } from '@/utils/supabase/helpers'
+import { revalidatePath } from 'next/cache'
 
-interface UpdateNicknameInput {
-  id: string
-  nickname: string
-}
+export async function updatePlantNicknameAction(formData: FormData): Promise<void> {
+  const id = String(formData.get('id') ?? '')
+  const nickname = String(formData.get('nickname') ?? '').trim()
 
-export async function updatePlantNicknameAction({
-  id,
-  nickname,
-}: UpdateNicknameInput): Promise<Plant> {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser()
-
-  if (userError || !user) {
-    throw new Error('인증되지 않은 사용자입니다.')
+  if (!id || !nickname) {
+    throw new Error('닉네임을 입력해주세요.')
   }
+
+  const { supabase, user } = await requireAuth()
 
   const { data, error } = await supabase
     .from('plants')
@@ -36,5 +27,5 @@ export async function updatePlantNicknameAction({
     throw new Error(error?.message ?? '닉네임 수정에 실패했습니다.')
   }
 
-  return fromDbFormat(data)
+  revalidatePath('/')
 }

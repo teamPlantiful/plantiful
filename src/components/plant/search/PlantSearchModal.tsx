@@ -88,7 +88,10 @@ export default function PlantSpeciesSearchModal({
         <PlantSearchInput value={searchQuery} onChange={setSearchQuery} />
 
         {/* 스크롤 영역 */}
-        <div ref={setScrollContainer} className="h-[400px] overflow-y-auto mt-4 space-y-2">
+        <div
+          ref={setScrollContainer}
+          className="h-[400px] overflow-y-auto mt-4 space-y-2 scrollbar-overlay"
+        >
           <PlantCustomInput
             value={customName}
             onChange={setCustomName}
