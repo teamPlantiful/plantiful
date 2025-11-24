@@ -19,7 +19,6 @@ export default function PlantCustomInput({ value, onChange, onSelect }: PlantCus
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder="식물 이름 입력"
-            size="md"
             className="bg-background w-full"
           />
         </div>
