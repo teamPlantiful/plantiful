@@ -47,7 +47,8 @@ export const config = {
      * - favicon.ico (favicon file)
      * - images, icons, etc in public folder
      * - actions, apis (server actions and API routes handle auth themselves)
+     * - login, register (public auth pages)
      */
-    '/((?!_next/static|_next/image|favicon.ico|actions|apis|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|actions|apis|login|register|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
