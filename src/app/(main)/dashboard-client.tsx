@@ -6,6 +6,10 @@ import PlantFilterBar from '@/components/home/PlantFilterBar'
 import PlantRegistrationFab from '@/components/home/PlantRegistrationFab'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useGetPlants } from '@/hooks/queries/useGetPlants'
+import { useWaterPlant } from '@/hooks/mutations/useWaterPlant'
+import { useUpdatePlantNickname } from '@/hooks/mutations/useUpdatePlantNickname'
+import { useUpdatePlantIntervals } from '@/hooks/mutations/useUpdatePlantIntervals'
+import { useDeletePlant } from '@/hooks/mutations/useDeletePlant'
 
 type SortKey = 'water' | 'name' | 'recent'
 
@@ -15,6 +19,11 @@ export default function DashboardClient() {
   const pathname = usePathname()
 
   const { data: plants = [], isLoading } = useGetPlants()
+
+  const waterPlant = useWaterPlant()
+  const updateNickname = useUpdatePlantNickname()
+  const updateIntervals = useUpdatePlantIntervals()
+  const deletePlant = useDeletePlant()
 
   // 1) URL에서 현재 값
   const search = searchParams.get('q') ?? ''
@@ -39,6 +48,35 @@ export default function DashboardClient() {
 
     router.push(url)
   }
+
+  const handleSearchChange = (value: string) => {
+    setParams({ q: value })
+  }
+
+  const handleWater = (id: string) => {
+    waterPlant.mutate({ id })
+  }
+
+  const handleSaveNickname = (id: string, nickname: string) => {
+    updateNickname.mutate({ id, nickname })
+  }
+
+  const handleSaveIntervals = (
+    id: string,
+    next: { watering: number; fertilizer: number; repotting: number }
+  ) => {
+    updateIntervals.mutate({
+      id,
+      wateringDays: next.watering,
+      fertilizerMonths: next.fertilizer,
+      repottingMonths: next.repotting,
+    })
+  }
+
+  const handleDelete = (id: string) => {
+    deletePlant.mutate({ id })
+  }
+
   return (
     <div>
       <div className="max-w-190 mx-auto p-4 space-y-6 md:space-y-8 animate-fade-in">
@@ -46,10 +84,19 @@ export default function DashboardClient() {
         <PlantFilterBar
           search={search}
           sort={sort}
-          onSearchChange={(value) => setParams({ q: value })}
+          onSearchChange={handleSearchChange}
           onSortChange={(value) => setParams({ sort: value })}
         />
-        <PlantListSection plants={plants} isLoading={isLoading} search={search} sort={sort} />
+        <PlantListSection
+          plants={plants}
+          isLoading={isLoading}
+          search={search}
+          sort={sort}
+          onWater={handleWater}
+          onSaveNickname={handleSaveNickname}
+          onSaveIntervals={handleSaveIntervals}
+          onDelete={handleDelete}
+        />
       </div>
       <PlantRegistrationFab />
     </div>

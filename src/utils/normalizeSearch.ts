@@ -49,3 +49,7 @@ export function normalizeSearch(value: string) {
     chosung: toChosung(trimmed),
   }
 }
+export function isChosungOnly(value: string) {
+  if (!value) return false
+  return /^[ㄱ-ㅎ]+$/.test(value)
+}

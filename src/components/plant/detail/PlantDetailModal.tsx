@@ -256,8 +256,8 @@ export default function PlantDetailModal({
                 e.preventDefault()
               }
               const wateringDays = clamp(Number(wateringInterval) || 1, 1)
-              const fertilizerDays = monthsToDays(clamp(Number(fertilizerIntervalMonth) || 1, 1))
-              const repottingDays = monthsToDays(clamp(Number(repottingIntervalMonth) || 1, 1))
+              const fertilizerDays = clamp(Number(fertilizerIntervalMonth) || 1, 1)
+              const repottingDays = clamp(Number(repottingIntervalMonth) || 1, 1)
 
               onSaveIntervals?.({
                 watering: wateringDays,
@@ -318,18 +318,12 @@ export default function PlantDetailModal({
               e.preventDefault()
               return
             }
-            // ✅ 서버 액션은 진행하고, 클라 상태는 onDelete로 정리
+            // 서버 액션은 진행하고, 클라 상태는 onDelete로 정리
             onDelete()
           }}
         >
           <input type="hidden" name="id" value={plant.id} />
-          <Button
-            variant="destructive-outline"
-            className="w-full"
-            onClick={() => {
-              if (!confirmOnDelete || window.confirm('정말 삭제할까요?')) onDelete()
-            }}
-          >
+          <Button type="submit" variant="destructive-outline" className="w-full">
             <Trash2 className="h-4 w-4 mr-2" />
             삭제하기
           </Button>
