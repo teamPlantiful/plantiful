@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Input from '@/components/common/Input'
+import Input from '@/components/common/input'
 import SelectBox from '@/components/common/select-box'
 import { Search } from 'lucide-react'
 import useDebounce from '@/hooks/useDebounce'

@@ -1,6 +1,6 @@
 'use client'
 
-import Input from '../../common/Input'
+import Input from '../../common/input'
 import { Search } from 'lucide-react'
 
 interface PlantSearchInputProps {

@@ -69,7 +69,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             className={cn(
               'w-full file:hidden outline-none placeholder:text-muted-foreground',
-              'border border-input bg-background',
+              'border border-input bg-card',
               'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background',
               'disabled:cursor-not-allowed disabled:opacity-50',
               sizes[size],
