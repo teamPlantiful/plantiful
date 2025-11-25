@@ -97,7 +97,7 @@ export default function RegisterForm() {
         <Input 
           id="email"
           name="email"
-          type="email"
+          type="text"
           placeholder="name@example.com"
         />
       </div>
