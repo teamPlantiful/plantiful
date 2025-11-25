@@ -1,32 +1,24 @@
 'use server'
 
-import type { Plant } from '@/types/plant'
-import { fromDbFormat } from '@/utils/plant'
-import { createClient } from '@/utils/supabase/server'
+import { requireAuth } from '@/utils/supabase/helpers'
+import { revalidatePath } from 'next/cache'
+import { clamp, monthsToDays } from '@/utils/generateDay'
 
-interface UpdateIntervalsInput {
-  id: string
-  wateringDays: number
-  fertilizerDays: number
-  repottingDays: number
-}
+export async function updatePlantIntervalsAction(formData: FormData): Promise<void> {
+  const id = String(formData.get('id') ?? '')
+  const wateringInterval = Number(formData.get('wateringInterval') ?? 0)
+  const fertilizerIntervalMonth = Number(formData.get('fertilizerIntervalMonth') ?? 0)
+  const repottingIntervalMonth = Number(formData.get('repottingIntervalMonth') ?? 0)
 
-export async function updatePlantIntervalsAction({
-  id,
-  wateringDays,
-  fertilizerDays,
-  repottingDays,
-}: UpdateIntervalsInput): Promise<Plant> {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser()
-
-  if (userError || !user) {
+  if (!id) {
     throw new Error('인증되지 않은 사용자입니다.')
   }
+
+  const wateringDays = clamp(wateringInterval || 1, 1)
+  const fertilizerDays = monthsToDays(clamp(fertilizerIntervalMonth || 1, 1))
+  const repottingDays = monthsToDays(clamp(repottingIntervalMonth || 1, 1))
+
+  const { supabase, user } = await requireAuth()
 
   const { data, error } = await supabase
     .from('plants')
@@ -44,5 +36,5 @@ export async function updatePlantIntervalsAction({
     throw new Error(error?.message ?? '주기 변경에 실패했습니다.')
   }
 
-  return fromDbFormat(data)
+  revalidatePath('/')
 }

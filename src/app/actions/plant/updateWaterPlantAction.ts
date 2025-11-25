@@ -1,42 +1,30 @@
 'use server'
 
-import type { Plant } from '@/types/plant'
-import { fromDbFormat } from '@/utils/plant'
-import { createClient } from '@/utils/supabase/server'
+import { requireAuth } from '@/utils/supabase/helpers'
+import { revalidatePath } from 'next/cache'
 
-interface WaterPlantInput {
-  id: string
-  lastWateredAt: string
-}
+export async function updateWaterPlantAction(formData: FormData): Promise<void> {
+  const id = String(formData.get('id') ?? '')
 
-export async function updateWaterPlantAction({
-  id,
-  lastWateredAt,
-}: WaterPlantInput): Promise<Plant> {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser()
-
-  if (userError || !user) {
-    throw new Error('인증되지 않은 사용자입니다.')
+  if (!id) {
+    throw new Error('잘못된 요청입니다.')
   }
 
-  const { data, error } = await supabase
+  const { supabase, user } = await requireAuth()
+
+  const now = new Date().toISOString()
+
+  const { error } = await supabase
     .from('plants')
     .update({
-      last_watered_at: lastWateredAt,
+      last_watered_at: now,
     })
     .eq('id', id)
     .eq('user_id', user.id)
-    .select('*')
-    .single()
 
-  if (error || !data) {
-    throw new Error(error?.message ?? '물주기 업데이트에 실패했습니다.')
+  if (error) {
+    throw new Error(error.message ?? '물주기 업데이트에 실패했습니다.')
   }
 
-  return fromDbFormat(data)
+  revalidatePath('/')
 }
