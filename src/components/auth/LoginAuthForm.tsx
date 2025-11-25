@@ -49,8 +49,8 @@ export default function LoginAuthForm() {
         return
       }
 
-      // 로그인 성공 시 메인 화면으로 이동
-      router.replace("/")
+      // 로그인 성공 시 새로고침 및 로그인 폼 조건에 따라 메인으로 이동
+      router.refresh()
     })
   }
 
