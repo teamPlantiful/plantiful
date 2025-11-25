@@ -11,7 +11,7 @@ import SelectBox from '@/components/common/select-box'
 import { CareGuideSection } from '@/components/shared/CareGuideSection'
 
 import type { Plant, CareInfo } from '@/types/plant'
-import { generateDayOptions, generateMonthOptions } from '@/utils/date'
+import { generateDayOptions, generateMonthOptions, calculateDday } from '@/utils/date'
 import { clamp, daysToMonths, monthsToDays } from '@/utils/generateDay'
 
 import { updatePlantNicknameAction } from '@/app/actions/plant/updatePlantNicknameAction'
@@ -54,7 +54,9 @@ export default function PlantDetailModal({
 
   const ddayWater = useMemo(() => {
     if (!plant.nextWateringDate) return null
-    const diff = Math.floor((new Date(plant.nextWateringDate).getTime() - Date.now()) / 86400000)
+
+    const diff = calculateDday(plant.nextWateringDate)
+
     return diff >= 0 ? diff : 0
   }, [plant.nextWateringDate])
 
