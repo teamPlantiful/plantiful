@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react'
 import { register } from '@/app/actions/auth/register'
 import { useRouter } from 'next/navigation'
 import Button from '@/components/common/button'
-import Input from '@/components/common/Input'
+import Input from '@/components/common/input'
 
 export default function RegisterForm() {
   const router = useRouter()

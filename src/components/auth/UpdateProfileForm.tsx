@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import Button from '@/components/common/button'
-import Input from '@/components/common/Input'
+import Input from '@/components/common/input'
 import updateProfiles from '@/app/actions/auth/updateProfiles'
 
 type Props = {
@@ -29,7 +29,7 @@ export default function UpdateProfilesForm({ initialUserName }: Props) {
       if (result.error) {
         setMsg(result.error)
       }
-      // 성공 시, 변경 완료 문구 출력 
+      // 성공 시, 변경 완료 문구 출력
       else if (result.success) {
         setMsg(result.success)
         setTimeout(() => setMsg(null), 3000) // 3초 뒤 메시지 사라짐
@@ -68,9 +68,9 @@ export default function UpdateProfilesForm({ initialUserName }: Props) {
           </Button>
         </div>
         {msg && (
-        <p className={`text-sm ${msg.includes('성공') ? 'text-green-600' : 'text-red-600'}`}>
-          {msg}
-        </p>
+          <p className={`text-sm ${msg.includes('성공') ? 'text-green-600' : 'text-red-600'}`}>
+            {msg}
+          </p>
         )}
       </div>
     </form>

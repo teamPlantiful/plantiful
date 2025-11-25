@@ -68,17 +68,6 @@ export function Modal({
     }
   }, [open])
 
-  // 모달 열릴 때 첫 번째 포커스 가능한 요소로 포커스
-  useEffect(() => {
-    if (!open) return
-
-    const focusableElements = modalRef.current?.querySelectorAll(
-      'button:not([tabindex="-1"]), [href]:not([tabindex="-1"]), input:not([tabindex="-1"]), select:not([tabindex="-1"]), textarea:not([tabindex="-1"]), [tabindex]:not([tabindex="-1"])'
-    )
-    const firstElement = focusableElements?.[0] as HTMLElement
-    firstElement?.focus()
-  }, [open])
-
   if (!open || !mounted) return null
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
