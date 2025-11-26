@@ -20,6 +20,7 @@ const PlantFilterBar: React.FC<PlantFilterBarProps> = ({
   onSortChange,
 }) => {
   const [innerSearch, setInnerSearch] = useState<string>(search)
+  const [isComposing, setIsComposing] = useState(false)
 
   useEffect(() => {
     setInnerSearch(search)
@@ -28,6 +29,7 @@ const PlantFilterBar: React.FC<PlantFilterBarProps> = ({
   const debouncedSearch = useDebounce(innerSearch, 300)
 
   useEffect(() => {
+    if (isComposing) return
     if (debouncedSearch === search) return
 
     onSearchChange(debouncedSearch)
