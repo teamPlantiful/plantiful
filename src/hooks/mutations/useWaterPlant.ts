@@ -1,23 +1,27 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import type { Plant } from '@/types/plant'
 import { queryKeys } from '@/lib/queryKeys'
-import { updateWateredAt } from '@/app/apis/supabaseApi'
+import { updateWaterPlantAction } from '@/app/actions/plant/updateWaterPlantAction'
 
 interface WaterPlantVariables {
   id: string
-  lastWateredAt: string
 }
 
 export const useWaterPlant = () => {
   const queryClient = useQueryClient()
 
-  return useMutation<Plant, Error, WaterPlantVariables>({
-    mutationFn: ({ id, lastWateredAt }) => updateWateredAt(id, lastWateredAt),
+  return useMutation<void, Error, WaterPlantVariables>({
+    mutationFn: async ({ id }) => {
+      const formData = new FormData()
+      formData.set('id', id)
+      await updateWaterPlantAction(formData)
+    },
 
-    onSuccess: (updatedPlant) => {
-      queryClient.setQueryData<Plant[]>(queryKeys.plants.list(), (prev = []) =>
-        prev.map((p) => (p.id === updatedPlant.id ? updatedPlant : p))
-      )
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.plants.list() })
+    },
+
+    onError: (error) => {
+      console.error('물주기 실패:', error)
     },
   })
 }

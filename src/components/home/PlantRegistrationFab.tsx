@@ -17,25 +17,25 @@ export default function PlantRegistrationFab() {
     // 1) 농사로 검색 결과인 경우 → 상세 API 호출
     if (isSearchResult) {
       const cntntsNo = String(plant.id)
+      const imageUrl = plant.defaultImage?.mediumUrl ?? ''
 
       // 상세 API 요청
-      const res = await fetch(`/apis/plantDetail/${cntntsNo}`)
+      const res = await fetch(
+        `/apis/plantDetail/${cntntsNo}?imageUrl=${encodeURIComponent(imageUrl)}`
+      )
+
       const detail: PlantSpeciesInfo = await res.json()
+      detail.koreanName = plant.commonName
 
       setSelectedSpecies(detail)
     }
-    // 2) 직접 입력한 경우 → 이름만 등록
+    // 2) 직접 입력한 경우
     else {
       const manualPlant: PlantSpeciesInfo = {
         cntntsNo: Date.now().toString(),
         koreanName: plant.commonName,
         scientificName: '',
-        careInfo: {
-          lightDemandCode: undefined,
-          waterCycleCode: undefined,
-          temperatureCode: undefined,
-          humidityCode: undefined,
-        },
+        imageUrl: null,
       }
 
       setSelectedSpecies(manualPlant)
@@ -52,7 +52,10 @@ export default function PlantRegistrationFab() {
 
   return (
     <>
-      <Fab onClick={() => setIsSearchModalOpen(true)} />
+      <Fab
+        onClick={() => setIsSearchModalOpen(true)}
+        className="fixed right-[calc((100vw-57rem)/2-1rem)] max-md:right-6 max-lg:right-8 "
+      />
       <PlantSpeciesSearchModal
         open={isSearchModalOpen}
         onOpenChange={setIsSearchModalOpen}

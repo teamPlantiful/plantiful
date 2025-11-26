@@ -1,16 +1,32 @@
-'use client'
-
-import { useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Leaf, User, Lock } from 'lucide-react'
+import { redirect } from 'next/navigation'
+import { createClient } from '@/utils/supabase/server'
+import { ArrowLeft, User, Lock } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/common/card'
 import Button from '@/components/common/button'
-import Input from '@/components/common/Input'
-import LogoutButton from '@/components/auth/logoutButton'
+import UpdateProfilesForm from '@/components/auth/UpdateProfileForm'
+import UpdatePasswordForm from '@/components/auth/UpdatePasswordForm'
+import LogoutButton from '@/components/auth/LogoutButton'
+import Image from 'next/image'
 
+export default async function Page() {
 
-export default function Page() {
-  const [nickname, setNickname] = useState('식집사')
+  const supabase = await createClient()
+
+  // 로그인한 유저 정보 불러옴
+  const { data: { user } } = await supabase.auth.getUser()
+  // 로그인 유저만 마이페이지 진입 가능
+  if (!user) {
+    redirect('/login')
+  }
+  // Supabase DB에서 닉네임 읽어오기
+  const { data: profileData } = await supabase
+    .from('profiles')
+    .select('name')
+    .eq('id', user.id)
+    .single()
+  // 현재 닉네임 표시를 Props를 통해 컴포넌트에 전달
+  const currentUserName = profileData?.name
 
   return (
     <div className="min-h-screen bg-background">
@@ -24,7 +40,13 @@ export default function Page() {
           </Link>
           {/* 마이페이지 헤더 */}
           <div className="flex items-center gap-2">
-            <Leaf className="w-6 h-6 text-primary" />
+            <Image
+              src="/plantiful-logo.png"
+              alt="Plantiful Logo"
+              width={24}
+              height={24}
+              className="rounded-full"
+            />
             <h1 className="text-lg font-bold text-primary">마이페이지</h1>
           </div>
         </div>
@@ -40,28 +62,7 @@ export default function Page() {
             </div>
           </CardHeader>
           <CardContent className="pt-0 space-y-4">
-            <div className="space-y-2">
-              <label
-                htmlFor="nickname"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                닉네임
-              </label>
-              <div className="pt-2 flex gap-2">
-                <div className="flex-1">
-                  <Input
-                    id="nickname"
-                    value={nickname}
-                    onChange={(e) => setNickname(e.target.value)}
-                    placeholder="닉네임을 입력하세요"
-                    size="sm"
-                  />
-                </div>
-                <Button variant="default" size="sm" className="bg-primary hover:bg-primary/90">
-                  저장
-                </Button>
-              </div>
-            </div>
+            <UpdateProfilesForm initialUserName={currentUserName}/>
           </CardContent>
         </Card>
         {/* 비밀번호 변경 구역 */}
@@ -73,60 +74,12 @@ export default function Page() {
             </div>
           </CardHeader>
           <CardContent className="pt-0 space-y-4">
-            <div className="space-y-2">
-              <label
-                htmlFor="current-password"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                현재 비밀번호
-              </label>
-              <Input
-                size="sm"
-                id="current-password"
-                type="password"
-                placeholder="••••••••"
-                className="mt-2"
-              />
-            </div>
-            <div className="space-y-2">
-              <label
-                htmlFor="new-password"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                새 비밀번호
-              </label>
-              <Input
-                size="sm"
-                id="new-password"
-                type="password"
-                placeholder="••••••••"
-                className="mt-2"
-              />
-            </div>
-            <div className="space-y-2">
-              <label
-                htmlFor="confirm-password"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                새 비밀번호 확인
-              </label>
-              <Input
-                size="sm"
-                id="confirm-password"
-                type="password"
-                placeholder="••••••••"
-                className="mt-2"
-              />
-            </div>
-            <Button variant="default" className="w-full bg-primary hover:bg-primary/90">
-              비밀번호 변경
-            </Button>
+            <UpdatePasswordForm />
           </CardContent>
         </Card>
         <div className="my-6" />
-
         {/* 로그아웃 기능 */}
-          <LogoutButton />
+        <LogoutButton />
       </main>
     </div>
   )

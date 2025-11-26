@@ -42,7 +42,7 @@ export function CardHeader({
       className={cn('flex items-center justify-between p-6 text-card-foreground', className)}
       {...props}
     >
-      {left && <div className="mr-4">{left}</div>}
+      {left && <div className="mr-2">{left}</div>}
       <div className="flex-1 min-w-0 whitespace-pre-line wrap-break-word hyphens-auto">
         {children}
       </div>

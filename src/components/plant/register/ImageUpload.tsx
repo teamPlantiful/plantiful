@@ -3,17 +3,29 @@
 import { Camera, X } from 'lucide-react'
 import cn from '@/lib/cn'
 import useImageUpload from '@/hooks/useImageUpload'
-import { useRef } from 'react'
+import { useRef, useEffect } from 'react'
 import Image from 'next/image'
 
 interface ImageUploadProps {
   className?: string
   onImageChange?: (file: File | null) => void
+  initialImageUrl?: string | null
 }
 
-export default function ImageUpload({ className, onImageChange }: ImageUploadProps) {
-  const { previewUrl, handleImageSelect, handleImageRemove, error } = useImageUpload()
+export default function ImageUpload({
+  className,
+  onImageChange,
+  initialImageUrl,
+}: ImageUploadProps) {
+  const { previewUrl, setPreviewUrl, handleImageSelect, handleImageRemove, error } =
+    useImageUpload()
   const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (initialImageUrl) {
+      setPreviewUrl(initialImageUrl)
+    }
+  }, [initialImageUrl, setPreviewUrl])
 
   const handleClick = () => {
     inputRef.current?.click()

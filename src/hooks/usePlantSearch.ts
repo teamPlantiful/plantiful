@@ -1,47 +1,40 @@
-import { useState, useEffect } from 'react'
-import { PlantSearchResult } from '@/types/plant'
+import { useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
+import type { PlantSearchResult } from '@/types/plant'
 import axios from 'axios'
+import useDebounce from './useDebounce'
+import { normalizeSearch } from '@/utils/normalizeSearch'
 
 export const usePlantSearch = () => {
   const [searchQuery, setSearchQuery] = useState('')
-  const [plants, setPlants] = useState<PlantSearchResult[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const debouncedQuery = useDebounce(searchQuery, 300)
+  const { original, chosung } = normalizeSearch(debouncedQuery)
+  const isEmpty = !original || original.length < 1
 
-  useEffect(() => {
-    if (!searchQuery.trim()) {
-      setPlants([])
-      return
-    }
+  const {
+    data,
+    isFetching,
+    error: queryError,
+  } = useQuery({
+    queryKey: ['plant-search', original, chosung],
+    enabled: !isEmpty,
+    queryFn: async () => {
+      const res = await axios.get<{ plants?: PlantSearchResult[] }>(
+        `/apis/searchPlant?q=${original}&chosung=${chosung}`
+      )
+      return res.data.plants || []
+    },
+    staleTime: 1000 * 30,
+    retry: 1,
+  })
 
-    const fetchPlants = async () => {
-      setLoading(true)
-      setError(null)
-      try {
-        const API_URL = `/apis/searchPlant?q=${searchQuery}`
-        const response = await axios.get<{ plants?: PlantSearchResult[] }>(API_URL)
-
-        setPlants(response.data.plants || [])
-      } catch (err) {
-        if (axios.isAxiosError(err)) {
-          setError(err.message)
-        } else {
-          setError('검색 중 오류 발생')
-        }
-        setPlants([])
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchPlants()
-  }, [searchQuery])
-
+  const error =
+    queryError instanceof Error ? queryError.message : queryError ? String(queryError) : null
   return {
     searchQuery,
     setSearchQuery,
-    plants,
-    loading,
+    plants: data ?? [],
+    loading: isFetching,
     error,
   }
 }

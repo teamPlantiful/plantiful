@@ -68,8 +68,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       className
     )
 
+    const Component = Comp as any
+
     return (
-      <Comp
+      <Component
         ref={ref}
         type={type ?? (Comp === 'button' ? 'button' : undefined)}
         className={computedClassName}
@@ -92,7 +94,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             {rightIcon && <span className="shrink-0">{rightIcon}</span>}
           </>
         )}
-      </Comp>
+      </Component>
     )
   }
 )
