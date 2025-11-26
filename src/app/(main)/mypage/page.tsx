@@ -1,12 +1,13 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
-import { ArrowLeft, Leaf, User, Lock } from 'lucide-react'
+import { ArrowLeft, User, Lock } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/common/card'
 import Button from '@/components/common/button'
 import UpdateProfilesForm from '@/components/auth/UpdateProfileForm'
 import UpdatePasswordForm from '@/components/auth/UpdatePasswordForm'
 import LogoutButton from '@/components/auth/LogoutButton'
+import Image from 'next/image'
 
 export default async function Page() {
 
@@ -39,7 +40,13 @@ export default async function Page() {
           </Link>
           {/* 마이페이지 헤더 */}
           <div className="flex items-center gap-2">
-            <Leaf className="w-6 h-6 text-primary" />
+            <Image
+              src="/plantiful-logo.png"
+              alt="Plantiful Logo"
+              width={24}
+              height={24}
+              className="rounded-full"
+            />
             <h1 className="text-lg font-bold text-primary">마이페이지</h1>
           </div>
         </div>
