@@ -15,7 +15,9 @@ export default function Header() {
             priority
             className="rounded-full"
           />
-          <h1 className="text-2xl font-bold text-primary">Plantiful</h1>
+          <h1 className="text-2xl text-primary" style={{ fontFamily: "'Pacifico', cursive" }}>
+            Plantiful
+          </h1>
         </div>
         <Link href="/mypage">
           <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center">

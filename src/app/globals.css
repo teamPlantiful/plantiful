@@ -1,4 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
 @import 'tailwindcss';
+
+@font-face {
+  font-family: 'SeoulNamsan';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/SeoulNamsanM.woff')
+    format('woff');
+  font-weight: normal;
+  font-display: swap;
+}
 
 /* Tailwind CSS v4 Theme Configuration */
 @theme {
@@ -137,6 +146,7 @@
     }
   }
 }
+
 :root {
   /* Custom plant theme tokens */
   --leaf-green: hsl(103 43% 55%);
@@ -197,6 +207,12 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family:
+      SeoulNamsan,
+      -apple-system,
+      BlinkMacSystemFont,
+      system-ui,
+      sans-serif;
   }
 }
 
