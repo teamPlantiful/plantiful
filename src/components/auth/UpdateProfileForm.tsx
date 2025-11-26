@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import updateProfiles from '@/app/actions/auth/updateProfiles'
 import Button from '@/components/common/button'
 import Input from '@/components/common/input'
-import updateProfiles from '@/app/actions/auth/updateProfiles'
 
 type Props = {
   initialUserName: string
@@ -12,15 +12,14 @@ type Props = {
 export default function UpdateProfilesForm({ initialUserName }: Props) {
   const [msg, setMsg] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
-  const [userName, setUserName] = useState(initialUserName)
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    // 닉네임 칸이 비어있을 경우 기본으로 식집사 적용.
-    const isUserName = userName.trim() === '' ? '식집사' : userName.trim()
-    const formData = new FormData()
-    formData.set('userName', isUserName)
+  const handleAction = (formData: FormData) => {
+    let userName = formData.get('userName')?.toString() || ''
 
+    // 비어있다면 '식집사'
+    userName = userName.trim() === '' ? '식집사' : userName.trim()
+    formData.set('userName', userName)
+      
     // 서버 응답 중 UI 깜빡임 방지를 위해 useTransition 사용.
     startTransition(async () => {
       const result = await updateProfiles(formData)
@@ -32,13 +31,21 @@ export default function UpdateProfilesForm({ initialUserName }: Props) {
       // 성공 시, 변경 완료 문구 출력
       else if (result.success) {
         setMsg(result.success)
-        setTimeout(() => setMsg(null), 3000) // 3초 뒤 메시지 사라짐
+        // 3초 뒤에는 완료 문구 사라짐
+        setTimeout(() => setMsg(null), 3000)
       }
     })
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form 
+      onSubmit={(e) => {
+        e.preventDefault() // 폼 초기화 방지
+        const formData = new FormData(e.currentTarget)
+        handleAction(formData)
+      }} 
+      className="space-y-4"
+    >
       <div className="space-y-2">
         <label
           htmlFor="userName"
@@ -51,10 +58,9 @@ export default function UpdateProfilesForm({ initialUserName }: Props) {
             <Input
               size="sm"
               id="userName"
-              /* name="userName" // 기본 폼일때 사용 가능 */
+              name="userName"
               placeholder="식집사"
-              value={userName}
-              onChange={(e) => setUserName(e.target.value)}
+              defaultValue={initialUserName}
             />
           </div>
           <Button

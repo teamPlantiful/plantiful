@@ -1,47 +1,70 @@
 'use client'
 
-import updatePassword from '@/app/actions/auth/updatePassword'
 import { useState, useTransition } from 'react'
+import updatePassword from '@/app/actions/auth/updatePassword'
 import Button from '@/components/common/button'
 import Input from '@/components/common/input'
 
 export default function UpdatePasswordForm() {
   const [msg, setMsg] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
-  const [currentPassword, setCurrentPassword] = useState('')
-  const [newPassword, setNewPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    const formData = new FormData()
-    formData.set('currentPassword', currentPassword)
-    formData.set('newPassword', newPassword)
-    formData.set('confirmPassword', confirmPassword)
+  // 비밀번호 양식
+  const validatePassword = (password: string) => {
+    const regex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!@#$%^&*]{8,}$/
+    return regex.test(password)
+  }
+  
+  const handleAction = (formData: FormData, form: HTMLFormElement) => {
+    const currentPassword = formData.get('currentPassword') as string
+    const newPassword = formData.get('newPassword') as string
+    const confirmPassword = formData.get('confirmPassword') as string
+
+    // 입력 필드 검증
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setMsg("모든 항목을 입력해주세요.")
+      return
+    }
+    // 비밀번호 유효성 검증
+    if (!validatePassword(newPassword)) {
+      setMsg("비밀번호는 8자 이상이며, 영문과 숫자를 포함해야 합니다.")
+      return
+    }
+    // 비밀번호 확인 일치 여부 검증
+    if (newPassword !== confirmPassword) {
+      setMsg("설정할 비밀번호가 일치하지 않습니다.")
+      return
+    }
 
     // 서버 응답 중 UI 깜빡임 방지를 위해 useTransition 사용.
     startTransition(async () => {
+      setMsg(null)
       const result = await updatePassword(formData)
 
       // 에러 발생 시, 에러 메세지 출력
       if (result.error) {
         setMsg(result.error)
       }
-      // 성공 시, 변경 완료 문구 출력
+      // 성공 시, 변경 완료 문구 출력 후, 입력칸 초기화
       else if (result.success) {
         setMsg(result.success)
-        setTimeout(() => setMsg(null), 3000) // 3초 뒤 메시지 사라짐
-
-        // 입력칸 초기화
-        setCurrentPassword('')
-        setNewPassword('')
-        setConfirmPassword('')
+        form.reset()
+        // 3초 뒤에는 완료 문구 사라짐.
+        setTimeout(() => setMsg(null), 3000)
       }
     })
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form 
+      onSubmit={(e) => {
+        e.preventDefault() // 폼 초기화 방지
+        const form = e.currentTarget
+        const formData = new FormData(e.currentTarget)
+        handleAction(formData, form)
+      }}
+      className="space-y-4"
+    >
       <div className="space-y-2">
         <label
           htmlFor="currentPassword"
@@ -52,12 +75,10 @@ export default function UpdatePasswordForm() {
         <Input
           size="sm"
           id="currentPassword"
-          /* name="currentPassword" // 기본 폼일때 사용 가능 */
+          name="currentPassword"
           type="password"
           placeholder="••••••••"
           className="mt-2"
-          value={currentPassword}
-          onChange={(e) => setCurrentPassword(e.target.value)}
         />
       </div>
       <div className="space-y-2">
@@ -70,12 +91,10 @@ export default function UpdatePasswordForm() {
         <Input
           size="sm"
           id="newPassword"
-          /* name="newPassword" // 기본 폼일때 사용 가능 */
+          name="newPassword"
           type="password"
           placeholder="••••••••"
           className="mt-2"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
         />
       </div>
       <div className="space-y-2">
@@ -88,12 +107,10 @@ export default function UpdatePasswordForm() {
         <Input
           size="sm"
           id="confirmPassword"
-          /* name="confirmPassword" // 기본 폼일때 사용 가능 */
+          name="confirmPassword"
           type="password"
           placeholder="••••••••"
           className="mt-2"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
         />
       </div>
       <Button

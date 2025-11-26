@@ -14,7 +14,6 @@ export default async function Page() {
 
   // 로그인한 유저 정보 불러옴
   const { data: { user } } = await supabase.auth.getUser()
-  console.log('User:', user);
   // 로그인 유저만 마이페이지 진입 가능
   if (!user) {
     redirect('/login')
