@@ -1,7 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { updatePlantIntervalsAction } from '@/app/actions/plant/updatePlantIntervalsAction'
 import { queryKeys } from '@/lib/queryKeys'
-
+import type { Plant } from '@/types/plant'
+import { monthsToDays } from '@/utils/generateDay'
 interface UpdateIntervalsVariables {
   id: string
   wateringDays: number
@@ -23,7 +24,24 @@ export const useUpdatePlantIntervals = () => {
       await updatePlantIntervalsAction(formData)
     },
 
-    onSuccess: () => {
+    onMutate: async ({ id, wateringDays, fertilizerMonths, repottingMonths }) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.plants.list() })
+
+      queryClient.setQueryData<Plant[]>(queryKeys.plants.list(), (prev = []) =>
+        prev.map((plant) =>
+          plant.id === id
+            ? {
+                ...plant,
+                wateringIntervalDays: wateringDays,
+                fertilizerIntervalDays: monthsToDays(fertilizerMonths),
+                repottingIntervalDays: monthsToDays(repottingMonths),
+              }
+            : plant
+        )
+      )
+    },
+
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.plants.list() })
     },
   })
