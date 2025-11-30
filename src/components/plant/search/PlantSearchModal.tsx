@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { Modal, ModalHeader, ModalContent } from '@/components/common/modal'
+import { useInView } from 'react-intersection-observer'
 import type { PlantSearchResult } from '@/types/plant'
 import { useInfinitePlantSearch } from '@/hooks/queries/useInfinitePlantSearch'
 import PlantSearchInput from './PlantSearchInput'
@@ -25,34 +26,19 @@ export default function PlantSpeciesSearchModal({
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, error } =
     useInfinitePlantSearch(searchQuery)
 
-  const [scrollContainer, setScrollContainer] = useState<HTMLDivElement | null>(null)
-  const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null)
-
+  const { ref, inView } = useInView({
+    threshold: 0,
+    rootMargin: '200px',
+  })
   const plants = useMemo(() => {
     return data?.pages.flatMap((p) => p.items) ?? []
   }, [data])
 
   useEffect(() => {
-    if (!scrollContainer || !loadMoreTriggerRef.current) return
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const target = entries[0]
-        if (target.isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage()
-        }
-      },
-      {
-        root: scrollContainer,
-        rootMargin: '200px',
-        threshold: 0,
-      }
-    )
-
-    observer.observe(loadMoreTriggerRef.current)
-
-    return () => observer.disconnect()
-  }, [scrollContainer, hasNextPage, isFetchingNextPage, fetchNextPage])
+    if (inView && hasNextPage) {
+      fetchNextPage()
+    }
+  }, [inView, hasNextPage, fetchNextPage])
 
   // 핸들러
   const handleClose = () => {
@@ -88,10 +74,7 @@ export default function PlantSpeciesSearchModal({
         <PlantSearchInput value={searchQuery} onChange={setSearchQuery} />
 
         {/* 스크롤 영역 */}
-        <div
-          ref={setScrollContainer}
-          className="h-[400px] overflow-y-auto mt-4 space-y-2 scrollbar-overlay"
-        >
+        <div className="h-[400px] overflow-y-auto mt-4 space-y-2 scrollbar-overlay">
           <PlantCustomInput
             value={customName}
             onChange={setCustomName}
@@ -108,7 +91,7 @@ export default function PlantSpeciesSearchModal({
 
           {/* 무한 스크롤  */}
           <div
-            ref={loadMoreTriggerRef}
+            ref={ref}
             className="h-12 w-full flex items-center justify-center text-gray-400 text-sm"
           >
             {isFetchingNextPage
