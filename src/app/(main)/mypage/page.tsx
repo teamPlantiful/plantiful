@@ -26,7 +26,7 @@ export default async function Page() {
     .eq('id', user.id)
     .single()
   // 현재 닉네임 표시를 Props를 통해 컴포넌트에 전달
-  const currentUserName = profileData?.name
+  const currentUserName = profileData?.name ?? ''
 
   return (
     <div className="min-h-screen bg-background">
