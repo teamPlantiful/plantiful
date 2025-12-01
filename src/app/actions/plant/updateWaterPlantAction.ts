@@ -1,7 +1,6 @@
 'use server'
 
 import { requireAuth } from '@/utils/supabase/helpers'
-import { revalidatePath } from 'next/cache'
 
 export async function updateWaterPlantAction(formData: FormData): Promise<void> {
   const id = String(formData.get('id') ?? '')
@@ -48,5 +47,5 @@ export async function updateWaterPlantAction(formData: FormData): Promise<void> 
     throw new Error(updateError.message ?? '물주기 업데이트에 실패했습니다.')
   }
 
-  revalidatePath('/')
+  //revalidatePath('/')
 }
