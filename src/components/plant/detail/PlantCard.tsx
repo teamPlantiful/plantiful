@@ -48,39 +48,6 @@ export default function PlantCard({
       aria-label={`${nickname} 카드 열기`}
     >
       <div className="flex items-center gap-4">
-        <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-secondary/20">
-          {image ? (
-            <img src={image} alt={nickname} className="h-full w-full object-cover" />
-          ) : (
-            <img
-              src="https://placehold.co/48x48/EBF4E5/3B5935?text=?"
-              alt="placeholder"
-              className="h-full w-full object-cover opacity-80"
-            />
-          )}
-        </div>
-
-        {/* 텍스트(닉네임/종명 + D-Day) */}
-        <div className="min-w-0 flex-1">
-          <div className="mb-0.5 truncate text-base font-semibold text-foreground">{nickname}</div>
-          {speciesName ? (
-            <div className="truncate text-xs italic text-muted-foreground">{speciesName}</div>
-          ) : (
-            <div className="h-4 text-xs text-transparent">.</div>
-          )}
-
-          <div
-            className={cn(
-              'mt-2 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium transition',
-              ddayVariant === 'urgent' && 'bg-destructive/10 text-destructive',
-              ddayVariant === 'warning' && 'bg-accent/30 text-foreground',
-              ddayVariant === 'normal' && 'bg-secondary/20 text-secondary'
-            )}
-          >
-            {ddayWater >= 0 ? `D-${ddayWater}` : `D+${Math.abs(ddayWater)}`}
-          </div>
-        </div>
-
         {/* 물주기 버튼 */}
         <form action={updateWaterPlantAction} onSubmit={(e) => {}}>
           <input type="hidden" name="id" value={id} />
@@ -104,6 +71,37 @@ export default function PlantCard({
             <Droplets className="h-5 w-5" />
           </Button>
         </form>
+        {/* 텍스트(닉네임/종명 + D-Day) */}
+        <div className="min-w-0 flex-1">
+          <div className="mb-0.5 truncate text-base font-semibold text-foreground">{nickname}</div>
+          {speciesName ? (
+            <div className="truncate text-xs italic text-muted-foreground">{speciesName}</div>
+          ) : (
+            <div className="h-4 text-xs text-transparent">.</div>
+          )}
+
+          <div
+            className={cn(
+              'mt-2 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium transition',
+              ddayVariant === 'urgent' && 'bg-destructive/10 text-destructive',
+              ddayVariant === 'warning' && 'bg-accent/30 text-foreground',
+              ddayVariant === 'normal' && 'bg-secondary/20 text-secondary'
+            )}
+          >
+            {ddayWater >= 0 ? `D-${ddayWater}` : `D+${Math.abs(ddayWater)}`}
+          </div>
+        </div>
+        <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-secondary/20">
+          {image ? (
+            <img src={image} alt={nickname} className="h-full w-full object-cover" />
+          ) : (
+            <img
+              src="https://placehold.co/48x48/EBF4E5/3B5935?text=?"
+              alt="placeholder"
+              className="h-full w-full object-cover opacity-80"
+            />
+          )}
+        </div>
       </div>
     </Card>
   )
