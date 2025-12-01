@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useRef, useEffect, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { Modal, ModalHeader, ModalContent } from '@/components/common/modal'
-import { useInView } from 'react-intersection-observer'
 import type { PlantSearchResult } from '@/types/plant'
 import { useInfinitePlantSearch } from '@/hooks/queries/useInfinitePlantSearch'
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import PlantSearchInput from './PlantSearchInput'
 import PlantCustomInput from './PlantCustomInput'
 import PlantList from './PlantList'
@@ -26,19 +26,13 @@ export default function PlantSpeciesSearchModal({
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, error } =
     useInfinitePlantSearch(searchQuery)
 
-  const { ref, inView } = useInView({
-    threshold: 0,
-    rootMargin: '200px',
+  const observerRef = useInfiniteScroll({
+    hasNextPage,
+    fetchNextPage,
   })
   const plants = useMemo(() => {
     return data?.pages.flatMap((p) => p.items) ?? []
   }, [data])
-
-  useEffect(() => {
-    if (inView && hasNextPage) {
-      fetchNextPage()
-    }
-  }, [inView, hasNextPage, fetchNextPage])
 
   // 핸들러
   const handleClose = () => {
@@ -91,7 +85,7 @@ export default function PlantSpeciesSearchModal({
 
           {/* 무한 스크롤  */}
           <div
-            ref={ref}
+            ref={observerRef}
             className="h-12 w-full flex items-center justify-center text-gray-400 text-sm"
           >
             {isFetchingNextPage
