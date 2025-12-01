@@ -135,6 +135,7 @@ export default function PlantListSection({
                 coverImageUrl={p.coverImageUrl}
                 defaultImageUrl={p.defaultImageUrl}
                 ddayWater={ddayWater}
+                lastWateredAt={p.lastWateredAt}
                 onClick={handleCardClick}
                 onWater={handleWater}
                 className="w-full"

@@ -12,18 +12,40 @@ export async function updateWaterPlantAction(formData: FormData): Promise<void> 
 
   const { supabase, user } = await requireAuth()
 
-  const now = new Date().toISOString()
-
-  const { error } = await supabase
+  // 1) 현재 식물의 마지막 물준 날짜 조회
+  const { data: plant, error: fetchError } = await supabase
     .from('plants')
-    .update({
-      last_watered_at: now,
-    })
+    .select('last_watered_at')
+    .eq('id', id)
+    .eq('user_id', user.id)
+    .single()
+
+  if (fetchError || !plant) {
+    throw new Error('식물 정보를 찾을 수 없습니다.')
+  }
+
+  const now = new Date()
+  const last = plant.last_watered_at ? new Date(plant.last_watered_at) : null
+
+  const isSameDay =
+    last &&
+    last.getFullYear() === now.getFullYear() &&
+    last.getMonth() === now.getMonth() &&
+    last.getDate() === now.getDate()
+
+  if (isSameDay) {
+    return
+  }
+
+  // 2) 오늘 처음 물 주는 경우에만 업데이트
+  const { error: updateError } = await supabase
+    .from('plants')
+    .update({ last_watered_at: now.toISOString() })
     .eq('id', id)
     .eq('user_id', user.id)
 
-  if (error) {
-    throw new Error(error.message ?? '물주기 업데이트에 실패했습니다.')
+  if (updateError) {
+    throw new Error(updateError.message ?? '물주기 업데이트에 실패했습니다.')
   }
 
   revalidatePath('/')

@@ -32,6 +32,7 @@ export interface PlantCardInfo {
   coverImageUrl?: string | null
   defaultImageUrl?: string | null
   ddayWater: number
+  lastWateredAt?: string | null
   onWater: (id: string) => void
   onClick: (id: string) => void
   className?: string
