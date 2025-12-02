@@ -10,6 +10,16 @@ interface UpdateIntervalsVariables {
   repottingMonths: number
 }
 
+const calcNextWateringDate = (plant: Plant, wateringDays: number): string | null => {
+  if (!plant.lastWateredAt) return plant.nextWateringDate ?? null
+
+  const base = new Date(plant.lastWateredAt)
+  base.setHours(0, 0, 0, 0)
+  base.setDate(base.getDate() + wateringDays)
+
+  return base.toISOString()
+}
+
 export const useUpdatePlantIntervals = () => {
   const queryClient = useQueryClient()
 
@@ -28,16 +38,18 @@ export const useUpdatePlantIntervals = () => {
       await queryClient.cancelQueries({ queryKey: queryKeys.plants.list() })
 
       queryClient.setQueryData<Plant[]>(queryKeys.plants.list(), (prev = []) =>
-        prev.map((plant) =>
-          plant.id === id
-            ? {
-                ...plant,
-                wateringIntervalDays: wateringDays,
-                fertilizerIntervalDays: monthsToDays(fertilizerMonths),
-                repottingIntervalDays: monthsToDays(repottingMonths),
-              }
-            : plant
-        )
+        prev.map((plant) => {
+          if (plant.id !== id) return plant
+
+          const nextWateringDate = calcNextWateringDate(plant, wateringDays)
+          return {
+            ...plant,
+            wateringIntervalDays: wateringDays,
+            fertilizerIntervalDays: monthsToDays(fertilizerMonths),
+            repottingIntervalDays: monthsToDays(repottingMonths),
+            nextWateringDate,
+          }
+        })
       )
     },
 

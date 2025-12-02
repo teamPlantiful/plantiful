@@ -143,6 +143,7 @@ export default function PlantDetailModal({
                   setNickname(plant.nickname)
                   setEditing(false)
                 }}
+                className="border"
               >
                 취소
               </Button>
@@ -167,7 +168,7 @@ export default function PlantDetailModal({
       <ModalContent className="space-y-4 pt-0 pb-0">
         {/* 탭 */}
         <div
-          className="grid grid-cols-2 rounded-md border p-0.5 bg-secondary/10 border-secondary/20"
+          className="grid grid-cols-2 rounded-md border bg-secondary/10 border-secondary/20 overflow-hidden"
           role="tablist"
           aria-label="식물 상세 탭"
         >
@@ -180,7 +181,7 @@ export default function PlantDetailModal({
             tabIndex={tab === 'status' ? 0 : -1}
             onClick={() => setTab('status')}
             className={cn(
-              'rounded-md py-1.5 text-sm font-medium transition-colors outline-none',
+              'rounded-md text-sm py-1.5 font-medium transition-colors outline-none',
               'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
               tab === 'status'
                 ? 'bg-white text-foreground shadow-sm'
@@ -199,7 +200,7 @@ export default function PlantDetailModal({
             tabIndex={tab === 'settings' ? 0 : -1}
             onClick={() => setTab('settings')}
             className={cn(
-              'rounded-md py-1.5 text-sm font-medium transition-colors outline-none',
+              'rounded-md text-sm py-1.5 font-medium transition-colors outline-none',
               'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
               tab === 'settings'
                 ? 'bg-white text-foreground shadow-sm'
