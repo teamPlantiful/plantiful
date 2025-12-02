@@ -14,6 +14,7 @@ import { DateSelect } from './DateSelect'
 import { CareGuideSection } from '../../shared/CareGuideSection'
 import { generateDayOptions, generateMonthOptions } from '@/utils/date'
 import { useAddPlant } from '@/hooks/mutations/useAddPlant'
+import { useGetPlants } from '@/hooks/queries/useGetPlants'
 import cn from '@/lib/cn'
 
 interface FormData {
@@ -43,12 +44,13 @@ export const RegisterPlantModal = ({
   onBack,
 }: RegisterPlantModalProps) => {
   const { mutate: addPlant } = useAddPlant()
+  const { data: plants } = useGetPlants()
   const {
     register,
     control,
     handleSubmit,
     reset,
-    formState: { isValid },
+    formState: { errors },
   } = useForm<FormData>({
     defaultValues: {
       nickname: '',
@@ -71,7 +73,7 @@ export const RegisterPlantModal = ({
 
     const plantData: PlantData = {
       species: selectedSpecies,
-      nickname: data.nickname || selectedSpecies.koreanName,
+      nickname: data.nickname.trim(),
       wateringInterval: parseInt(data.wateringInterval),
       fertilizerInterval: parseInt(data.fertilizerInterval) * 30,
       repottingInterval: parseInt(data.repottingInterval) * 30,
@@ -143,10 +145,19 @@ export const RegisterPlantModal = ({
               </div>
 
               <Input
-                className="bg-card"
-                label="닉네임"
-                placeholder={selectedSpecies.koreanName}
-                {...register('nickname')}
+                className="bg-card mb-1"
+                label="식물 이름 *"
+                {...register('nickname', {
+                  required: '식물 이름을 입력해주세요.',
+                  validate: (value) => {
+                    const nickname = value.trim()
+                    const isDuplicate = plants?.some(
+                      (plant) => plant.nickname.toLowerCase() === nickname.toLowerCase()
+                    )
+                    return isDuplicate ? '이미 존재하는 이름입니다.' : true
+                  },
+                })}
+                error={errors.nickname?.message}
               />
 
               <div className="grid grid-cols-2 gap-3">
@@ -231,7 +242,7 @@ export const RegisterPlantModal = ({
           </div>
 
           <div className="pt-5 px-6 pb-6 border-t border-border">
-            <Button type="submit" widthFull disabled={!isValid}>
+            <Button type="submit" widthFull>
               등록하기
             </Button>
           </div>
