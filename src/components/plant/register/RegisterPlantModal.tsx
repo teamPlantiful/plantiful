@@ -1,11 +1,12 @@
 'use client'
 
 import { Modal, ModalHeader, ModalContent } from '@/components/common/modal'
+import { Alert } from '@/components/common/alert'
 import Button from '@/components/common/button'
 import Input from '@/components/common/input'
 import SelectBox from '@/components/common/select-box'
 import { ArrowLeft } from 'lucide-react'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { PlantSpeciesInfo, PlantData } from '@/types/plant'
 import ImageUpload from './ImageUpload'
@@ -14,6 +15,7 @@ import { DateSelect } from './DateSelect'
 import { CareGuideSection } from '../../shared/CareGuideSection'
 import { generateDayOptions, generateMonthOptions } from '@/utils/date'
 import { useAddPlant } from '@/hooks/mutations/useAddPlant'
+import { useGetPlants } from '@/hooks/queries/useGetPlants'
 import cn from '@/lib/cn'
 
 interface FormData {
@@ -43,12 +45,15 @@ export const RegisterPlantModal = ({
   onBack,
 }: RegisterPlantModalProps) => {
   const { mutate: addPlant } = useAddPlant()
+  const { data: plants } = useGetPlants()
+  const [showAlert, setShowAlert] = useState(false)
+
   const {
     register,
     control,
     handleSubmit,
     reset,
-    formState: { isValid },
+    formState: { errors, isDirty },
   } = useForm<FormData>({
     defaultValues: {
       nickname: '',
@@ -63,7 +68,17 @@ export const RegisterPlantModal = ({
   })
 
   const handleClose = () => {
+    if (isDirty) {
+      setShowAlert(true)
+    } else {
+      onOpenChange(false)
+    }
+  }
+
+  const handleConfirmClose = () => {
+    setShowAlert(false)
     onOpenChange(false)
+    reset()
   }
 
   const onSubmit = handleSubmit((data) => {
@@ -71,7 +86,7 @@ export const RegisterPlantModal = ({
 
     const plantData: PlantData = {
       species: selectedSpecies,
-      nickname: data.nickname || selectedSpecies.koreanName,
+      nickname: data.nickname.trim(),
       wateringInterval: parseInt(data.wateringInterval),
       fertilizerInterval: parseInt(data.fertilizerInterval) * 30,
       repottingInterval: parseInt(data.repottingInterval) * 30,
@@ -103,7 +118,8 @@ export const RegisterPlantModal = ({
   if (!selectedSpecies) return null
 
   return (
-    <Modal open={open} onClose={handleClose} size="md">
+    <>
+      <Modal open={open} onClose={handleClose} size="md" closeOnBackdrop={true}>
       <ModalHeader
         closable
         className="pb-4"
@@ -143,10 +159,19 @@ export const RegisterPlantModal = ({
               </div>
 
               <Input
-                className="bg-card"
-                label="닉네임"
-                placeholder={selectedSpecies.koreanName}
-                {...register('nickname')}
+                className="bg-card mb-1"
+                label="식물 이름 *"
+                {...register('nickname', {
+                  required: '식물 이름을 입력해주세요.',
+                  validate: (value) => {
+                    const nickname = value.trim()
+                    const isDuplicate = plants?.some(
+                      (plant) => plant.nickname.toLowerCase() === nickname.toLowerCase()
+                    )
+                    return isDuplicate ? '이미 존재하는 이름입니다.' : true
+                  },
+                })}
+                error={errors.nickname?.message}
               />
 
               <div className="grid grid-cols-2 gap-3">
@@ -231,12 +256,24 @@ export const RegisterPlantModal = ({
           </div>
 
           <div className="pt-5 px-6 pb-6 border-t border-border">
-            <Button type="submit" widthFull disabled={!isValid}>
+            <Button type="submit" widthFull>
               등록하기
             </Button>
           </div>
         </form>
       </ModalContent>
     </Modal>
+
+      <Alert
+        open={showAlert}
+        onClose={() => setShowAlert(false)}
+        title="작성 중인 내용이 있습니다"
+        description="작성된 내용을 잃을 수 있습니다. 창을 닫으시겠습니까?"
+        confirmText="닫기"
+        cancelText="취소"
+        onConfirm={handleConfirmClose}
+        variant="destructive"
+      />
+    </>
   )
 }
