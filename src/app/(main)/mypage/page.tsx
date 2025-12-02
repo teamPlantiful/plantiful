@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
-import { ArrowLeft, User, Lock } from 'lucide-react'
+import { ArrowLeft, User, Lock, Smile } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/common/card'
 import Button from '@/components/common/button'
 import UpdateProfilesForm from '@/components/auth/UpdateProfileForm'
@@ -27,6 +27,16 @@ export default async function Page() {
     .single()
   // 현재 닉네임 표시를 Props를 통해 컴포넌트에 전달
   const currentUserName = profileData?.name ?? ''
+  // 소셜 로그인 여부 판단
+  const provider = user?.app_metadata?.provider || 'email'
+  const isOAuthUser = provider !== 'email'
+
+  // 소셜 로그인이면 로그인 플랫폼 보여줌
+  const providerLabelMap: Record<string, string> = {
+    google: 'Google 로그인 계정입니다.',
+    kakao: 'Kakao 로그인 계정입니다.',
+  }
+  const providerLabel = providerLabelMap[provider]
 
   return (
     <div className="min-h-screen bg-background">
@@ -65,18 +75,43 @@ export default async function Page() {
             <UpdateProfilesForm initialUserName={currentUserName}/>
           </CardContent>
         </Card>
-        {/* 비밀번호 변경 구역 */}
-        <Card className="shadow-card">
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Lock className="h-5 w-5 text-primary" />
-              <span className="text-xl font-bold">비밀번호 변경</span>
+        {/* 소셜 로그인 시 보이는 구역 */}
+        {isOAuthUser && (
+          <Card className="shadow-card">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Smile className="h-5 w-5 text-primary" />
+                <span className="text-xl font-bold">로그인 플랫폼</span>
+              </div>
+            </CardHeader>
+          <CardContent className="pt-0 space-y-4 flex justify-center gap-2">
+            <div>
+              <Image
+                src={`/${provider}-logo.png`}
+                alt={`${provider} Logo`}
+                width={24}
+                height={24}></Image>
             </div>
-          </CardHeader>
-          <CardContent className="pt-0 space-y-4">
-            <UpdatePasswordForm />
+            <div>
+              <span className="text-sm text-gray-600">{providerLabel}</span>
+            </div>
           </CardContent>
         </Card>
+        )}
+        {/* 비밀번호 변경 구역 */}
+        {!isOAuthUser && (
+          <Card className="shadow-card">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Lock className="h-5 w-5 text-primary" />
+                <span className="text-xl font-bold">비밀번호 변경</span>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0 space-y-4">
+              <UpdatePasswordForm />
+            </CardContent>
+          </Card>
+        )}
         <div className="my-6" />
         {/* 로그아웃 기능 */}
         <LogoutButton />
