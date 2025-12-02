@@ -48,6 +48,7 @@ export const RegisterPlantModal = ({
     control,
     handleSubmit,
     reset,
+    watch,
     formState: { isValid },
   } = useForm<FormData>({
     defaultValues: {
@@ -61,6 +62,9 @@ export const RegisterPlantModal = ({
     },
     mode: 'onChange',
   })
+
+  const startDate = watch('startDate')
+  const today = new Date()
 
   const handleClose = () => {
     onOpenChange(false)
@@ -158,6 +162,7 @@ export const RegisterPlantModal = ({
                       label="처음 함께한 날짜"
                       value={field.value}
                       onChange={field.onChange}
+                      maxDate={today}
                     />
                   )}
                 />
@@ -169,6 +174,8 @@ export const RegisterPlantModal = ({
                       label="마지막 물 준 날짜"
                       value={field.value}
                       onChange={field.onChange}
+                      minDate={startDate}
+                      maxDate={today}
                     />
                   )}
                 />

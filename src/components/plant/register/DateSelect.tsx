@@ -11,9 +11,11 @@ interface DateSelectProps {
   label: string
   value: Date
   onChange: (date: Date) => void
+  minDate?: Date
+  maxDate?: Date
 }
 
-export function DateSelect({ label, value, onChange }: DateSelectProps) {
+export function DateSelect({ label, value, onChange, minDate, maxDate }: DateSelectProps) {
   const [isOpen, setIsOpen] = useState(false)
 
   const handleDateChange = (date: Date) => {
@@ -31,7 +33,7 @@ export function DateSelect({ label, value, onChange }: DateSelectProps) {
       <Popover
         isOpen={isOpen}
         onClose={setIsOpen}
-        content={<Calendar value={value} onChange={handleDateChange} />}
+        content={<Calendar value={value} onChange={handleDateChange} minDate={minDate} maxDate={maxDate} />}
         side="top"
         align="start"
         className="block"

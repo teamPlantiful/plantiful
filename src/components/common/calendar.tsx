@@ -9,11 +9,13 @@ import Button from './button'
 interface CalendarProps {
   value: Date
   onChange: (date: Date) => void
+  minDate?: Date
+  maxDate?: Date
 }
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토']
 
-export function Calendar({ value, onChange }: CalendarProps) {
+export function Calendar({ value, onChange, minDate, maxDate }: CalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(value.getMonth())
   const [currentYear, setCurrentYear] = useState(value.getFullYear())
 
@@ -43,8 +45,20 @@ export function Calendar({ value, onChange }: CalendarProps) {
     }
   }
 
+  const isDateDisabled = (date: Date) => {
+    if (minDate && date < new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate())) {
+      return true
+    }
+    if (maxDate && date > new Date(maxDate.getFullYear(), maxDate.getMonth(), maxDate.getDate())) {
+      return true
+    }
+    return false
+  }
+
   const handleDateClick = (date: Date) => {
-    onChange(date)
+    if (!isDateDisabled(date)) {
+      onChange(date)
+    }
   }
 
   return (
@@ -91,6 +105,7 @@ export function Calendar({ value, onChange }: CalendarProps) {
           const isSelected = isSameDay(day.fullDate, value)
           const isCurrentMonth = day.month === 'current'
           const isToday = isSameDay(day.fullDate, new Date())
+          const disabled = isDateDisabled(day.fullDate)
 
           return (
             <Button
@@ -98,10 +113,12 @@ export function Calendar({ value, onChange }: CalendarProps) {
               variant={isSelected ? 'default' : 'ghost'}
               size="sm"
               onClick={() => handleDateClick(day.fullDate)}
+              disabled={disabled}
               className={cn(
                 'rounded-full',
                 !isCurrentMonth && 'text-muted-foreground/30',
-                isToday && !isSelected && 'ring-1 ring-primary/30'
+                isToday && !isSelected && 'ring-1 ring-primary/30',
+                disabled && 'opacity-30 cursor-not-allowed'
               )}
             >
               {day.date}
