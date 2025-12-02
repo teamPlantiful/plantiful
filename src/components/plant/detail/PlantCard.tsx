@@ -49,7 +49,6 @@ export default function PlantCard({
   }, [lastWateredAt])
 
   const imageSrc = image || 'https://placehold.co/64x64/EBF4E5/3B5935.png?text=%3F'
-  const displayName = nickname
 
   return (
     <Card
@@ -80,10 +79,10 @@ export default function PlantCard({
 
               if (isWateredToday) {
                 e.preventDefault()
-                alert(`${displayName}: 오늘 이미 물을 줬습니다.`)
+                alert(`${nickname}: 오늘 이미 물을 줬습니다.`)
                 return
               }
-              alert(`${displayName}: 물을 줬습니다.`)
+              alert(`${nickname}: 물을 줬습니다.`)
 
               onWater?.(id)
               setIsWatering(true)
