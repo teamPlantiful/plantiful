@@ -11,22 +11,28 @@ interface ToastProps {
   id: string
   message: string
   type: ToastType
+  duration?: number
   onClose: () => void
 }
 
-export function Toast({ id, message, type, onClose }: ToastProps) {
+export function Toast({ id, message, type, duration = 3000, onClose }: ToastProps) {
   const [isVisible, setIsVisible] = useState(false)
-
-  useEffect(() => {
-    requestAnimationFrame(() => {
-      setIsVisible(true)
-    })
-  }, [])
 
   const handleClose = () => {
     setIsVisible(false)
     setTimeout(onClose, 300)
   }
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      setIsVisible(true)
+    })
+
+    const timer = setTimeout(() => {
+      handleClose()
+    }, duration)
+
+    return () => clearTimeout(timer)
+  }, [duration])
 
   const styles = {
     default: '',
