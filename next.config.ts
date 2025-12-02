@@ -9,6 +9,11 @@ const nextConfig: NextConfig = {
         hostname: 'nongsaro.go.kr',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'placehold.co',
+        pathname: '/**',
+      },
     ],
   },
 }
