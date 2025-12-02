@@ -11,14 +11,10 @@ interface AlertProps {
   title?: ReactNode
   description?: ReactNode
   children?: ReactNode
-
-  // 버튼
   confirmText?: string
   cancelText?: string
   onConfirm?: () => void
   showCancel?: boolean
-
-  // 스타일 
   variant?: 'default' | 'destructive'
   loading?: boolean
 }
@@ -45,21 +41,25 @@ export function Alert({
   }
 
   return (
-    <Modal open={open} onClose={onClose} size="sm" closeOnBackdrop={false} closeOnEscape={true}>
+    <Modal
+      open={open}
+      onClose={onClose}
+      size="sm"
+      closeOnBackdrop={false}
+      closeOnEscape={true}
+      zIndex={100}
+    >
       <div className="flex flex-col gap-4">
-        {/* 제목 영역 */}
         {title && (
           <ModalHeader className="flex flex-col gap-1">
             <h2 className="text-lg font-semibold leading-none tracking-tight">{title}</h2>
           </ModalHeader>
         )}
 
-        {/* 본문 영역 */}
         <ModalContent>
           <div className="text-sm text-gray-500 dark:text-gray-400">{description || children}</div>
         </ModalContent>
 
-        {/* 버튼 영역 */}
         <ModalFooter className="flex justify-end gap-2 sm:justify-end">
           {showCancel && (
             <Button variant="outline" onClick={onClose} disabled={loading}>

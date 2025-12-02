@@ -12,6 +12,7 @@ interface ModalProps extends ComponentPropsWithRef<'div'> {
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | 'full'
   closeOnBackdrop?: boolean
   closeOnEscape?: boolean
+  zIndex?: number
 }
 
 export function Modal({
@@ -21,6 +22,7 @@ export function Modal({
   size = 'md',
   closeOnBackdrop = false,
   closeOnEscape = true,
+  zIndex = 50, // 기본 zIndex 값 설정 (일반 모달은 50)
   className,
   ...props
 }: ModalProps) {
@@ -32,7 +34,6 @@ export function Modal({
     setMounted(true)
   }, [])
 
-  // ESC 키로 모달 닫기
   useEffect(() => {
     if (!open || !closeOnEscape) return
 
@@ -46,10 +47,8 @@ export function Modal({
     return () => document.removeEventListener('keydown', handleEscape)
   }, [open, onClose, closeOnEscape])
 
-  // 모달 열릴 때 스크롤 위치 저장 및 body 스크롤 방지
   useEffect(() => {
     if (open) {
-      // 현재 스크롤 위치 저장
       scrollYRef.current = window.scrollY
       document.body.style.position = 'fixed'
       document.body.style.top = `-${scrollYRef.current}px`
@@ -58,7 +57,6 @@ export function Modal({
 
     return () => {
       if (open) {
-        // 모달이 닫힐 때 스크롤 위치 복원
         const scrollY = scrollYRef.current
         document.body.style.position = ''
         document.body.style.top = ''
@@ -88,14 +86,17 @@ export function Modal({
 
   const modalContent = (
     <>
-      {/* Backdrop - 뒤 콘텐츠가 흐릿하게 보임 */}
+      {/* Backdrop: z-class 제거하고 style로 zIndex 직접 제어 */}
       <div
-        className="fixed inset-0 z-99 bg-black/80 backdrop-blur-sm"
+        style={{ zIndex: zIndex }}
+        className="fixed inset-0 bg-black/80 backdrop-blur-sm"
         onClick={handleBackdropClick}
       />
 
+      {/* Content Wrapper: Backdrop보다 10 높게 설정 */}
       <div
-        className="fixed inset-0 z-100 flex items-center justify-center pointer-events-none"
+        style={{ zIndex: zIndex + 10 }}
+        className="fixed inset-0 flex items-center justify-center pointer-events-none"
         role="dialog"
         aria-modal="true"
       >
