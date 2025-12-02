@@ -1,11 +1,12 @@
 'use client'
 
 import { Modal, ModalHeader, ModalContent } from '@/components/common/modal'
+import { Alert } from '@/components/common/alert'
 import Button from '@/components/common/button'
 import Input from '@/components/common/input'
 import SelectBox from '@/components/common/select-box'
 import { ArrowLeft } from 'lucide-react'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { PlantSpeciesInfo, PlantData } from '@/types/plant'
 import ImageUpload from './ImageUpload'
@@ -45,12 +46,14 @@ export const RegisterPlantModal = ({
 }: RegisterPlantModalProps) => {
   const { mutate: addPlant } = useAddPlant()
   const { data: plants } = useGetPlants()
+  const [showAlert, setShowAlert] = useState(false)
+
   const {
     register,
     control,
     handleSubmit,
     reset,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<FormData>({
     defaultValues: {
       nickname: '',
@@ -65,7 +68,17 @@ export const RegisterPlantModal = ({
   })
 
   const handleClose = () => {
+    if (isDirty) {
+      setShowAlert(true)
+    } else {
+      onOpenChange(false)
+    }
+  }
+
+  const handleConfirmClose = () => {
+    setShowAlert(false)
     onOpenChange(false)
+    reset()
   }
 
   const onSubmit = handleSubmit((data) => {
@@ -105,7 +118,8 @@ export const RegisterPlantModal = ({
   if (!selectedSpecies) return null
 
   return (
-    <Modal open={open} onClose={handleClose} size="md">
+    <>
+      <Modal open={open} onClose={handleClose} size="md" closeOnBackdrop={true}>
       <ModalHeader
         closable
         className="pb-4"
@@ -249,5 +263,17 @@ export const RegisterPlantModal = ({
         </form>
       </ModalContent>
     </Modal>
+
+      <Alert
+        open={showAlert}
+        onClose={() => setShowAlert(false)}
+        title="작성 중인 내용이 있습니다"
+        description="작성된 내용을 잃을 수 있습니다. 창을 닫으시겠습니까?"
+        confirmText="닫기"
+        cancelText="취소"
+        onConfirm={handleConfirmClose}
+        variant="destructive"
+      />
+    </>
   )
 }

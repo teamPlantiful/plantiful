@@ -56,8 +56,8 @@ export function Alert({
           </ModalHeader>
         )}
 
-        <ModalContent>
-          <div className="text-sm text-gray-500 dark:text-gray-400">{description || children}</div>
+        <ModalContent className="mb-2">
+          <div className="text-sm text-gray-500 dark:text-gray-600">{description || children}</div>
         </ModalContent>
 
         <ModalFooter className="flex justify-end gap-2 sm:justify-end">
