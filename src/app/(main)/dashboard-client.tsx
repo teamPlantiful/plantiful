@@ -8,8 +8,9 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useGetPlants } from '@/hooks/queries/useGetPlants'
 import { useWaterPlant } from '@/hooks/mutations/useWaterPlant'
 import { useUpdatePlantNickname } from '@/hooks/mutations/useUpdatePlantNickname'
-import { useUpdatePlantIntervals } from '@/hooks/mutations/useUpdatePlantIntervals'
+import { useUpdatePlant } from '@/hooks/mutations/useUpdatePlant'
 import { useDeletePlant } from '@/hooks/mutations/useDeletePlant'
+import type { PlantIntervalsUpdatePayload } from '@/components/plant/detail/PlantDetailSettingsTab'
 
 type SortKey = 'water' | 'name' | 'recent'
 
@@ -22,7 +23,7 @@ export default function DashboardClient() {
 
   const waterPlant = useWaterPlant()
   const updateNickname = useUpdatePlantNickname()
-  const updateIntervals = useUpdatePlantIntervals()
+  const updateIntervals = useUpdatePlant()
   const deletePlant = useDeletePlant()
 
   // 1) URL에서 현재 값
@@ -61,15 +62,16 @@ export default function DashboardClient() {
     updateNickname.mutate({ id, nickname })
   }
 
-  const handleSaveIntervals = (
-    id: string,
-    next: { watering: number; fertilizer: number; repotting: number }
-  ) => {
+  const handleSaveIntervals = (id: string, next: PlantIntervalsUpdatePayload) => {
     updateIntervals.mutate({
       id,
-      wateringDays: next.watering,
-      fertilizerMonths: next.fertilizer,
-      repottingMonths: next.repotting,
+      wateringDays: next.wateringDays,
+      fertilizerMonths: next.fertilizerMonths,
+      repottingMonths: next.repottingMonths,
+      adoptedAt: next.adoptedAt,
+      lastWateredAt: next.lastWateredAt,
+      file: next.file ?? undefined,
+      removeImage: next.removeImage,
     })
   }
 

@@ -4,8 +4,9 @@ import { useEffect, useMemo, useState } from 'react'
 import PlantCard from '@/components/plant/detail/PlantCard'
 import PlantDetailModal from '@/components/plant/detail/PlantDetailModal'
 import { normalizeSearch, isChosungOnly } from '@/utils/normalizeSearch'
-import { calculateDday } from '@/utils/date'
+import { addDays, calculateDday } from '@/utils/date'
 import type { Plant } from '@/types/plant'
+import type { PlantIntervalsUpdatePayload } from '@/components/plant/detail/PlantDetailSettingsTab'
 
 interface PlantListSectionProps {
   plants: Plant[]
@@ -14,10 +15,7 @@ interface PlantListSectionProps {
   sort?: 'water' | 'name' | 'recent'
   onWater: (id: string) => void
   onSaveNickname: (id: string, nextName: string) => void
-  onSaveIntervals: (
-    id: string,
-    next: { watering: number; fertilizer: number; repotting: number }
-  ) => void
+  onSaveIntervals: (id: string, next: PlantIntervalsUpdatePayload) => void
   onDelete: (id: string) => void
 }
 
@@ -96,11 +94,7 @@ export default function PlantListSection({
     onSaveNickname(selected.id, trimmed)
   }
 
-  const handleSaveIntervals = async (next: {
-    watering: number
-    fertilizer: number
-    repotting: number
-  }) => {
+  const handleSaveIntervals = (next: PlantIntervalsUpdatePayload) => {
     if (!selected) return
     onSaveIntervals(selected.id, next)
   }
@@ -124,8 +118,10 @@ export default function PlantListSection({
       ) : (
         <section className="grid gap-3 grid-cols-1 md:grid-cols-2">
           {sortedPlants.map((p) => {
-            const ddayWater = p.nextWateringDate ? calculateDday(p.nextWateringDate) : 0
-
+            const ddayWater =
+              p.lastWateredAt && p.wateringIntervalDays
+                ? calculateDday(addDays(p.lastWateredAt, p.wateringIntervalDays))
+                : 0
             return (
               <PlantCard
                 key={p.id}
