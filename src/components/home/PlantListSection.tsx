@@ -131,7 +131,7 @@ export default function PlantListSection({
                 key={p.id}
                 id={p.id}
                 nickname={p.nickname}
-                speciesName={p.scientificName}
+                speciesName={p.koreanName}
                 coverImageUrl={p.coverImageUrl}
                 defaultImageUrl={p.defaultImageUrl}
                 ddayWater={ddayWater}
