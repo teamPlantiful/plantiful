@@ -7,6 +7,7 @@ import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import PlantSearchInput from './PlantSearchInput'
 import PlantCustomInput from './PlantCustomInput'
 import PlantList from './PlantList'
+import PlantListSkeleton from './PlantListSkeleton'
 
 interface PlantSearchContentProps {
   searchQuery: string
@@ -23,7 +24,7 @@ export default function PlantSearchContent({
   setCustomName,
   onSelect,
 }: PlantSearchContentProps) {
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, error } =
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isFetching, error } =
     useInfinitePlantSearch(searchQuery)
 
   const observerRef = useInfiniteScroll({
@@ -34,6 +35,8 @@ export default function PlantSearchContent({
   const plants = useMemo(() => {
     return data?.pages.flatMap((p) => p.items) ?? []
   }, [data])
+
+  const showInitialLoading = isLoading || (isFetching && (!data || plants.length === 0))
 
   const handleSelect = (plant: PlantSearchResult) => {
     onSelect(plant)
@@ -48,7 +51,6 @@ export default function PlantSearchContent({
     <>
       <PlantSearchInput value={searchQuery} onChange={setSearchQuery} />
 
-      {/* 스크롤 영역 */}
       <div className="h-[400px] overflow-y-auto mt-4 space-y-2 scrollbar-overlay">
         <PlantCustomInput
           value={customName}
@@ -57,23 +59,15 @@ export default function PlantSearchContent({
         />
 
         <PlantList
-          loading={false}
+          loading={showInitialLoading}
           error={error ? String(error) : null}
           plants={plants}
           searchQuery={searchQuery}
           onSelect={handleSelect}
         />
 
-        {/* 무한 스크롤 */}
-        <div
-          ref={observerRef}
-          className="h-12 w-full flex items-center justify-center text-gray-400 text-sm"
-        >
-          {isFetchingNextPage
-            ? '데이터를 불러오는 중입니다...'
-            : hasNextPage
-              ? '스크롤하여 더보기'
-              : '더 이상 결과가 없습니다.'}
+        <div ref={observerRef} className="w-full pt-2">
+          {isFetchingNextPage && <PlantListSkeleton count={2} />}
         </div>
       </div>
     </>

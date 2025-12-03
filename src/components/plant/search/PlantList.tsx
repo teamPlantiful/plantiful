@@ -1,7 +1,7 @@
 'use client'
 
-import { Loader2 } from 'lucide-react'
 import type { PlantSearchResult } from '@/types/plant'
+import PlantListSkeleton from './PlantListSkeleton'
 
 interface PlantListProps {
   loading: boolean
@@ -13,12 +13,7 @@ interface PlantListProps {
 
 export default function PlantList({ loading, error, plants, onSelect }: PlantListProps) {
   if (loading) {
-    return (
-      <div className="flex justify-center items-center h-40">
-        <Loader2 className="h-6 w-6 animate-spin text-primary" />
-        <span className="ml-2 text-muted-foreground">검색 중...</span>
-      </div>
-    )
+    return <PlantListSkeleton count={6} />
   }
 
   if (error) {
