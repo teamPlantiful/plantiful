@@ -8,6 +8,7 @@ import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import PlantSearchInput from './PlantSearchInput'
 import PlantCustomInput from './PlantCustomInput'
 import PlantList from './PlantList'
+import PlantListSkeleton from './PlantListSkeleton'
 
 interface PlantSpeciesSearchModalProps {
   open: boolean
@@ -23,18 +24,20 @@ export default function PlantSpeciesSearchModal({
   const [searchQuery, setSearchQuery] = useState('')
   const [customName, setCustomName] = useState('')
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, error } =
-    useInfinitePlantSearch(searchQuery)
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isFetching, error } =
+    useInfinitePlantSearch(searchQuery, open)
 
   const observerRef = useInfiniteScroll({
     hasNextPage,
     fetchNextPage,
   })
+
   const plants = useMemo(() => {
     return data?.pages.flatMap((p) => p.items) ?? []
   }, [data])
 
-  // 핸들러
+  const showInitialLoading = isLoading || (isFetching && (!data || plants.length === 0))
+
   const handleClose = () => {
     onOpenChange(false)
     setSearchQuery('')
@@ -67,7 +70,6 @@ export default function PlantSpeciesSearchModal({
       <ModalContent className="pt-0 pb-0">
         <PlantSearchInput value={searchQuery} onChange={setSearchQuery} />
 
-        {/* 스크롤 영역 */}
         <div className="h-[400px] overflow-y-auto mt-4 space-y-2 scrollbar-overlay">
           <PlantCustomInput
             value={customName}
@@ -76,23 +78,15 @@ export default function PlantSpeciesSearchModal({
           />
 
           <PlantList
-            loading={false}
+            loading={showInitialLoading}
             error={error ? String(error) : null}
             plants={plants}
             searchQuery={searchQuery}
             onSelect={handleSelect}
           />
 
-          {/* 무한 스크롤  */}
-          <div
-            ref={observerRef}
-            className="h-12 w-full flex items-center justify-center text-gray-400 text-sm"
-          >
-            {isFetchingNextPage
-              ? '데이터를 불러오는 중입니다...'
-              : hasNextPage
-                ? '스크롤하여 더보기'
-                : '더 이상 결과가 없습니다.'}
+          <div ref={observerRef} className="w-full pt-2">
+            {isFetchingNextPage && <PlantListSkeleton count={2} />}
           </div>
         </div>
       </ModalContent>

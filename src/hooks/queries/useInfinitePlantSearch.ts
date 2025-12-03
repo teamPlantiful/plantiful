@@ -8,11 +8,12 @@ interface PagedPlantResult {
   totalPage: number
 }
 
-export function useInfinitePlantSearch(query: string) {
+export function useInfinitePlantSearch(query: string, enabled: boolean = true) {
   const safeQuery = query.trim()
 
   return useInfiniteQuery<PagedPlantResult>({
     queryKey: ['plant-search', safeQuery],
+    enabled: enabled,
     initialPageParam: 1,
     queryFn: async ({ pageParam }) => {
       const { data } = await axios.get('/apis/searchPlant', {
@@ -30,6 +31,5 @@ export function useInfinitePlantSearch(query: string) {
       }
       return undefined
     },
-
   })
 }
