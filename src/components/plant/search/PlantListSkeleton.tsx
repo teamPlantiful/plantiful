@@ -14,7 +14,6 @@ export default function PlantListSkeleton({ count = 6 }: PlantListSkeletonProps)
 
           <div className="flex flex-col gap-1.5 flex-1">
             <div className="h-6 w-1/3 bg-muted rounded" />
-            <div className="h-4 w-1/2 bg-muted rounded" />
           </div>
         </div>
       ))}
