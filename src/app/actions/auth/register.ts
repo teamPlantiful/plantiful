@@ -1,5 +1,6 @@
 'use server'
 
+import { cookies } from 'next/headers'
 import { createClient } from '@/utils/supabase/server'
 
 export async function register(formData: FormData) {
@@ -16,6 +17,7 @@ export async function register(formData: FormData) {
     email,
     password,
     options: {
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/apis/auth/callback`,
       data: {
         name: userName
       }
@@ -29,14 +31,16 @@ export async function register(formData: FormData) {
     return { error: "회원가입 중 문제가 발생했습니다." }
   }
 
-  const { error: signInError } = await supabase.auth.signInWithPassword({
-    email,
-    password,
+  const responseCookies = await cookies()
+  responseCookies.set({
+    name: "pending_email",
+    value: email,
+    httpOnly: true,
+    secure: true,
+    path: "/",
+    maxAge: 60 * 10,
   })
 
-  if (signInError) {
-    return { error: "로그인 중 문제가 발생했습니다." }
-  }
-
-  return { success: true }
+  console.log("signUpError:", signUpError)
+  return { success: "이제 이메일 인증을 진행해 주세요!" }
 }
