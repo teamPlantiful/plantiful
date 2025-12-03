@@ -50,13 +50,7 @@ export default function PlantDetailModal({
   }, [open, plant.nickname])
 
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      size="md"
-      closeOnBackdrop
-      className="animate-fade-in overflow-y-auto"
-    >
+    <Modal open={open} onClose={onClose} size="md" closeOnBackdrop className="animate-fade-in">
       <div className="flex max-h-[80vh] flex-col">
         {/* 헤더 (닉네임 / 수정 폼) */}
         <ModalHeader closable onClose={onClose} className="pb-4 shrink-0">
@@ -71,7 +65,7 @@ export default function PlantDetailModal({
           />
         </ModalHeader>
 
-        <ModalContent className="flex-1 overflow-y-auto space-y-4">
+        <ModalContent className="flex-1 overflow-y-auto space-y-4 scrollbar-overlay">
           {/* 탭 스위처 */}
           <div
             className="grid grid-cols-2 gap-1 rounded-md border bg-secondary/10 border-secondary/20 overflow-hidden"
