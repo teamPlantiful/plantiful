@@ -101,9 +101,9 @@ export default function PlantCard({
         </form>
         {/* 텍스트(닉네임/종명 + D-Day) */}
         <div className="min-w-0 flex-1">
-          <div className="mb-0.5 truncate text-base font-semibold text-foreground">{nickname}</div>
+          <div className="mb-1 truncate text-base font-semibold text-foreground">{nickname}</div>
           {speciesName ? (
-            <div className="truncate text-xs italic text-muted-foreground">{speciesName}</div>
+            <div className="ml-0.5 mb-1 truncate text-xs text-muted-foreground">{speciesName}</div>
           ) : (
             <div className="h-4 text-xs text-transparent">.</div>
           )}
