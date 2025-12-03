@@ -3,7 +3,7 @@
 import TodayPlantSection from '@/components/home/TodayPlantSection'
 import PlantListSection from '@/components/home/PlantListSection'
 import PlantFilterBar from '@/components/home/PlantFilterBar'
-import PlantRegistrationFab from '@/components/home/PlantRegistrationFab'
+import PlantRegisterFab from '@/components/home/PlantRegisterFab'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useGetPlants } from '@/hooks/queries/useGetPlants'
 import { useWaterPlant } from '@/hooks/mutations/useWaterPlant'
@@ -98,7 +98,7 @@ export default function DashboardClient() {
           onDelete={handleDelete}
         />
       </div>
-      <PlantRegistrationFab />
+      <PlantRegisterFab />
     </div>
   )
 }
