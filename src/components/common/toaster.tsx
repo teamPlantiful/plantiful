@@ -1,6 +1,6 @@
 'use client'
 
-import { useToastStore } from '@/store/toast'
+import { useToastStore } from '@/store/useToastStore'
 import Toast from './toast'
 
 export function Toaster() {
