@@ -1,7 +1,7 @@
 'use client'
 
-import { useToastStore } from '@/hooks/useToast'
-import { Toast } from './toast'
+import { useToastStore } from '@/store/toast'
+import Toast from './toast'
 
 export function Toaster() {
   const { toasts, removeToast } = useToastStore()
