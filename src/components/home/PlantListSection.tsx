@@ -33,44 +33,20 @@ export default function PlantListSection({
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
   const sortedPlants = useMemo(() => {
-    // 1. 검색 필터링 (완성형 + 초성 둘 다 지원)
-    const { original: searchWord, chosung: searchCho } = normalizeSearch(search)
+    const { original: searchWord } = normalizeSearch(search)
     const useChosungSearch = isChosungOnly(searchWord)
 
-    let filtered = plants
-
-    if (searchWord) {
-      filtered = plants.filter((plant) => {
+    //초성 검색일 때만 클라이언트에서 추가 필터링
+    if (searchWord && useChosungSearch) {
+      return plants.filter((plant) => {
         const nickname = plant.nickname ?? ''
         const { original: nickWord, chosung: nickCho } = normalizeSearch(nickname)
-
         if (!nickWord) return false
-
-        if (useChosungSearch) {
-          return nickCho.includes(searchWord)
-        }
-
-        return nickWord.includes(searchWord)
+        return nickCho.includes(searchWord)
       })
     }
-
-    // 2. 정렬
-    if (sort === 'name') {
-      return [...filtered].sort((a, b) => a.nickname.localeCompare(b.nickname))
-    }
-    if (sort === 'recent') {
-      return [...filtered].sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      )
-    }
-
-    // 물주기 우선 정렬
-    return [...filtered].sort((a, b) => {
-      const ddayA = a.nextWateringDate ? calculateDday(a.nextWateringDate) : Infinity
-      const ddayB = b.nextWateringDate ? calculateDday(b.nextWateringDate) : Infinity
-      return ddayA - ddayB
-    })
-  }, [plants, sort, search])
+    return plants
+  }, [plants, search])
 
   const selected = useMemo(
     () => plants.find((p) => p.id === selectedId) ?? null,

@@ -4,54 +4,32 @@ import TodayPlantSection from '@/components/home/TodayPlantSection'
 import PlantListSection from '@/components/home/PlantListSection'
 import PlantFilterBar from '@/components/home/PlantFilterBar'
 import PlantRegisterFab from '@/components/home/PlantRegisterFab'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { useGetPlants } from '@/hooks/queries/useGetPlants'
+import { useState } from 'react'
+import { useGetPlants, type SortKey } from '@/hooks/queries/useGetPlants'
 import { useWaterPlant } from '@/hooks/mutations/useWaterPlant'
 import { useUpdatePlantNickname } from '@/hooks/mutations/useUpdatePlantNickname'
 import { useUpdatePlant } from '@/hooks/mutations/useUpdatePlant'
 import { useDeletePlant } from '@/hooks/mutations/useDeletePlant'
 import type { PlantIntervalsUpdatePayload } from '@/components/plant/detail/PlantDetailSettingsTab'
 
-type SortKey = 'water' | 'name' | 'recent'
-
 export default function DashboardClient() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const pathname = usePathname()
+  const [search, setSearch] = useState('')
+  const [sort, setSort] = useState<SortKey>('recent')
 
-  const { data: plants = [], isLoading } = useGetPlants()
+  //상태를 서버에 넘김
+  const { data: plants = [], isLoading } = useGetPlants({ search, sort })
 
   const waterPlant = useWaterPlant()
   const updateNickname = useUpdatePlantNickname()
   const updateIntervals = useUpdatePlant()
   const deletePlant = useDeletePlant()
 
-  // 1) URL에서 현재 값
-  const search = searchParams.get('q') ?? ''
-  const sort = (searchParams.get('sort') as SortKey) ?? 'recent'
-  // 2) URL 쿼리만 업데이트
-  const setParams = (next: Partial<{ q: string; sort: SortKey }>) => {
-    const sp = new URLSearchParams(searchParams?.toString() ?? '')
-
-    const merged: { q: string; sort: SortKey } = {
-      q: next.q ?? search,
-      sort: next.sort ?? sort,
-    }
-
-    if (!merged.q) sp.delete('q')
-    else sp.set('q', merged.q)
-
-    if (!merged.sort || merged.sort === 'recent') sp.delete('sort')
-    else sp.set('sort', merged.sort)
-
-    const query = sp.toString()
-    const url = query ? `${pathname}?${query}` : pathname
-
-    router.push(url)
+  const handleSearchChange = (value: string) => {
+    setSearch(value)
   }
 
-  const handleSearchChange = (value: string) => {
-    setParams({ q: value })
+  const handleSortChange = (value: SortKey) => {
+    setSort(value)
   }
 
   const handleWater = (id: string) => {
@@ -87,7 +65,7 @@ export default function DashboardClient() {
           search={search}
           sort={sort}
           onSearchChange={handleSearchChange}
-          onSortChange={(value) => setParams({ sort: value })}
+          onSortChange={handleSortChange}
         />
         <PlantListSection
           plants={plants}
