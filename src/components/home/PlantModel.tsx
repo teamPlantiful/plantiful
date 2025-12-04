@@ -1,17 +1,14 @@
-'use client'
-
-import { Suspense, useEffect, useRef } from 'react'
-import { Canvas } from '@react-three/fiber'
-import { OrbitControls, useGLTF } from '@react-three/drei'
+import { useEffect, useRef } from 'react'
+import { useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 
 type PlantState = 'normal' | 'thirsty'
 
-interface ModelProps {
+interface PlantModelProps {
   state: PlantState
 }
 
-function Model({ state }: ModelProps) {
+export default function PlantModel({ state }: PlantModelProps) {
   const model = useGLTF('/models/plant.glb')
   const plantMeshesRef = useRef<
     Array<{ mesh: THREE.Mesh; originalMaterial: THREE.Material; index: number }>
@@ -84,24 +81,5 @@ function Model({ state }: ModelProps) {
     <group rotation={[0, Math.PI / 5, 0]} position={[0, -0.9, 0]} scale={1.1}>
       <primitive object={model.scene} />
     </group>
-  )
-}
-
-interface PlantModelProps {
-  state?: PlantState
-}
-
-export default function PlantModel({ state = 'normal' }: PlantModelProps) {
-  return (
-    <Canvas camera={{ position: [0, 0.8, 2.5], fov: 45 }}>
-      <ambientLight intensity={0.7} />
-      <directionalLight position={[1, 1.5, 2]} />
-
-      <Suspense fallback={null}>
-        <Model state={state} />
-      </Suspense>
-
-      <OrbitControls enableZoom={false} enablePan={false} makeDefault />
-    </Canvas>
   )
 }
