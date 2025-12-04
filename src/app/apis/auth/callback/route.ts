@@ -2,10 +2,9 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 
 export async function GET(request: Request) {
-  const supabase = await createClient()
-
   const { searchParams } = new URL(request.url)
   const code = searchParams.get('code')
+  const supabase = await createClient()
 
   if (!code) {
     return NextResponse.redirect(new URL('/authError', request.url))
@@ -15,7 +14,6 @@ export async function GET(request: Request) {
   const { error } = await supabase.auth.exchangeCodeForSession(code)
 
   if (error) {
-    console.error('exchangeCodeForSession error:', error)
     return NextResponse.redirect(new URL('/authError', request.url))
   }
 
