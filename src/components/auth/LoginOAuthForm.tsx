@@ -16,7 +16,7 @@ export default function LoginOAuthForm() {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/apis/auth/callback`,
+          redirectTo: `${window.location.origin}/apis/auth/oauth/callback`,
         },
       })
 
