@@ -10,12 +10,14 @@ interface ImageUploadProps {
   className?: string
   onImageChange?: (file: File | null) => void
   initialImageUrl?: string | null
+  name?: string
 }
 
 export default function ImageUpload({
   className,
   onImageChange,
   initialImageUrl,
+  name,
 }: ImageUploadProps) {
   const { previewUrl, setPreviewUrl, handleImageSelect, handleImageRemove, error } =
     useImageUpload()
@@ -52,6 +54,7 @@ export default function ImageUpload({
         ref={inputRef}
         type="file"
         accept="image/*"
+        name={name}
         onChange={handleChange}
         className="hidden"
       />
