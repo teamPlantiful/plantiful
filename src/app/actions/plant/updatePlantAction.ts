@@ -18,10 +18,6 @@ export async function updatePlantAction(formData: FormData): Promise<void> {
   const removeImageRaw = formData.get('removeImage')
   const removeImage = removeImageRaw === 'true'
 
-  if (!id) {
-    throw new Error('인증되지 않은 사용자입니다.')
-  }
-
   const wateringDays = clamp(wateringInterval || 1, 1)
   const fertilizerDays = monthsToDays(clamp(fertilizerIntervalMonth || 1, 1))
   const repottingDays = monthsToDays(clamp(repottingIntervalMonth || 1, 1))
