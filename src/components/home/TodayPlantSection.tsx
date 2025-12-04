@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 import { Card, CardContent } from '@/components/common/card'
-import PlantModel from './PlantModel'
+import PlantCanvas from './PlantCanvas'
 import { calculateDday } from '@/utils/date'
 import type { Plant } from '@/types/plant'
 
@@ -47,7 +47,7 @@ export default function TodayPlantSection({ plants }: TodayPlantSectionProps) {
         <CardContent className="p-0">
           <div className="relative w-full h-90 grid place-items-center rounded-[calc(var(--radius-lg)-2px)] bg-linear-to-b from-[hsl(103_43%_92%)] to-[hsl(60_10%_98%)]">
             {/* 항상 3D 모델 표시 */}
-            <PlantModel state={plantState} />
+            <PlantCanvas state={plantState} />
 
             {/* 식물이 있을 때만 정보 표시 */}
             {urgentPlant && (
