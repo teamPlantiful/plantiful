@@ -18,5 +18,5 @@ export async function sendResetEmail(formData: FormData) {
   }
   
   // 발송 완료되었을 경우, 성공 메세지 출력
-  return { success: "입력하신 이메일로 비밀번호 재설정 링크가 발송되었습니다!"}
+  return { success: "비밀번호 재설정 링크가 발송되었습니다!"}
 }

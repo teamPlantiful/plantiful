@@ -3,6 +3,7 @@ import LoginOAuthForm from '@/components/auth/LoginOAuthForm'
 import { Card, CardContent, CardHeader } from '@/components/common/card'
 import Link from 'next/link'
 import Image from 'next/image'
+import ForgotPasswordButton from '@/components/auth/ForgotPasswordButton'
 
 export default function LoginForm() {
   return (
@@ -42,11 +43,8 @@ export default function LoginForm() {
             </div>
 
             <div className="text-center text-sm mt-8">
-              <Link href="/account/forgot-password">
-                <button type="button" className="mb-1 text-primary hover:underline cursor-pointer">
-                  비밀번호를 잊으셨나요? 비밀번호 찾기
-                </button>
-              </Link>
+              {/* 비밀번호 찾기 버튼 */}
+              <ForgotPasswordButton />
               <Link href="/register">
                 <button type="button" className="text-primary hover:underline cursor-pointer">
                   계정이 없으신가요? 회원가입하기

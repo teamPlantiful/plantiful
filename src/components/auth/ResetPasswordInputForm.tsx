@@ -110,7 +110,10 @@ export default function ResetPasswordInputForm() {
         {isPending ? '변경 중...' : '비밀번호 변경'}
       </Button>
       {msg && (
-        <p className={`text-sm text-center ${msg.includes('성공') ? 'text-green-500' : 'text-red-500'}`}>
+        <p 
+          className={`text-sm text-center ${msg.includes('성공') ? 'text-green-500' : 'text-red-500'}`}
+          style={{ whiteSpace: 'pre-line' }} /* whitespace: pre-line으로 \n 줄바꿈 처리 */
+        >
           {msg}
         </p>
       )}
