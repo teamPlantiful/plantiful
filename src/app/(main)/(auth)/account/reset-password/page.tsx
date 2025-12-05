@@ -14,10 +14,10 @@ export default async function ResetPasswordPage() {
   }
   
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
+  const { data: { user } } = await supabase.auth.getUser()
 
   // 쿠키는 있는데 세션이 없을 경우(인증 시간 초과), 인증 만료 페이지로
-  if (!session) {
+  if (!user) {
     redirect('/authError')
   } 
 
