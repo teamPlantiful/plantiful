@@ -1,10 +1,9 @@
-import LoginAuthForm from '@/components/auth/LoginAuthForm'
-import LoginOAuthForm from '@/components/auth/LoginOAuthForm'
+import ForgotPasswordInputForm from '@/components/auth/ForgotPasswordInputForm'
 import { Card, CardContent, CardHeader } from '@/components/common/card'
 import Link from 'next/link'
 import Image from 'next/image'
 
-export default function LoginForm() {
+export default function ForgotPasswordForm() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md animate-fade-in">
@@ -29,24 +28,17 @@ export default function LoginForm() {
 
         <Card className="shadow-card">
           <CardHeader>
-            <span className="text-2xl font-bold">로그인</span>
-            <p className="pt-1 text-sm">계정에 로그인하세요</p>
+            <span className="text-2xl font-bold">비밀번호 찾기</span>
+            <p className="pt-1 text-sm">비밀번호를 찾으실 이메일을 입력해주세요</p>
           </CardHeader>
           <CardContent>
-            <LoginAuthForm />
-            <LoginOAuthForm />
+            <ForgotPasswordInputForm />
             <div className="relative my-3">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-border" />
               </div>
             </div>
-
             <div className="text-center text-sm mt-8">
-              <Link href="/account/forgot-password">
-                <button type="button" className="mb-1 text-primary hover:underline cursor-pointer">
-                  비밀번호를 잊으셨나요? 비밀번호 찾기
-                </button>
-              </Link>
               <Link href="/register">
                 <button type="button" className="text-primary hover:underline cursor-pointer">
                   계정이 없으신가요? 회원가입하기
