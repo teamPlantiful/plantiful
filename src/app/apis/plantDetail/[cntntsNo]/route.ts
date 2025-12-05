@@ -67,7 +67,6 @@ export async function GET(
     })
 
     const rawDetail = await getNongsaroDetail(cntntsNo, NONGSARO_API_KEY, parser)
-    console.log('rawDetail =', rawDetail)
 
     if (!rawDetail) {
       return NextResponse.json({ error: '상세 정보를 찾을 수 없습니다.' }, { status: 404 })
