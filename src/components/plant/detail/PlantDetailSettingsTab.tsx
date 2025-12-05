@@ -175,7 +175,7 @@ export default function PlantDetailSettingsTab({
                 }
               }}
             />
-            <p className="text-xs text-muted-foreground">이미지를 클릭해서 변경할 수 있어요</p>
+            <p className="text-xs text-muted-foreground">ⓧ 버튼을 클릭해서 변경할 수 있어요</p>
           </div>
         </div>
       </div>
