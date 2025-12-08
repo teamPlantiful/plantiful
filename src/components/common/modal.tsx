@@ -68,17 +68,6 @@ export function Modal({
     }
   }, [open])
 
-  // 모달 열릴 때 첫 번째 포커스 가능한 요소로 포커스
-  useEffect(() => {
-    if (!open) return
-
-    const focusableElements = modalRef.current?.querySelectorAll(
-      'button:not([tabindex="-1"]), [href]:not([tabindex="-1"]), input:not([tabindex="-1"]), select:not([tabindex="-1"]), textarea:not([tabindex="-1"]), [tabindex]:not([tabindex="-1"])'
-    )
-    const firstElement = focusableElements?.[0] as HTMLElement
-    firstElement?.focus()
-  }, [open])
-
   if (!open || !mounted) return null
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -114,7 +103,7 @@ export function Modal({
         <Card
           ref={modalRef}
           className={cn(
-            'relative w-full mx-4 my-8 max-h-[90vh] pointer-events-auto',
+            'relative w-full mx-4 my-8 max-h-[90vh] pointer-events-auto p-6',
             sizeClasses[size],
             className
           )}
@@ -129,6 +118,15 @@ export function Modal({
   return createPortal(modalContent, document.body)
 }
 
-export { CardHeader as ModalHeader }
-export { CardContent as ModalContent }
-export { CardFooter as ModalFooter }
+// Modal 전용 Header/Content/Footer - 패딩 제거하고 CardHeader/Content/Footer 래핑
+export function ModalHeader({ className, ...props }: ComponentPropsWithRef<typeof CardHeader>) {
+  return <CardHeader className={cn('p-0', className)} {...props} />
+}
+
+export function ModalContent({ className, ...props }: ComponentPropsWithRef<typeof CardContent>) {
+  return <CardContent className={cn('p-0', className)} {...props} />
+}
+
+export function ModalFooter({ className, ...props }: ComponentPropsWithRef<typeof CardFooter>) {
+  return <CardFooter className={cn('p-0', className)} {...props} />
+}

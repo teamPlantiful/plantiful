@@ -1,35 +1,59 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import PlantCard from '@/components/plant/detail/PlantCard'
-import { useGetPlants } from '@/hooks/queries/useGetPlants'
 import PlantDetailModal from '@/components/plant/detail/PlantDetailModal'
-import { useWaterPlant } from '@/hooks/mutations/useWaterPlant'
-import { useUpdatePlantIntervals } from '@/hooks/mutations/useUpdatePlantIntervals'
-import { useUpdatePlantNickname } from '@/hooks/mutations/useUpdatePlantNickname'
-import { useDeletePlant } from '@/hooks/mutations/useDeletePlant'
+import { normalizeSearch, isChosungOnly } from '@/utils/normalizeSearch'
+import { calculateDday } from '@/utils/date'
+import type { Plant } from '@/types/plant'
+
 interface PlantListSectionProps {
+  plants: Plant[]
+  isLoading: boolean
   search?: string
   sort?: 'water' | 'name' | 'recent'
+  onWater: (id: string) => void
+  onSaveNickname: (id: string, nextName: string) => void
+  onSaveIntervals: (
+    id: string,
+    next: { watering: number; fertilizer: number; repotting: number }
+  ) => void
+  onDelete: (id: string) => void
 }
 
-export default function PlantListSection({ search = '', sort = 'water' }: PlantListSectionProps) {
-  const { data: plants = [], isLoading } = useGetPlants()
-
+export default function PlantListSection({
+  plants,
+  isLoading,
+  search = '',
+  sort = 'water',
+  onWater,
+  onSaveNickname,
+  onSaveIntervals,
+  onDelete,
+}: PlantListSectionProps) {
   const [open, setOpen] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const { mutateAsync: waterPlant } = useWaterPlant()
-  const { mutateAsync: updateIntervals } = useUpdatePlantIntervals()
-  const { mutateAsync: updateNickname } = useUpdatePlantNickname()
-  const { mutateAsync: deletePlantMutation } = useDeletePlant()
 
   const sortedPlants = useMemo(() => {
-    // 1. 검색 필터링
+    // 1. 검색 필터링 (완성형 + 초성 둘 다 지원)
+    const { original: searchWord, chosung: searchCho } = normalizeSearch(search)
+    const useChosungSearch = isChosungOnly(searchWord)
+
     let filtered = plants
-    if (search) {
-      filtered = plants.filter((plant) =>
-        plant.nickname.toLowerCase().includes(search.toLowerCase())
-      )
+
+    if (searchWord) {
+      filtered = plants.filter((plant) => {
+        const nickname = plant.nickname ?? ''
+        const { original: nickWord, chosung: nickCho } = normalizeSearch(nickname)
+
+        if (!nickWord) return false
+
+        if (useChosungSearch) {
+          return nickCho.includes(searchWord)
+        }
+
+        return nickWord.includes(searchWord)
+      })
     }
 
     // 2. 정렬
@@ -41,14 +65,11 @@ export default function PlantListSection({ search = '', sort = 'water' }: PlantL
         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       )
     }
+
     // 물주기 우선 정렬
     return [...filtered].sort((a, b) => {
-      const ddayA = a.nextWateringDate
-        ? Math.floor((new Date(a.nextWateringDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-        : Infinity
-      const ddayB = b.nextWateringDate
-        ? Math.floor((new Date(b.nextWateringDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-        : Infinity
+      const ddayA = a.nextWateringDate ? calculateDday(a.nextWateringDate) : Infinity
+      const ddayB = b.nextWateringDate ? calculateDday(b.nextWateringDate) : Infinity
       return ddayA - ddayB
     })
   }, [plants, sort, search])
@@ -63,21 +84,16 @@ export default function PlantListSection({ search = '', sort = 'water' }: PlantL
     setOpen(true)
   }
 
-  const handleWater = async (id: string) => {
-    const now = new Date().toISOString()
-    await waterPlant({ id, lastWateredAt: now })
+  const handleWater = (id: string) => {
+    onWater(id)
   }
-  // 모달 내의 엑션들
-  const handleSaveNickname = async (nextName: string) => {
-    if (!selectedId) return
-    const trimmed = nextName.trim()
-    if (!trimmed) {
-      setOpen(false)
-      return
-    }
 
-    await updateNickname({ id: selectedId, nickname: trimmed })
-    setOpen(false)
+  // 모달 내의 액션들
+  const handleSaveNickname = async (nextName: string) => {
+    if (!selected) return
+    const trimmed = nextName.trim()
+    if (!trimmed) return
+    onSaveNickname(selected.id, trimmed)
   }
 
   const handleSaveIntervals = async (next: {
@@ -85,24 +101,15 @@ export default function PlantListSection({ search = '', sort = 'water' }: PlantL
     fertilizer: number
     repotting: number
   }) => {
-    if (!selectedId) return
-
-    await updateIntervals({
-      id: selectedId,
-      wateringDays: next.watering,
-      fertilizerDays: next.fertilizer,
-      repottingDays: next.repotting,
-    })
-
-    setOpen(false)
+    if (!selected) return
+    onSaveIntervals(selected.id, next)
   }
 
   const handleDelete = async () => {
-    if (!selectedId) return
-    await deletePlantMutation(selectedId)
+    if (!selected) return
+    onDelete(selected.id)
     setOpen(false)
   }
-
   return (
     <>
       {/* 식물 목록 */}
@@ -117,11 +124,7 @@ export default function PlantListSection({ search = '', sort = 'water' }: PlantL
       ) : (
         <section className="grid gap-3 grid-cols-1 md:grid-cols-2">
           {sortedPlants.map((p) => {
-            const ddayWater = p.nextWateringDate
-              ? Math.floor(
-                  (new Date(p.nextWateringDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-                )
-              : 0
+            const ddayWater = p.nextWateringDate ? calculateDday(p.nextWateringDate) : 0
 
             return (
               <PlantCard

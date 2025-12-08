@@ -6,6 +6,7 @@ interface UseImageUploadReturn {
   handleImageSelect: (e: ChangeEvent<HTMLInputElement>) => void
   handleImageRemove: () => void
   error: string | null
+  setPreviewUrl: (url: string | null) => void
 }
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
@@ -62,5 +63,6 @@ export default function useImageUpload(): UseImageUploadReturn {
     handleImageSelect,
     handleImageRemove,
     error,
+    setPreviewUrl,
   }
 }

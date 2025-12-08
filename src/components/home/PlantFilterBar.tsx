@@ -1,8 +1,10 @@
 'use client'
 
-import Input from '@/components/common/Input'
+import { useEffect, useState } from 'react'
+import Input from '@/components/common/input'
 import SelectBox from '@/components/common/select-box'
 import { Search } from 'lucide-react'
+import useDebounce from '@/hooks/useDebounce'
 
 interface PlantFilterBarProps {
   search?: string
@@ -11,12 +13,28 @@ interface PlantFilterBarProps {
   onSortChange: (value: 'water' | 'name' | 'recent') => void
 }
 
-export default function PlantFilterBar({
+const PlantFilterBar: React.FC<PlantFilterBarProps> = ({
   search = '',
   sort,
   onSearchChange,
   onSortChange,
-}: PlantFilterBarProps) {
+}) => {
+  const [innerSearch, setInnerSearch] = useState<string>(search)
+  const [isComposing, setIsComposing] = useState(false)
+
+  useEffect(() => {
+    setInnerSearch(search)
+  }, [search])
+
+  const debouncedSearch = useDebounce(innerSearch, 300)
+
+  useEffect(() => {
+    if (isComposing) return
+    if (debouncedSearch === search) return
+
+    onSearchChange(debouncedSearch)
+  }, [debouncedSearch, onSearchChange, search])
+
   const handleSortChange = (value: string) => {
     onSortChange(value as 'water' | 'name' | 'recent')
   }
@@ -30,8 +48,8 @@ export default function PlantFilterBar({
             leftIcon={<Search className="size-4" />}
             aria-label="식물 검색"
             className="h-11 pl-10 rounded-md"
-            value={search}
-            onChange={(e) => onSearchChange(e.target.value)}
+            value={innerSearch}
+            onChange={(e) => setInnerSearch(e.target.value)}
           />
         </div>
       </div>
@@ -43,9 +61,9 @@ export default function PlantFilterBar({
           value={sort}
           placeholder="정렬"
           options={[
+            { value: 'recent', label: '최근 등록순' },
             { value: 'water', label: '물주기 우선' },
             { value: 'name', label: '이름순' },
-            { value: 'recent', label: '최근 등록순' },
           ]}
           onSelect={handleSortChange}
         />
@@ -53,3 +71,5 @@ export default function PlantFilterBar({
     </section>
   )
 }
+
+export default PlantFilterBar

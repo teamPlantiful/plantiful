@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/queryKeys'
 import type { PlantData, Plant } from '@/types/plant'
+import addPlantAction from '@/app/actions/plant/addPlantAction'
 
 interface MutationContext {
   previousPlants?: Plant[]
@@ -28,17 +29,8 @@ export const useAddPlant = () => {
       }
       formData.append('data', JSON.stringify(dataToSend))
 
-      const response = await fetch('/apis/plants', {
-        method: 'POST',
-        credentials: 'include',
-        body: formData,
-      })
-
-      if (!response.ok) {
-        throw new Error('식물 등록에 실패했습니다')
-      }
-
-      return response.json()
+      // Server Action 호출
+      return await addPlantAction(formData)
     },
     onMutate: async (newPlant) => {
       // 진행 중인 리페치 취소
@@ -70,10 +62,10 @@ export const useAddPlant = () => {
         nextWateringDate: new Date(
           newPlant.lastWateredDate.getTime() + newPlant.wateringInterval * 24 * 60 * 60 * 1000
         ).toISOString(),
-        lightDemandCode: newPlant.species.careInfo.lightDemandCode || null,
-        waterCycleCode: newPlant.species.careInfo.waterCycleCode || null,
-        temperatureCode: newPlant.species.careInfo.temperatureCode || null,
-        humidityCode: newPlant.species.careInfo.humidityCode || null,
+        lightDemandCode: newPlant.species.careInfo?.lightDemandCode || null,
+        waterCycleCode: newPlant.species.careInfo?.waterCycleCode || null,
+        temperatureCode: newPlant.species.careInfo?.temperatureCode || null,
+        humidityCode: newPlant.species.careInfo?.humidityCode || null,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       }
@@ -131,6 +123,10 @@ export const useAddPlant = () => {
         }
         img.src = data.coverImageUrl
       }
+    },
+    onSettled: () => {
+      // 성공/실패 관계없이 서버와 동기화
+      queryClient.invalidateQueries({ queryKey: queryKeys.plants.list() })
     },
   })
 }

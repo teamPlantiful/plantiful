@@ -1,4 +1,5 @@
 import type { Plant, PlantData } from '@/types/plant'
+import { toDateOnlyISO, addDays } from './date'
 
 export const prepareCardForInsert = (plantData: PlantData, userId: string): Partial<Plant> => {
   const {
@@ -12,8 +13,8 @@ export const prepareCardForInsert = (plantData: PlantData, userId: string): Part
     image,
   } = plantData
 
-  const nextWateringDate = new Date(lastWateredDate)
-  nextWateringDate.setDate(nextWateringDate.getDate() + wateringInterval)
+  // 유틸 함수 사용: 날짜 정규화 및 계산
+  const nextWateringDate = addDays(lastWateredDate, wateringInterval)
 
   return {
     userId,
@@ -27,12 +28,12 @@ export const prepareCardForInsert = (plantData: PlantData, userId: string): Part
     fertilizerIntervalDays: fertilizerInterval,
     repottingIntervalDays: repottingInterval,
     adoptedAt: startDate.toISOString(),
-    lastWateredAt: lastWateredDate.toISOString(),
-    nextWateringDate: nextWateringDate.toISOString(),
-    lightDemandCode: species.careInfo.lightDemandCode || null,
-    waterCycleCode: species.careInfo.waterCycleCode || null,
-    temperatureCode: species.careInfo.temperatureCode || null,
-    humidityCode: species.careInfo.humidityCode || null,
+    lastWateredAt: toDateOnlyISO(lastWateredDate),
+    nextWateringDate: toDateOnlyISO(nextWateringDate),
+    lightDemandCode: species.careInfo?.lightDemandCode || null,
+    waterCycleCode: species.careInfo?.waterCycleCode || null,
+    temperatureCode: species.careInfo?.temperatureCode || null,
+    humidityCode: species.careInfo?.humidityCode || null,
   }
 }
 
