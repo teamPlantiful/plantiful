@@ -1,8 +1,12 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
+import { headers } from 'next/headers'
 
 export async function register(formData: FormData) {
+  const requestHeaders = await headers()
+  const origin = requestHeaders.get("origin")  // 인증 요청 도메인
+  const callbackUrl = `${origin}/apis/auth/callback`
 
   const name = (formData.get('name') as string)?.trim()
   const email = formData.get('email') as string
@@ -16,7 +20,7 @@ export async function register(formData: FormData) {
     email,
     password,
     options: {
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/apis/auth/callback`,
+      emailRedirectTo: callbackUrl,
       data: {
         name: userName
       }
