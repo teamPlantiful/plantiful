@@ -13,6 +13,7 @@ import { generateDayOptions, generateMonthOptions } from '@/utils/date'
 import { useAddPlant } from '@/hooks/mutations/useAddPlant'
 import { useGetPlants } from '@/hooks/queries/useGetPlants'
 import cn from '@/lib/cn'
+import { useEffect } from 'react'
 
 interface FormData {
   nickname: string
@@ -62,9 +63,11 @@ export default function PlantRegisterContent({
   })
 
   // isDirty 변경 시 부모에게 알림
-  if (onDirtyChange) {
-    onDirtyChange(isDirty)
-  }
+  useEffect(() => {
+    if (onDirtyChange) {
+      onDirtyChange(isDirty)
+    }
+  }, [isDirty, onDirtyChange])
 
   const onSubmit = handleSubmit((data) => {
     const plantData: PlantData = {

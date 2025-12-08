@@ -8,7 +8,7 @@ import Input from '@/components/common/input'
 
 export default function RegisterForm() {
   const router = useRouter()
-  const [error, setError] = useState<string | null>(null)
+  const [msg, setMsg] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
   // 이메일 유효성 코드
@@ -31,34 +31,35 @@ export default function RegisterForm() {
 
     // 이메일 유효성 검증
     if (!validateEmail(email)) {
-      setError("올바른 이메일 형식을 입력해주세요.")
+      setMsg("올바른 이메일 형식을 입력해주세요.")
       return
     }
 
     // 비밀번호 유효성 검증
     if (!validatePassword(password)) {
-      setError("비밀번호는 8자 이상이며, 영문과 숫자를 포함해야 합니다.")
+      setMsg("비밀번호는 8자 이상이며, 영문과 숫자를 포함해야 합니다.")
       return
     }
 
     // 비밀번호 일치 검사
     if (password !== checkPassword) {
-      setError("설정할 비밀번호가 일치하지 않습니다.")
+      setMsg("설정할 비밀번호가 일치하지 않습니다.")
       return
     }
 
     // 폼 데이터 전송 때까지 리렌더 X
     startTransition(async () => {
-      setError(null)
+      setMsg(null)
       const result = await register(formData)
     
       if (result?.error) {
-        setError(result.error)
+        setMsg(result.error)
         return
       }
-    
-      // 회원가입 성공 시 새로고침 및 회원가입 폼 조건에 따라 메인으로 이동
-      router.refresh()
+      
+      if (result?.success) {
+        setMsg(result.success)
+      }
     })
   }
 
@@ -131,9 +132,11 @@ export default function RegisterForm() {
           placeholder="••••••••"
         />
       </div>
-      {/* 에러 메세지 */}
-      {error && (
-        <p className="text-sm text-red-500 text-center">{error}</p>
+      {/* 상태 메세지 */}
+      {msg && (
+        <p className={`text-sm text-center ${msg.includes('진행') ? 'text-green-500' : 'text-red-500'}`}>
+          {msg}
+        </p>
       )}
       {/* 회원가입 버튼 */}
       <Button 
