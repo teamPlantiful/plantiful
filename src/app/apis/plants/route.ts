@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
       if (hasNextPage && lastItem) {
         if (sortParam === 'name') nextCursor = lastItem.nickname
         else if (sortParam === 'water')
-          nextCursor = lastItem.nextWateringDate // DB컬럼명 주의 필요하지만 fromDbFormat 거쳤으므로 JS네이밍
+          nextCursor = lastItem.nextWateringDate 
         else nextCursor = lastItem.createdAt
       }
 
