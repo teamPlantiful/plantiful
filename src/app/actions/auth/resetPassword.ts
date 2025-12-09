@@ -18,9 +18,5 @@ export async function resetPassword(formData: FormData) {
     return { error: "비밀번호 재설정에 실패하였습니다." }
   }
 
-  // 비밀번호 재설정 후 쿠키 지움. (링크 재사용 불가)
-  const cookieStore = await cookies()
-  cookieStore.delete('reset_flow')
-  
   return { success: `비밀번호가 성공적으로 재설정되었습니다! \n 잠시 후 메인 화면으로 이동합니다.` }
 }

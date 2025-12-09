@@ -36,7 +36,7 @@ export default function ResetPasswordInputForm() {
       setMsg("설정할 비밀번호가 일치하지 않습니다.")
       return
     }
-
+    
     // 서버 응답 중 UI 깜빡임 방지를 위해 useTransition 사용.
     startTransition(async () => {
       setMsg(null)
@@ -51,10 +51,10 @@ export default function ResetPasswordInputForm() {
         setMsg(result.success)
         form.reset()
         // 잠시 후 완료 문구 사라지고 메인 화면으로 이동.
-        setTimeout(() => {
-          setMsg(null)
+        setTimeout(async () => {
+          await fetch('/apis/account/resetCompleted', { method: 'POST' })
+          router.replace('/')
         }, 3000)
-        router.replace('/')
       }
     })
   }
