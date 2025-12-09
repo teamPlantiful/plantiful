@@ -93,7 +93,7 @@ export default function PlantListSection({
         </section>
       ) : (
         <section className="grid gap-3 grid-cols-1 md:grid-cols-2">
-          {sortedPlants.map((p) => {
+          {sortedPlants.map((p, index) => {
             const ddayWater =
               p.lastWateredAt && p.wateringIntervalDays
                 ? calculateDday(addDays(p.lastWateredAt, p.wateringIntervalDays))
@@ -111,6 +111,7 @@ export default function PlantListSection({
                 onClick={handleCardClick}
                 onWater={handleWater}
                 className="w-full"
+                priority={index === 0}
               />
             )
           })}

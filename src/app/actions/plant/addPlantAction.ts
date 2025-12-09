@@ -2,7 +2,6 @@
 
 import { requireAuth } from '@/utils/supabase/helpers'
 import { toDbFormat, fromDbFormat, prepareCardForInsert } from '@/utils/plant'
-import { revalidatePath } from 'next/cache'
 import type { Plant } from '@/types/plant'
 import saveDefaultImage from '@/utils/saveDefaultImage'
 
@@ -75,9 +74,6 @@ export default async function addPlantAction(formData: FormData): Promise<Plant>
     if (error) throw error
 
     const plant = fromDbFormat(data)
-
-    // 캐시 무효화
-    revalidatePath('/')
 
     return plant
   } catch (error) {
