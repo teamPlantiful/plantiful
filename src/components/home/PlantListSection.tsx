@@ -111,7 +111,7 @@ export default function PlantListSection({
                 onClick={handleCardClick}
                 onWater={handleWater}
                 className="w-full"
-                priority={index === 0}
+                priority={index < 2}
               />
             )
           })}

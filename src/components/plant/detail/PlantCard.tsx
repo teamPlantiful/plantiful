@@ -124,10 +124,11 @@ export default function PlantCard({
           <Image
             src={imageSrc}
             alt={nickname || '식물 이미지'}
-            fill
-            sizes="64px"
-            className="object-cover"
+            width={64}
+            height={64}
+            className="object-cover w-full h-full"
             priority={priority}
+            {...(priority && { fetchPriority: 'high' as const })}
           />
         </div>
       </div>
