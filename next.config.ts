@@ -19,6 +19,11 @@ const nextConfig: NextConfig = {
         hostname: 'mlslddsfprsobkfdnjjb.supabase.co',
         pathname: '/storage/v1/object/public/plant-images/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'mlslddsfprsobkfdnjjb.supabase.co',
+        pathname: '/storage/v1/render/image/public/plant-images/**',
+      },
     ],
   },
 }
