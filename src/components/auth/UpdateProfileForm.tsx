@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useRef } from 'react'
 import updateProfiles from '@/app/actions/auth/updateProfiles'
 import Button from '@/components/common/button'
 import Input from '@/components/common/input'
@@ -12,8 +12,12 @@ type Props = {
 export default function UpdateProfilesForm({ initialUserName }: Props) {
   const [msg, setMsg] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+  const [isEditing, setIsEditing] = useState(false) // 수정 모드
+
+  const formRef = useRef<HTMLFormElement>(null) // DOM 요소 접근
 
   const handleAction = (formData: FormData) => {
+
     let userName = formData.get('userName')?.toString() || ''
 
     // 비어있다면 '식집사'
@@ -31,6 +35,8 @@ export default function UpdateProfilesForm({ initialUserName }: Props) {
       // 성공 시, 변경 완료 문구 출력
       else if (result.success) {
         setMsg(result.success)
+        // 수정 모드 종료
+        setIsEditing(false)
         // 3초 뒤에는 완료 문구 사라짐
         setTimeout(() => setMsg(null), 3000)
       }
@@ -39,6 +45,7 @@ export default function UpdateProfilesForm({ initialUserName }: Props) {
 
   return (
     <form 
+      ref={formRef}
       onSubmit={(e) => {
         e.preventDefault() // 폼 초기화 방지
         const formData = new FormData(e.currentTarget)
@@ -61,20 +68,36 @@ export default function UpdateProfilesForm({ initialUserName }: Props) {
               name="userName"
               placeholder="식집사"
               defaultValue={initialUserName}
+              disabled={!isEditing || isPending}
             />
           </div>
-          <Button
-            variant="default"
-            size="sm"
-            className="bg-primary hover:bg-primary/90"
-            type="submit"
-            disabled={isPending}
-          >
-            {isPending ? '저장 중...' : '저장'}
-          </Button>
+          {isEditing ? (
+            /* 수정 모드 */
+            <Button
+              variant="default"
+              size="sm"
+              className="bg-primary hover:bg-primary/90"
+              type="button"
+              onClick={() => formRef.current?.requestSubmit()} // 제출 이벤트 할당
+              disabled={isPending}
+            >
+              {isPending ? '저장 중...' : '저장'}
+            </Button>
+          ) : (
+            /* 기본 모드 */
+            <Button
+              variant="default"
+              size="sm"
+              className="bg-primary hover:bg-primary/90"
+              type="button"
+              onClick={() => setIsEditing(true)}
+            >
+              수정
+            </Button>
+          )}
         </div>
         {msg && (
-          <p className={`text-sm ${msg.includes('성공') ? 'text-green-600' : 'text-red-600'}`}>
+          <p className={`text-sm ${msg.includes('성공') ? 'text-green-500' : 'text-red-500'}`}>
             {msg}
           </p>
         )}
