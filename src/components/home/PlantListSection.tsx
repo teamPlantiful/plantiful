@@ -7,8 +7,6 @@ import { addDays, calculateDday } from '@/utils/date'
 import type { Plant } from '@/types/plant'
 import type { PlantIntervalsUpdatePayload } from '@/components/plant/detail/PlantDetailSettingsTab'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
-
-// ✅ 스켈레톤 컴포넌트 import (경로 확인 필요)
 import PlantListSkeleton from '@/components/plant/search/PlantListSkeleton'
 
 interface PlantListSectionProps {
@@ -16,7 +14,7 @@ interface PlantListSectionProps {
   isLoading: boolean
   search?: string
   sort?: 'water' | 'name' | 'recent'
-  
+
   hasNextPage: boolean
   fetchNextPage: () => void
   isFetchingNextPage: boolean
@@ -75,21 +73,16 @@ export default function PlantListSection({
     setOpen(false)
   }
 
-  // 1️⃣ 초기 로딩 상태 처리 (데이터가 없고 로딩 중일 때)
   if (isLoading) {
     return (
       <section className="grid gap-3 grid-cols-1 md:grid-cols-2">
-         {/* 그리드 모양을 맞추기 위해 스켈레톤을 2번 렌더링하거나, 
-             PlantListSkeleton 내부의 space-y-2를 제거하고 여기서 map을 돌리는 게 좋지만
-             일단 간단하게 그대로 사용합니다. */}
-         <div className="md:col-span-2">
-            <PlantListSkeleton count={6} />
-         </div>
+        <div className="md:col-span-2">
+          <PlantListSkeleton count={6} />
+        </div>
       </section>
     )
   }
 
-  // 데이터가 아예 없을 때
   if (plants.length === 0) {
     return (
       <section className="py-10 text-center">
@@ -101,7 +94,6 @@ export default function PlantListSection({
   return (
     <>
       <div className="space-y-6">
-        {/* 실제 식물 리스트 */}
         <section className="grid gap-3 grid-cols-1 md:grid-cols-2">
           {plants.map((p) => {
             const ddayWater =
@@ -126,17 +118,14 @@ export default function PlantListSection({
           })}
         </section>
 
-        {/* 2️⃣ 무한 스크롤 감지 및 추가 로딩 스켈레톤 */}
         {hasNextPage && (
           <div ref={loadMoreRef} className="w-full">
             {isFetchingNextPage ? (
-              // 추가 데이터를 불러올 때는 하단에 2개 정도만 보여줍니다.
               <div className="mt-4">
-                 <PlantListSkeleton count={2} />
+                <PlantListSkeleton count={2} />
               </div>
             ) : (
-              // 감지용 투명 박스
-              <div className="h-4" /> 
+              <div className="h-4" />
             )}
           </div>
         )}

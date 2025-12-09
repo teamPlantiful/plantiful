@@ -5,7 +5,7 @@ import PlantListSection from '@/components/home/PlantListSection'
 import PlantFilterBar from '@/components/home/PlantFilterBar'
 import PlantRegisterFab from '@/components/home/PlantRegisterFab'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { useGetPlants } from '@/hooks/queries/useGetPlants'
+import { useInfiniteMain } from '@/hooks/queries/useInfiniteMain'
 import { useWaterPlant } from '@/hooks/mutations/useWaterPlant'
 import { useUpdatePlantNickname } from '@/hooks/mutations/useUpdatePlantNickname'
 import { useUpdatePlant } from '@/hooks/mutations/useUpdatePlant'
@@ -19,17 +19,21 @@ export default function DashboardClient() {
   const searchParams = useSearchParams()
   const pathname = usePathname()
 
-  const { data: plants = [], isLoading } = useGetPlants()
+  const search = searchParams.get('q') ?? ''
+  const sort = (searchParams.get('sort') as SortKey) ?? 'recent'
+
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteMain({
+    q: search,
+    sort,
+  })
+
+  const plants = data?.pages.flatMap((page) => page.items) ?? []
 
   const waterPlant = useWaterPlant()
   const updateNickname = useUpdatePlantNickname()
   const updateIntervals = useUpdatePlant()
   const deletePlant = useDeletePlant()
 
-  // 1) URL에서 현재 값
-  const search = searchParams.get('q') ?? ''
-  const sort = (searchParams.get('sort') as SortKey) ?? 'recent'
-  // 2) URL 쿼리만 업데이트
   const setParams = (next: Partial<{ q: string; sort: SortKey }>) => {
     const sp = new URLSearchParams(searchParams?.toString() ?? '')
 
@@ -83,17 +87,22 @@ export default function DashboardClient() {
     <div>
       <div className="max-w-190 mx-auto p-4 space-y-6 md:space-y-8 animate-fade-in">
         <TodayPlantSection plants={plants} />
+
         <PlantFilterBar
           search={search}
           sort={sort}
           onSearchChange={handleSearchChange}
           onSortChange={(value) => setParams({ sort: value })}
         />
+
         <PlantListSection
           plants={plants}
           isLoading={isLoading}
           search={search}
           sort={sort}
+          isFetchingNextPage={isFetchingNextPage}
+          hasNextPage={hasNextPage}
+          fetchNextPage={fetchNextPage}
           onWater={handleWater}
           onSaveNickname={handleSaveNickname}
           onSaveIntervals={handleSaveIntervals}
