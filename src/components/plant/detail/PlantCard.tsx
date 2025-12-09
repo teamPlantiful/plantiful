@@ -20,7 +20,8 @@ export default function PlantCard({
   onWater,
   onClick,
   className,
-}: PlantCardInfo) {
+  priority = false,
+}: PlantCardInfo & { priority?: boolean }) {
   const [isWatering, setIsWatering] = useState(false)
 
   const image = useMemo(
@@ -126,6 +127,7 @@ export default function PlantCard({
             fill
             sizes="64px"
             className="object-cover"
+            priority={priority}
           />
         </div>
       </div>
