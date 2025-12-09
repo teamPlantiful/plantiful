@@ -1,18 +1,26 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useState, useMemo } from 'react'
 import PlantCard from '@/components/plant/detail/PlantCard'
 import PlantDetailModal from '@/components/plant/detail/PlantDetailModal'
-import { normalizeSearch, isChosungOnly } from '@/utils/normalizeSearch'
 import { addDays, calculateDday } from '@/utils/date'
 import type { Plant } from '@/types/plant'
 import type { PlantIntervalsUpdatePayload } from '@/components/plant/detail/PlantDetailSettingsTab'
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
+
+// ✅ 스켈레톤 컴포넌트 import (경로 확인 필요)
+import PlantListSkeleton from '@/components/plant/search/PlantListSkeleton'
 
 interface PlantListSectionProps {
   plants: Plant[]
   isLoading: boolean
   search?: string
   sort?: 'water' | 'name' | 'recent'
+  
+  hasNextPage: boolean
+  fetchNextPage: () => void
+  isFetchingNextPage: boolean
+
   onWater: (id: string) => void
   onSaveNickname: (id: string, nextName: string) => void
   onSaveIntervals: (id: string, next: PlantIntervalsUpdatePayload) => void
@@ -22,8 +30,9 @@ interface PlantListSectionProps {
 export default function PlantListSection({
   plants,
   isLoading,
-  search = '',
-  sort = 'water',
+  hasNextPage,
+  fetchNextPage,
+  isFetchingNextPage,
   onWater,
   onSaveNickname,
   onSaveIntervals,
@@ -32,45 +41,7 @@ export default function PlantListSection({
   const [open, setOpen] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
-  const sortedPlants = useMemo(() => {
-    // 1. 검색 필터링 (완성형 + 초성 둘 다 지원)
-    const { original: searchWord, chosung: searchCho } = normalizeSearch(search)
-    const useChosungSearch = isChosungOnly(searchWord)
-
-    let filtered = plants
-
-    if (searchWord) {
-      filtered = plants.filter((plant) => {
-        const nickname = plant.nickname ?? ''
-        const { original: nickWord, chosung: nickCho } = normalizeSearch(nickname)
-
-        if (!nickWord) return false
-
-        if (useChosungSearch) {
-          return nickCho.includes(searchWord)
-        }
-
-        return nickWord.includes(searchWord)
-      })
-    }
-
-    // 2. 정렬
-    if (sort === 'name') {
-      return [...filtered].sort((a, b) => a.nickname.localeCompare(b.nickname))
-    }
-    if (sort === 'recent') {
-      return [...filtered].sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      )
-    }
-
-    // 물주기 우선 정렬
-    return [...filtered].sort((a, b) => {
-      const ddayA = a.nextWateringDate ? calculateDday(a.nextWateringDate) : Infinity
-      const ddayB = b.nextWateringDate ? calculateDday(b.nextWateringDate) : Infinity
-      return ddayA - ddayB
-    })
-  }, [plants, sort, search])
+  const loadMoreRef = useInfiniteScroll({ hasNextPage, fetchNextPage })
 
   const selected = useMemo(
     () => plants.find((p) => p.id === selectedId) ?? null,
@@ -86,7 +57,6 @@ export default function PlantListSection({
     onWater(id)
   }
 
-  // 모달 내의 액션들
   const handleSaveNickname = async (nextName: string) => {
     if (!selected) return
     const trimmed = nextName.trim()
@@ -104,20 +74,36 @@ export default function PlantListSection({
     onDelete(selected.id)
     setOpen(false)
   }
+
+  // 1️⃣ 초기 로딩 상태 처리 (데이터가 없고 로딩 중일 때)
+  if (isLoading) {
+    return (
+      <section className="grid gap-3 grid-cols-1 md:grid-cols-2">
+         {/* 그리드 모양을 맞추기 위해 스켈레톤을 2번 렌더링하거나, 
+             PlantListSkeleton 내부의 space-y-2를 제거하고 여기서 map을 돌리는 게 좋지만
+             일단 간단하게 그대로 사용합니다. */}
+         <div className="md:col-span-2">
+            <PlantListSkeleton count={6} />
+         </div>
+      </section>
+    )
+  }
+
+  // 데이터가 아예 없을 때
+  if (plants.length === 0) {
+    return (
+      <section className="py-10 text-center">
+        <p className="text-muted-foreground">아직 등록된 식물이 없습니다 🌱</p>
+      </section>
+    )
+  }
+
   return (
     <>
-      {/* 식물 목록 */}
-      {isLoading ? (
-        <section>
-          <p className="text-center text-muted-foreground">식물 목록을 불러오는 중...</p>
-        </section>
-      ) : sortedPlants.length === 0 ? (
-        <section>
-          <p className="text-center text-muted-foreground">아직 등록된 식물이 없습니다</p>
-        </section>
-      ) : (
+      <div className="space-y-6">
+        {/* 실제 식물 리스트 */}
         <section className="grid gap-3 grid-cols-1 md:grid-cols-2">
-          {sortedPlants.map((p) => {
+          {plants.map((p) => {
             const ddayWater =
               p.lastWateredAt && p.wateringIntervalDays
                 ? calculateDday(addDays(p.lastWateredAt, p.wateringIntervalDays))
@@ -139,7 +125,23 @@ export default function PlantListSection({
             )
           })}
         </section>
-      )}
+
+        {/* 2️⃣ 무한 스크롤 감지 및 추가 로딩 스켈레톤 */}
+        {hasNextPage && (
+          <div ref={loadMoreRef} className="w-full">
+            {isFetchingNextPage ? (
+              // 추가 데이터를 불러올 때는 하단에 2개 정도만 보여줍니다.
+              <div className="mt-4">
+                 <PlantListSkeleton count={2} />
+              </div>
+            ) : (
+              // 감지용 투명 박스
+              <div className="h-4" /> 
+            )}
+          </div>
+        )}
+      </div>
+
       {open && selected && (
         <PlantDetailModal
           open={open}
