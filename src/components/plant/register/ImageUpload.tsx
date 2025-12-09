@@ -61,7 +61,13 @@ export default function ImageUpload({
 
       {previewUrl ? (
         <div className="relative w-32 h-32">
-          <Image src={previewUrl} alt="Preview" fill className="rounded-lg object-cover" />
+          <Image
+            src={previewUrl}
+            alt="Preview"
+            fill
+            sizes="128px"
+            className="rounded-lg object-cover"
+          />
           <button
             type="button"
             onClick={handleRemove}
