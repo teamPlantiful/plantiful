@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
 import TodayPlantSection from '@/components/home/TodayPlantSection'
@@ -9,11 +8,11 @@ import PlantFilterBar from '@/components/home/PlantFilterBar'
 import PlantRegisterFab from '@/components/home/PlantRegisterFab'
 
 import { useInfiniteMain } from '@/hooks/queries/useInfiniteMain'
+import type { SortKey } from '@/types/plant'
 import { useWaterPlant } from '@/hooks/mutations/useWaterPlant'
 import { useUpdatePlantNickname } from '@/hooks/mutations/useUpdatePlantNickname'
 import { useUpdatePlant } from '@/hooks/mutations/useUpdatePlant'
 import { useDeletePlant } from '@/hooks/mutations/useDeletePlant'
-import type { SortKey } from '@/hooks/queries/useGetPlants'
 import type { PlantIntervalsUpdatePayload } from '@/components/plant/detail/PlantDetailSettingsTab'
 
 export default function DashboardClient() {
@@ -117,7 +116,7 @@ export default function DashboardClient() {
           onDelete={handleDelete}
         />
       </div>
-      <PlantRegisterFab />
+      <PlantRegisterFab existingPlants={plants} />
     </div>
   )
 }

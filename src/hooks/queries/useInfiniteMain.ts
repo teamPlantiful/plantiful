@@ -1,17 +1,11 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
-import type { Plant } from '@/types/plant'
+import type { CursorPagedResult, SortKey } from '@/types/plant'
 import { queryKeys } from '@/lib/queryKeys'
 import axios from 'axios'
 
-interface CursorPagedResult {
-  items: Plant[]
-  nextCursor?: string
-  hasNextPage: boolean
-}
-
 interface UseInfiniteMainParams {
   q: string
-  sort: 'water' | 'name' | 'recent'
+  sort: SortKey
 }
 
 const fetchPlants = async ({

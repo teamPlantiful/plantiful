@@ -68,3 +68,13 @@ export interface PlantSearchResult {
   scientificName: string[]
   defaultImage?: { mediumUrl: string }
 }
+
+// 정렬 옵션 타입
+export type SortKey = 'water' | 'name' | 'recent'
+
+// 커서 기반 페이지네이션 결과 타입
+export interface CursorPagedResult {
+  items: Plant[]
+  nextCursor?: string
+  hasNextPage: boolean
+}
