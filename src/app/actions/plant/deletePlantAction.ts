@@ -15,26 +15,16 @@ export async function deletePlantAction(formData: FormData): Promise<void> {
   const { supabase, user } = await requireAuth()
 
   // 1. 삭제하기 전에 식물 데이터 조회 (이미지 URL 확인용)
-<<<<<<< HEAD
-=======
   // .maybeSingle() 사용: 0개 행이 반환되어도 에러 안 남
->>>>>>> 8e5e5e037eb45873d680e60dd4badd48d25d9e13
   const { data: plant, error: fetchError } = await supabase
     .from('plants')
     .select('cover_image_url')
     .eq('id', id)
     .eq('user_id', user.id)
-<<<<<<< HEAD
-    .single()
-
-  if (fetchError) {
-    throw new Error(fetchError.message || '식물 정보를 찾을 수 없습니다.')
-=======
     .maybeSingle()
 
   if (fetchError) {
     throw new Error(fetchError.message || '식물 정보 조회 실패')
->>>>>>> 8e5e5e037eb45873d680e60dd4badd48d25d9e13
   }
 
   // 2. 사용자가 업로드한 이미지가 있으면 Storage에서 삭제
