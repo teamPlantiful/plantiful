@@ -1,6 +1,6 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient, InfiniteData } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/queryKeys'
-import type { PlantData, Plant } from '@/types/plant'
+import type { PlantData, Plant, CursorPagedResult } from '@/types/plant'
 import addPlantAction from '@/app/actions/plant/addPlantAction'
 import { monthsToDays } from '@/utils/generateDay'
 import { addDays, normalizeToMidnight, toDateOnlyISO } from '@/utils/date'
@@ -99,39 +99,61 @@ export const useAddPlant = () => {
         updatedAt: now,
       }
 
-      // 낙관적 데이터 추가
-      queryClient.setQueriesData<Plant[]>({ queryKey: queryKeys.plants.lists() }, (prev = []) => [
-        optimisticPlant,
-        ...prev,
-      ])
+      // 무한 쿼리 캐시 낙관적 업데이트
+      queryClient.setQueriesData<InfiniteData<CursorPagedResult>>(
+        { queryKey: queryKeys.plants.lists() },
+        (old) => {
+          if (!old) return old
+
+          return {
+            ...old,
+            pages: old.pages.map((page, index) => {
+              // 첫 페이지에만 새 식물 추가
+              if (index === 0) {
+                return {
+                  ...page,
+                  items: [optimisticPlant, ...page.items],
+                }
+              }
+              return page
+            }),
+          }
+        }
+      )
 
       return { tempId, tempCoverImageUrl, tempDefaultImageUrl, previousPlants }
     },
 
     onSuccess: (newPlant, _variables, context) => {
-      // 서버 데이터로 교체하되, 이미지 URL은 유지
-      queryClient.setQueriesData<Plant[]>({ queryKey: queryKeys.plants.lists() }, (prev = []) =>
-        prev.map((plant) => {
-          if (plant.id === context?.tempId) {
-            return {
-              ...newPlant,
-              coverImageUrl: plant.coverImageUrl,
-              defaultImageUrl: plant.defaultImageUrl,
-            }
+      // 무한 쿼리 캐시: 임시 데이터를 서버 데이터로 교체
+      queryClient.setQueriesData<InfiniteData<CursorPagedResult>>(
+        { queryKey: queryKeys.plants.lists() },
+        (old) => {
+          if (!old) return old
+
+          return {
+            ...old,
+            pages: old.pages.map((page) => ({
+              ...page,
+              items: page.items.map((plant) => {
+                if (plant.id === context?.tempId) {
+                  return {
+                    ...newPlant,
+                    coverImageUrl: plant.coverImageUrl || newPlant.coverImageUrl,
+                    defaultImageUrl: plant.defaultImageUrl || newPlant.defaultImageUrl,
+                  }
+                }
+                return plant
+              }),
+            })),
           }
-          return plant
-        })
+        }
       )
     },
 
     onError: (_error, _variables, context) => {
-      // 에러 시 이전 상태로 복구 (모든 list 쿼리)
-      if (context?.previousPlants) {
-        queryClient.setQueriesData<Plant[]>(
-          { queryKey: queryKeys.plants.lists() },
-          context.previousPlants
-        )
-      }
+      // 에러 시 전체 쿼리 무효화 (서버에서 다시 fetch)
+      queryClient.invalidateQueries({ queryKey: queryKeys.plants.lists() })
     },
 
     onSettled: () => {

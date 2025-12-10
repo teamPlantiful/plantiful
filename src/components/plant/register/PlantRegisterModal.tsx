@@ -5,7 +5,7 @@ import { Modal, ModalHeader, ModalContent } from '@/components/common/modal'
 import { Alert } from '@/components/common/alert'
 import Button from '@/components/common/button'
 import { ArrowLeft } from 'lucide-react'
-import type { PlantSearchResult, PlantSpeciesInfo } from '@/types/plant'
+import type { PlantSearchResult, PlantSpeciesInfo, Plant } from '@/types/plant'
 import PlantSearchContent from '../search/PlantSearchContent'
 import PlantRegisterContent from './PlantRegisterContent'
 import cn from '@/lib/cn'
@@ -15,9 +15,10 @@ type ModalStep = 'search' | 'register'
 interface PlantRegisterModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  existingPlants?: Plant[]
 }
 
-export default function PlantRegisterModal({ open, onOpenChange }: PlantRegisterModalProps) {
+export default function PlantRegisterModal({ open, onOpenChange, existingPlants = [] }: PlantRegisterModalProps) {
   // 단계 상태
   const [currentStep, setCurrentStep] = useState<ModalStep>('search')
   const [selectedSpecies, setSelectedSpecies] = useState<PlantSpeciesInfo | null>(null)
@@ -170,6 +171,7 @@ export default function PlantRegisterModal({ open, onOpenChange }: PlantRegister
                 key={selectedSpecies.cntntsNo}
                 selectedSpecies={selectedSpecies}
                 initialNickname={initialNickname}
+                existingPlants={existingPlants}
                 onComplete={handleRegisterComplete}
                 onDirtyChange={setIsFormDirty}
               />

@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/queryKeys'
 import { deletePlantAction } from '@/app/actions/plant/deletePlantAction'
 import type { Plant } from '@/types/plant'
+
 interface DeletePlantVariables {
   id: string
 }
