@@ -5,26 +5,14 @@ import { subscribeForegroundMessages } from '@/utils/firebaseClient'
 
 export default function FcmInAppListener() {
   useEffect(() => {
-    let cancelled = false
+    subscribeForegroundMessages((payload) => {
+      console.log('🔔 FCM foreground message:', payload)
 
-    async function setup() {
-      await subscribeForegroundMessages((payload) => {
-        if (cancelled) return
+      const title = payload.notification?.title ?? '알림'
+      const body = payload.notification?.body ?? ''
 
-        console.log('FCM foreground message:', payload)
-
-        const title = payload.notification?.title ?? '알림'
-        const body = payload.notification?.body ?? ''
-
-        alert(`${title}\n${body}`)
-      })
-    }
-
-    setup()
-
-    return () => {
-      cancelled = true
-    }
+      alert(`${title}\n${body}`)
+    })
   }, [])
 
   return null
