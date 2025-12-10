@@ -5,6 +5,7 @@ import cn from '@/lib/cn'
 import useImageUpload from '@/hooks/useImageUpload'
 import { useRef, useEffect } from 'react'
 import Image from 'next/image'
+import optimizeImage from '@/utils/optimizeImage'
 
 interface ImageUploadProps {
   className?: string
@@ -61,7 +62,13 @@ export default function ImageUpload({
 
       {previewUrl ? (
         <div className="relative w-32 h-32">
-          <Image src={previewUrl} alt="Preview" fill className="rounded-lg object-cover" />
+          <Image
+            src={optimizeImage(previewUrl, 256) || previewUrl}
+            alt="Preview"
+            fill
+            sizes="128px"
+            className="rounded-lg object-contain"
+          />
           <button
             type="button"
             onClick={handleRemove}

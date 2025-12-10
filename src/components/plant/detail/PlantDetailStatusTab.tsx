@@ -1,6 +1,9 @@
+'use client'
+
 import { useMemo } from 'react'
 import { Calendar, Droplets, HeartPlus, Sprout } from 'lucide-react'
 import Image from 'next/image'
+import optimizeImage from '@/utils/optimizeImage'
 
 import { CareGuideSection } from '@/components/shared/CareGuideSection'
 import type { Plant, CareInfo } from '@/types/plant'
@@ -49,7 +52,13 @@ export default function PlantDetailStatusTab({ plant, nickname }: PlantDetailSta
       {/* 사진 */}
       <div className="flex items-center">
         <div className="relative h-36 w-36 shrink-0 overflow-hidden rounded-xl bg-secondary/20 mx-auto">
-          <Image src={imageSrc} alt={imageAlt} fill className="object-cover" />
+          <Image
+            src={optimizeImage(imageSrc, 288) || imageSrc}
+            alt={imageAlt}
+            fill
+            sizes="144px"
+            className="object-contain"
+          />
         </div>
       </div>
       <div className="space-y-3">

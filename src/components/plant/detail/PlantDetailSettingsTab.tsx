@@ -1,3 +1,5 @@
+'use client'
+
 import { useEffect, useMemo, useState } from 'react'
 
 import SelectBox from '@/components/common/select-box'
