@@ -35,10 +35,8 @@ const fetchPlants = async ({
 }
 
 export function useInfiniteMain({ q, sort }: UseInfiniteMainParams) {
-  const isDefault = !q.trim() && sort === 'recent'
-
   return useInfiniteQuery<CursorPagedResult>({
-    queryKey: queryKeys.plants.list(isDefault ? undefined : { search: q.trim(), sortBy: sort }),
+    queryKey: queryKeys.plants.list({ search: q.trim(), sortBy: sort }),
 
     initialPageParam: undefined,
 
