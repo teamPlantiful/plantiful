@@ -1,5 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 import type { Plant } from '@/types/plant'
+import { queryKeys } from '@/lib/queryKeys'
 import axios from 'axios'
 
 interface CursorPagedResult {
@@ -34,15 +35,18 @@ const fetchPlants = async ({
 }
 
 export function useInfiniteMain({ q, sort }: UseInfiniteMainParams) {
+  const isDefault = !q.trim() && sort === 'recent'
+
   return useInfiniteQuery<CursorPagedResult>({
-    queryKey: ['plants-main', { q: q.trim(), sort }],
+    queryKey: queryKeys.plants.list(isDefault ? undefined : { search: q.trim(), sortBy: sort }),
+
     initialPageParam: undefined,
 
     queryFn: ({ pageParam }) =>
       fetchPlants({ pageParam: pageParam as string | undefined, q, sort }),
 
     getNextPageParam: (lastPage) => {
-      return lastPage.nextCursor
+      return lastPage.nextCursor || undefined
     },
   })
 }

@@ -5,6 +5,7 @@ import PlantListSection from '@/components/home/PlantListSection'
 import PlantFilterBar from '@/components/home/PlantFilterBar'
 import PlantRegisterFab from '@/components/home/PlantRegisterFab'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+
 import { useInfiniteMain } from '@/hooks/queries/useInfiniteMain'
 import { useWaterPlant } from '@/hooks/mutations/useWaterPlant'
 import { useUpdatePlantNickname } from '@/hooks/mutations/useUpdatePlantNickname'
@@ -37,7 +38,7 @@ export default function DashboardClient() {
   const setParams = (next: Partial<{ q: string; sort: SortKey }>) => {
     const sp = new URLSearchParams(searchParams?.toString() ?? '')
 
-    const merged: { q: string; sort: SortKey } = {
+    const merged = {
       q: next.q ?? search,
       sort: next.sort ?? sort,
     }
@@ -56,6 +57,10 @@ export default function DashboardClient() {
 
   const handleSearchChange = (value: string) => {
     setParams({ q: value })
+  }
+
+  const handleSortChange = (value: SortKey) => {
+    setParams({ sort: value })
   }
 
   const handleWater = (id: string) => {
@@ -92,7 +97,7 @@ export default function DashboardClient() {
           search={search}
           sort={sort}
           onSearchChange={handleSearchChange}
-          onSortChange={(value) => setParams({ sort: value })}
+          onSortChange={handleSortChange}
         />
 
         <PlantListSection

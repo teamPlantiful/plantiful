@@ -23,10 +23,8 @@ export const queryKeys = {
 
     // 식물 목록 조회
     lists: () => [...queryKeys.plants.all, 'list'] as const,
-    list: (filters?: {
-      search?: string
-      sortBy?: 'water' | 'name' | 'recent'
-    }) => [...queryKeys.plants.lists(), filters] as const,
+    list: (filters?: { search?: string; sortBy?: 'water' | 'name' | 'recent' }) =>
+      [...queryKeys.plants.lists(), filters] as const,
 
     // 개별 식물 상세 조회
     details: () => [...queryKeys.plants.all, 'detail'] as const,

@@ -46,14 +46,13 @@ export default function PlantDetailStatusTab({ plant, nickname }: PlantDetailSta
 
   return (
     <div id="panel-status" role="tabpanel" aria-labelledby="tab-status" className="space-y-4">
-      <div className="space-y-3">
-        {/* 사진 */}
-        <div className="flex items-center gap-4">
-          <div className="relative h-36 w-36 flex-shrink-0 overflow-hidden rounded-xl bg-secondary/20 mx-auto">
-            <Image src={imageSrc} alt={imageAlt} fill className="object-cover" />
-          </div>
+      {/* 사진 */}
+      <div className="flex items-center">
+        <div className="relative h-36 w-36 shrink-0 overflow-hidden rounded-xl bg-secondary/20 mx-auto">
+          <Image src={imageSrc} alt={imageAlt} fill className="object-cover" />
         </div>
-
+      </div>
+      <div className="space-y-3">
         {/* 처음 함께한 날짜 */}
         <div className="flex items-center bg-secondary/10 justify-between p-3 rounded-lg border border-border text-foreground">
           <div className="flex items-center gap-3">

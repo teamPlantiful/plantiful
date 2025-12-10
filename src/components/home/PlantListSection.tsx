@@ -41,6 +41,7 @@ export default function PlantListSection({
 
   const loadMoreRef = useInfiniteScroll({ hasNextPage, fetchNextPage })
 
+  // 선택된 식물
   const selected = useMemo(
     () => plants.find((p) => p.id === selectedId) ?? null,
     [plants, selectedId]
@@ -73,6 +74,7 @@ export default function PlantListSection({
     setOpen(false)
   }
 
+  // 초기 로딩 시 skeleton UI
   if (isLoading) {
     return (
       <section className="grid gap-3 grid-cols-1 md:grid-cols-2">
@@ -83,6 +85,7 @@ export default function PlantListSection({
     )
   }
 
+  // 빈 목록
   if (plants.length === 0) {
     return (
       <section className="py-10 text-center">
@@ -95,11 +98,12 @@ export default function PlantListSection({
     <>
       <div className="space-y-6">
         <section className="grid gap-3 grid-cols-1 md:grid-cols-2">
-          {plants.map((p) => {
+          {plants.map((p, index) => {
             const ddayWater =
               p.lastWateredAt && p.wateringIntervalDays
                 ? calculateDday(addDays(p.lastWateredAt, p.wateringIntervalDays))
                 : 0
+
             return (
               <PlantCard
                 key={p.id}
@@ -118,6 +122,7 @@ export default function PlantListSection({
           })}
         </section>
 
+        {/* Infinite Scroll */}
         {hasNextPage && (
           <div ref={loadMoreRef} className="w-full">
             {isFetchingNextPage ? (
@@ -131,6 +136,7 @@ export default function PlantListSection({
         )}
       </div>
 
+      {/* 상세 모달 */}
       {open && selected && (
         <PlantDetailModal
           open={open}
