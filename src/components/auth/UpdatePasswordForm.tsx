@@ -122,7 +122,7 @@ export default function UpdatePasswordForm() {
         {isPending ? '변경 중...' : '비밀번호 변경'}
       </Button>
       {msg && (
-        <p className={`mt-2 text-sm ${msg.includes('성공') ? 'text-green-600' : 'text-red-600'}`}>
+        <p className={`mt-2 text-sm ${msg.includes('성공') ? 'text-green-500' : 'text-red-500'}`}>
           {msg}
         </p>
       )}
