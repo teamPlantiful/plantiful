@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { requestFcmToken, subscribeForegroundMessages } from '@/utils/firebaseClient'
+import { requestFcmToken, subscribeForegroundMessages } from '@/utils/firebase/firebaseClient'
 
 export default function TestFcmPage() {
   const [token, setToken] = useState<string | null>(null)

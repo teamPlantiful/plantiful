@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { requestFcmToken } from '@/utils/firebaseClient'
+import { requestFcmToken } from '@/utils/firebase/firebaseClient'
 
 interface UseFcmRegistrationResult {
   token: string | null

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { subscribeForegroundMessages } from '@/utils/firebaseClient'
+import { subscribeForegroundMessages } from '@/utils/firebase/firebaseClient'
 
 export default function FcmInAppListener() {
   useEffect(() => {
