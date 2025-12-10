@@ -1,25 +1,27 @@
 'use client'
 
+import { useState } from 'react'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+
 import TodayPlantSection from '@/components/home/TodayPlantSection'
 import PlantListSection from '@/components/home/PlantListSection'
 import PlantFilterBar from '@/components/home/PlantFilterBar'
 import PlantRegisterFab from '@/components/home/PlantRegisterFab'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
 import { useInfiniteMain } from '@/hooks/queries/useInfiniteMain'
 import { useWaterPlant } from '@/hooks/mutations/useWaterPlant'
 import { useUpdatePlantNickname } from '@/hooks/mutations/useUpdatePlantNickname'
 import { useUpdatePlant } from '@/hooks/mutations/useUpdatePlant'
 import { useDeletePlant } from '@/hooks/mutations/useDeletePlant'
+import type { SortKey } from '@/hooks/queries/useGetPlants'
 import type { PlantIntervalsUpdatePayload } from '@/components/plant/detail/PlantDetailSettingsTab'
-
-type SortKey = 'water' | 'name' | 'recent'
 
 export default function DashboardClient() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const pathname = usePathname()
+  const searchParams = useSearchParams()
 
+  // URL 기반 상태
   const search = searchParams.get('q') ?? ''
   const sort = (searchParams.get('sort') as SortKey) ?? 'recent'
 
@@ -35,6 +37,7 @@ export default function DashboardClient() {
   const updateIntervals = useUpdatePlant()
   const deletePlant = useDeletePlant()
 
+  // URL 업데이트
   const setParams = (next: Partial<{ q: string; sort: SortKey }>) => {
     const sp = new URLSearchParams(searchParams?.toString() ?? '')
 

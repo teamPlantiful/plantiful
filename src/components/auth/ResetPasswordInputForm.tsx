@@ -1,11 +1,13 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import updatePassword from '@/app/actions/auth/updatePassword'
+import { resetPassword } from '@/app/actions/auth/resetPassword'
+import { useRouter } from 'next/navigation'
 import Button from '@/components/common/button'
 import Input from '@/components/common/input'
 
-export default function UpdatePasswordForm() {
+export default function ResetPasswordInputForm() {
+  const router = useRouter()
   const [msg, setMsg] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
@@ -16,12 +18,11 @@ export default function UpdatePasswordForm() {
   }
   
   const handleAction = (formData: FormData, form: HTMLFormElement) => {
-    const currentPassword = formData.get('currentPassword') as string
     const newPassword = formData.get('newPassword') as string
     const confirmPassword = formData.get('confirmPassword') as string
 
     // 입력 필드 검증
-    if (!currentPassword || !newPassword || !confirmPassword) {
+    if (!newPassword || !confirmPassword) {
       setMsg("모든 항목을 입력해주세요.")
       return
     }
@@ -35,11 +36,11 @@ export default function UpdatePasswordForm() {
       setMsg("설정할 비밀번호가 일치하지 않습니다.")
       return
     }
-
+    
     // 서버 응답 중 UI 깜빡임 방지를 위해 useTransition 사용.
     startTransition(async () => {
       setMsg(null)
-      const result = await updatePassword(formData)
+      const result = await resetPassword(formData)
 
       // 에러 발생 시, 에러 메세지 출력
       if (result.error) {
@@ -49,8 +50,11 @@ export default function UpdatePasswordForm() {
       else if (result.success) {
         setMsg(result.success)
         form.reset()
-        // 3초 뒤에는 완료 문구 사라짐.
-        setTimeout(() => setMsg(null), 3000)
+        // 잠시 후 완료 문구 사라지고 메인 화면으로 이동.
+        setTimeout(async () => {
+          await fetch('/apis/account/resetCompleted', { method: 'POST' })
+          router.replace('/')
+        }, 3000)
       }
     })
   }
@@ -65,22 +69,6 @@ export default function UpdatePasswordForm() {
       }}
       className="space-y-4"
     >
-      <div className="space-y-2">
-        <label
-          htmlFor="currentPassword"
-          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-        >
-          현재 비밀번호
-        </label>
-        <Input
-          size="sm"
-          id="currentPassword"
-          name="currentPassword"
-          type="password"
-          placeholder="••••••••"
-          className="mt-2"
-        />
-      </div>
       <div className="space-y-2">
         <label
           htmlFor="newPassword"
@@ -122,7 +110,10 @@ export default function UpdatePasswordForm() {
         {isPending ? '변경 중...' : '비밀번호 변경'}
       </Button>
       {msg && (
-        <p className={`mt-2 text-sm ${msg.includes('성공') ? 'text-green-500' : 'text-red-500'}`}>
+        <p 
+          className={`text-sm text-center ${msg.includes('성공') ? 'text-green-500' : 'text-red-500'}`}
+          style={{ whiteSpace: 'pre-line' }} /* whitespace: pre-line으로 \n 줄바꿈 처리 */
+        >
           {msg}
         </p>
       )}

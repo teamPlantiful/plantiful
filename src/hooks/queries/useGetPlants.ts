@@ -2,7 +2,6 @@ import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/queryKeys'
 import type { Plant } from '@/types/plant'
 
-
 export type SortKey = 'water' | 'name' | 'recent'
 
 interface UseGetPlantsParams {
