@@ -1,3 +1,5 @@
+'use client'
+
 import { useMemo } from 'react'
 import { Calendar, Droplets, HeartPlus, Sprout } from 'lucide-react'
 import Image from 'next/image'
