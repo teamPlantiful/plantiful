@@ -7,7 +7,7 @@ export default async function Header() {
   // 도메인 주소 변환
   const h = await headers()
   const host = h.get('host')
-  const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http'
+  const protocol = host?.includes('localhost') ? 'http' : 'https'
   const baseUrl = `${protocol}://${host}`
 
   // 라우트 핸들러의 getUser와 세션 일치를 위해 쿠키를 가져옴
