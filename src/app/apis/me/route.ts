@@ -20,6 +20,7 @@ export async function GET() {
 
   // 닉네임 반환
   return NextResponse.json({
-    userName: profileData?.name ?? ''
+    userName: profileData?.name ?? '',
+    provider: user.app_metadata?.provider ?? 'email',
   })
 }
