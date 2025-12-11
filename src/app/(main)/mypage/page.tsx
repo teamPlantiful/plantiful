@@ -1,34 +1,38 @@
-import Link from 'next/link'
-import { redirect } from 'next/navigation'
-import { createClient } from '@/utils/supabase/server'
 import { ArrowLeft, User, Lock, Smile } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/common/card'
 import Button from '@/components/common/button'
 import UpdateProfilesForm from '@/components/auth/UpdateProfileForm'
 import UpdatePasswordForm from '@/components/auth/UpdatePasswordForm'
 import LogoutButton from '@/components/auth/LogoutButton'
+import Link from 'next/link'
 import Image from 'next/image'
+import { cookies, headers } from 'next/headers'
 
 export default async function Page() {
+  // 도메인 주소 변환
+  const h = await headers()
+  const host = h.get('host')
+  const protocol = host?.includes('localhost') ? 'http' : 'https'
+  const baseUrl = `${protocol}://${host}`
+  
+  // 라우트 핸들러의 getUser와 세션 일치를 위해 쿠키를 가져옴
+  const cookieStore = await cookies()
+  const cookieString = cookieStore
+    .getAll()
+    .map(c => `${c.name}=${c.value}`)
+    .join('; ')
 
-  const supabase = await createClient()
+  const res = await fetch(`${baseUrl}/apis/me`, {
+    cache: 'no-store',
+    headers: {
+      Cookie: cookieString, // 쿠키 삽입
+    },
+  })
 
-  // 로그인한 유저 정보 불러옴
-  const { data: { user } } = await supabase.auth.getUser()
-  // 로그인 유저만 마이페이지 진입 가능
-  if (!user) {
-    redirect('/login')
-  }
-  // Supabase DB에서 닉네임 읽어오기
-  const { data: profileData } = await supabase
-    .from('profiles')
-    .select('name')
-    .eq('id', user.id)
-    .single()
-  // 현재 닉네임 표시를 Props를 통해 컴포넌트에 전달
-  const currentUserName = profileData?.name ?? ''
+  // fetch를 통해 유저 정보 불러옴
+  const { userName, provider } = await res.json()
+
   // 소셜 로그인 여부 판단
-  const provider = user?.app_metadata?.provider || 'email'
   const isOAuthUser = provider !== 'email'
 
   // 소셜 로그인이면 로그인 플랫폼 보여줌
@@ -41,7 +45,7 @@ export default async function Page() {
   return (
     <div className="min-h-screen bg-background">
       <div className="sticky top-0 z-10 bg-background border-b border-border px-4 py-4">
-        <div className="max-w-xl mx-auto flex items-center gap-3">
+        <div className="max-w-200 mx-auto flex items-center gap-3">
           {/* 뒤로가기 버튼 */}
           <Link href="/">
             <Button variant="ghost" size="icon" className="rounded-full w-9 h-9">
@@ -49,15 +53,15 @@ export default async function Page() {
             </Button>
           </Link>
           {/* 마이페이지 헤더 */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <Image
               src="/plantiful-logo.png"
               alt="Plantiful Logo"
-              width={24}
-              height={24}
-              className="rounded-full"
+              width={30}
+              height={30}
+              className="rounded-full select-none"
             />
-            <h1 className="text-lg font-bold text-primary">마이페이지</h1>
+            <h1 className="text-lg font-bold text-primary select-none">마이페이지</h1>
           </div>
         </div>
       </div>
@@ -72,7 +76,7 @@ export default async function Page() {
             </div>
           </CardHeader>
           <CardContent className="pt-0 space-y-4">
-            <UpdateProfilesForm initialUserName={currentUserName}/>
+            <UpdateProfilesForm initialUserName={userName}/>
           </CardContent>
         </Card>
         {/* 소셜 로그인 시 보이는 구역 */}

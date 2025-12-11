@@ -17,7 +17,7 @@ export default async function Header() {
     .map(c => `${c.name}=${c.value}`)
     .join('; ')
 
-  const res = await fetch(`${baseUrl}/apis/profile`, {
+  const res = await fetch(`${baseUrl}/apis/me`, {
     cache: 'no-store',
     headers: {
       Cookie: cookieString,  // 직접 쿠키를 넣어줌
