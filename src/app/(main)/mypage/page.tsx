@@ -55,7 +55,7 @@ export default async function Page() {
           {/* 마이페이지 헤더 */}
           <div className="flex items-center gap-1">
             <Image
-              src="/plantiful-logo.png"
+              src="/plantiful-logo.webp"
               alt="Plantiful Logo"
               width={30}
               height={30}
@@ -91,7 +91,7 @@ export default async function Page() {
           <CardContent className="pt-0 space-y-4 flex justify-center gap-2">
             <div>
               <Image
-                src={`/${provider}-logo.png`}
+                src={`/${provider}-logo.webp`}
                 alt={`${provider} Logo`}
                 width={24}
                 height={24}></Image>

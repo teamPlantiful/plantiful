@@ -12,7 +12,7 @@ export default function LoginForm() {
         <div className="text-center mb-6">
           <div className="inline-flex items-center gap-1 mb-3">
             <Image
-              src="/plantiful-logo.png"
+              src="/plantiful-logo.webp"
               alt="Plantiful Logo"
               width={48}
               height={48}
