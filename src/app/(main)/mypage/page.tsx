@@ -23,7 +23,6 @@ export default async function Page() {
     .join('; ')
 
   const res = await fetch(`${baseUrl}/apis/me`, {
-    cache: 'no-store',
     headers: {
       Cookie: cookieString, // 쿠키 삽입
     },
