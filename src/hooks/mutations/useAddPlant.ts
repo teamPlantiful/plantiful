@@ -9,7 +9,7 @@ interface AddPlantContext {
   tempId: string
   tempCoverImageUrl?: string
   tempDefaultImageUrl?: string
-  previousPlants?: Plant[]
+  previousData?: InfiniteData<CursorPagedResult>
 }
 
 const generateTempId = () => `temp-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
@@ -47,7 +47,9 @@ export const useAddPlant = () => {
       await queryClient.cancelQueries({ queryKey: queryKeys.plants.lists() })
 
       // 이전 데이터 저장 (롤백용)
-      const previousPlants = queryClient.getQueryData<Plant[]>(queryKeys.plants.list())
+      const previousData = queryClient.getQueryData<InfiniteData<CursorPagedResult>>(
+        queryKeys.plants.lists()
+      )
 
       const tempId = generateTempId()
 
@@ -121,47 +123,22 @@ export const useAddPlant = () => {
         }
       )
 
-      return { tempId, tempCoverImageUrl, tempDefaultImageUrl, previousPlants }
+      return { tempId, tempCoverImageUrl, tempDefaultImageUrl, previousData }
     },
 
-    onSuccess: (newPlant, _variables, context) => {
-      // 무한 쿼리 캐시: 임시 데이터를 서버 데이터로 교체
-      queryClient.setQueriesData<InfiniteData<CursorPagedResult>>(
-        { queryKey: queryKeys.plants.lists() },
-        (old) => {
-          if (!old) return old
-
-          return {
-            ...old,
-            pages: old.pages.map((page) => ({
-              ...page,
-              items: page.items.map((plant) => {
-                if (plant.id === context?.tempId) {
-                  return {
-                    ...newPlant,
-                    coverImageUrl: plant.coverImageUrl || newPlant.coverImageUrl,
-                    defaultImageUrl: plant.defaultImageUrl || newPlant.defaultImageUrl,
-                  }
-                }
-                return plant
-              }),
-            })),
-          }
-        }
-      )
-    },
-
-    onError: (_error, _variables, context) => {
-      // 에러 시 전체 쿼리 무효화 (서버에서 다시 fetch)
+    onSuccess: () => {
+      // 서버 데이터로 즉시 refetch (올바른 정렬 순서 적용)
       queryClient.invalidateQueries({ queryKey: queryKeys.plants.lists() })
     },
 
-    onSettled: () => {
-      // stale 표시만 (즉시 refetch 안 함, 다음 포커스/마운트 시 동기화)
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.plants.lists(),
-        refetchType: 'none',
-      })
+    onError: (_error, _variables, context) => {
+      // 에러 시 이전 데이터로 롤백
+      if (context?.previousData) {
+        queryClient.setQueriesData(
+          { queryKey: queryKeys.plants.lists() },
+          context.previousData
+        )
+      }
     },
   })
 }

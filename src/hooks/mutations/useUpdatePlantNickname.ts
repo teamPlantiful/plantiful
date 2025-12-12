@@ -1,7 +1,7 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient, InfiniteData } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/queryKeys'
 import { updatePlantNicknameAction } from '@/app/actions/plant/updatePlantNicknameAction'
-import type { Plant } from '@/types/plant'
+import type { CursorPagedResult } from '@/types/plant'
 
 interface UpdateNicknameVariables {
   id: string
@@ -9,7 +9,7 @@ interface UpdateNicknameVariables {
 }
 
 interface UpdateNicknameContext {
-  previousPlants?: Plant[]
+  previousData?: InfiniteData<CursorPagedResult>
 }
 
 export const useUpdatePlantNickname = () => {
@@ -24,26 +24,50 @@ export const useUpdatePlantNickname = () => {
     },
 
     onMutate: async ({ id, nickname }) => {
-      await queryClient.cancelQueries({ queryKey: queryKeys.plants.list() })
+      await queryClient.cancelQueries({ queryKey: queryKeys.plants.lists() })
 
-      const previousPlants = queryClient.getQueryData<Plant[]>(queryKeys.plants.list())
-
-      queryClient.setQueryData<Plant[]>(queryKeys.plants.list(), (prev = []) =>
-        prev.map((p) => (p.id === id ? { ...p, nickname } : p))
+      // 이전 데이터 저장 (롤백용)
+      const previousData = queryClient.getQueryData<InfiniteData<CursorPagedResult>>(
+        queryKeys.plants.lists()
       )
 
-      return { previousPlants }
+      // 무한 쿼리 캐시 낙관적 업데이트
+      queryClient.setQueriesData<InfiniteData<CursorPagedResult>>(
+        { queryKey: queryKeys.plants.lists() },
+        (old) => {
+          if (!old) return old
+
+          return {
+            ...old,
+            pages: old.pages.map((page) => ({
+              ...page,
+              items: page.items.map((plant) =>
+                plant.id === id ? { ...plant, nickname } : plant
+              ),
+            })),
+          }
+        }
+      )
+
+      return { previousData }
     },
 
     onError: (error, _vars, context) => {
       console.error('닉네임 수정 실패:', error)
-      if (context?.previousPlants) {
-        queryClient.setQueryData(queryKeys.plants.list(), context.previousPlants)
+      if (context?.previousData) {
+        queryClient.setQueriesData(
+          { queryKey: queryKeys.plants.lists() },
+          context.previousData
+        )
       }
     },
 
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.plants.list() })
+      // stale 표시만 (즉시 refetch 안 함, 다음 포커스/마운트 시 동기화)
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.plants.lists(),
+        refetchType: 'none',
+      })
     },
   })
 }

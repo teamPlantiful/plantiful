@@ -7,7 +7,6 @@ import cn from '@/lib/cn'
 import { Modal, ModalHeader, ModalContent, ModalFooter } from '@/components/common/modal'
 import Button from '@/components/common/button'
 import type { Plant } from '@/types/plant'
-import { deletePlantAction } from '@/app/actions/plant/deletePlantAction'
 
 import PlantDetailHeader from '@/components/plant/detail/PlantDetailHeader'
 import PlantDetailStatusTab from '@/components/plant/detail/PlantDetailStatusTab'
@@ -127,23 +126,19 @@ export default function PlantDetailModal({
 
         {/* 삭제 버튼 */}
         <ModalFooter className="pt-4 shrink-0">
-          <form
-            action={deletePlantAction}
+          <Button
+            variant="destructive-outline"
             className="w-full"
-            onSubmit={(e) => {
+            onClick={() => {
               if (confirmOnDelete && !window.confirm('정말 삭제할까요?')) {
-                e.preventDefault()
                 return
               }
               onDelete()
             }}
           >
-            <input type="hidden" name="id" value={plant.id} />
-            <Button type="submit" variant="destructive-outline" className="w-full">
-              <Trash2 className="h-4 w-4 mr-2" />
-              삭제하기
-            </Button>
-          </form>
+            <Trash2 className="h-4 w-4 mr-2" />
+            삭제하기
+          </Button>
         </ModalFooter>
       </div>
     </Modal>

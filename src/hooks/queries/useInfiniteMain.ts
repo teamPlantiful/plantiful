@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, keepPreviousData } from '@tanstack/react-query'
 import type { CursorPagedResult, SortKey } from '@/types/plant'
 import { queryKeys } from '@/lib/queryKeys'
 import axios from 'axios'
@@ -40,5 +40,7 @@ export function useInfiniteMain({ q, sort }: UseInfiniteMainParams) {
     getNextPageParam: (lastPage) => {
       return lastPage.nextCursor || undefined
     },
+
+    placeholderData: keepPreviousData,
   })
 }

@@ -122,13 +122,13 @@ export default function PlantDetailSettingsTab({
       aria-labelledby="tab-settings"
       className="flex flex-col relative min-h-full"
       onSubmit={(e) => {
+        e.preventDefault()
+
         if (!hasChanges) {
-          e.preventDefault()
           return
         }
 
         if (confirmOnSave && !window.confirm('변경하시겠습니까?')) {
-          e.preventDefault()
           return
         }
 

@@ -3,10 +3,16 @@
  *
  * 사용 예시:
  * @example
- * // 특정 필터의 식물 목록
- * queryKey: queryKeys.plants.list({ search: '몬스테라' })
+ * // 메인 무한 스크롤 - 특정 필터의 식물 목록
+ * queryKey: queryKeys.plants.list({ search: '몬스테라', sortBy: 'water' })
  *
- * // 모든 식물 목록 쿼리 무효화
+ * // 검색 무한 스크롤 - 식물 종 검색
+ * queryKey: queryKeys.plantSpecies.search('몬스테라')
+ *
+ * // 현재 사용자 정보 조회 (/apis/me)
+ * queryKey: queryKeys.user.me()
+ *
+ * // 모든 식물 목록 쿼리 무효화 (무한 스크롤 포함)
  * queryClient.invalidateQueries({ queryKey: queryKeys.plants.lists() })
  *
  * // 모든 식물 관련 쿼리 무효화
@@ -21,14 +27,10 @@ export const queryKeys = {
     // 모든 식물 관련 쿼리의 루트 키
     all: ['plants'] as const,
 
-    // 식물 목록 조회
+    // 식물 목록 조회 (무한 스크롤)
     lists: () => [...queryKeys.plants.all, 'list'] as const,
     list: (filters?: { search?: string; sortBy?: 'water' | 'name' | 'recent' }) =>
       [...queryKeys.plants.lists(), filters] as const,
-
-    // 개별 식물 상세 조회
-    details: () => [...queryKeys.plants.all, 'detail'] as const,
-    detail: (id: string) => [...queryKeys.plants.details(), id] as const,
   },
 
   /**
@@ -37,28 +39,19 @@ export const queryKeys = {
   plantSpecies: {
     all: ['plantSpecies'] as const,
 
-    // 식물 종 검색
+    // 식물 종 검색 (무한 스크롤)
     searches: () => [...queryKeys.plantSpecies.all, 'search'] as const,
-    search: (query: string, page?: number) =>
-      [...queryKeys.plantSpecies.searches(), { query, page }] as const,
-
-    // 식물 종 상세 정보
-    details: () => [...queryKeys.plantSpecies.all, 'detail'] as const,
-    detail: (id: string | number) => [...queryKeys.plantSpecies.details(), id] as const,
+    search: (query: string) => [...queryKeys.plantSpecies.searches(), query] as const,
   },
 
   /**
-   * 사용자 프로필 관련 쿼리키
+   * 사용자 관련 쿼리키
    */
-  profile: {
-    all: ['profile'] as const,
+  user: {
+    all: ['user'] as const,
 
-    // 현재 사용자 프로필
-    current: () => [...queryKeys.profile.all, 'current'] as const,
-
-    // 특정 사용자 프로필
-    details: () => [...queryKeys.profile.all, 'detail'] as const,
-    detail: (userId: string) => [...queryKeys.profile.details(), userId] as const,
+    // 현재 로그인한 사용자 정보 (/apis/me)
+    me: () => [...queryKeys.user.all, 'me'] as const,
   },
 } as const
 
