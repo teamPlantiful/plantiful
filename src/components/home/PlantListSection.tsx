@@ -78,9 +78,7 @@ export default function PlantListSection({
   if (isLoading) {
     return (
       <section className="grid gap-3 grid-cols-1 md:grid-cols-2">
-        <div className="md:col-span-2">
-          <PlantListSkeleton count={6} />
-        </div>
+        <PlantListSkeleton count={6} />
       </section>
     )
   }
@@ -127,7 +125,7 @@ export default function PlantListSection({
         {hasNextPage && (
           <div ref={loadMoreRef} className="w-full">
             {isFetchingNextPage ? (
-              <div className="mt-4">
+              <div className="mt-4 grid gap-3 grid-cols-1 md:grid-cols-2">
                 <PlantListSkeleton count={2} />
               </div>
             ) : (
