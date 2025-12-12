@@ -126,31 +126,9 @@ export const useAddPlant = () => {
       return { tempId, tempCoverImageUrl, tempDefaultImageUrl, previousData }
     },
 
-    onSuccess: (newPlant, _variables, context) => {
-      // 무한 쿼리 캐시: 임시 데이터를 서버 데이터로 교체
-      queryClient.setQueriesData<InfiniteData<CursorPagedResult>>(
-        { queryKey: queryKeys.plants.lists() },
-        (old) => {
-          if (!old) return old
-
-          return {
-            ...old,
-            pages: old.pages.map((page) => ({
-              ...page,
-              items: page.items.map((plant) => {
-                if (plant.id === context?.tempId) {
-                  return {
-                    ...newPlant,
-                    coverImageUrl: plant.coverImageUrl || newPlant.coverImageUrl,
-                    defaultImageUrl: plant.defaultImageUrl || newPlant.defaultImageUrl,
-                  }
-                }
-                return plant
-              }),
-            })),
-          }
-        }
-      )
+    onSuccess: () => {
+      // 서버 데이터로 즉시 refetch (올바른 정렬 순서 적용)
+      queryClient.invalidateQueries({ queryKey: queryKeys.plants.lists() })
     },
 
     onError: (_error, _variables, context) => {
@@ -161,14 +139,6 @@ export const useAddPlant = () => {
           context.previousData
         )
       }
-    },
-
-    onSettled: () => {
-      // stale 표시만 (즉시 refetch 안 함, 다음 포커스/마운트 시 동기화)
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.plants.lists(),
-        refetchType: 'none',
-      })
     },
   })
 }
