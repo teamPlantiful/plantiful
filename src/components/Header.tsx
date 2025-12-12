@@ -1,6 +1,7 @@
 import { User } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+import NotificationBell from '@/components/notification/NotificationBell'
 
 export default function Header() {
   return (
@@ -19,11 +20,14 @@ export default function Header() {
             Plantiful
           </h1>
         </div>
-        <Link href="/mypage">
-          <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center">
-            <User className="h-4 w-4" />
-          </div>
-        </Link>
+        <div className="flex items-center gap-3">
+          <NotificationBell />
+          <Link href="/mypage">
+            <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center">
+              <User className="h-4 w-4" />
+            </div>
+          </Link>
+        </div>
       </div>
     </div>
   )

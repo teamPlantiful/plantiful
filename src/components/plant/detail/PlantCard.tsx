@@ -9,6 +9,8 @@ import type { PlantCardInfo } from '@/types/plant'
 import { updateWaterPlantAction } from '@/app/actions/plant/updateWaterPlantAction'
 import Image from 'next/image'
 import optimizeImage from '@/utils/optimizeImage'
+import { useNotificationStore } from '@/store/useNotificationStore'
+import { toast } from '@/store/useToastStore'
 
 export default function PlantCard({
   id,
@@ -24,6 +26,8 @@ export default function PlantCard({
   priority = false,
 }: PlantCardInfo & { priority?: boolean }) {
   const [isWatering, setIsWatering] = useState(false)
+
+  const addNotification = useNotificationStore((s) => s.addNotification)
 
   const image = useMemo(() => {
     const rawUrl = coverImageUrl || defaultImageUrl || ''
@@ -82,13 +86,25 @@ export default function PlantCard({
 
               if (isWateredToday) {
                 e.preventDefault()
-                alert(`${nickname}: 오늘 이미 물을 줬습니다.`)
+                toast(`${nickname || speciesName || '이 식물'}은 오늘 이미 물을 줬어요.`, 'info')
                 return
               }
-              alert(`${nickname}: 물을 줬습니다.`)
 
               onWater?.(id)
               setIsWatering(true)
+
+              addNotification({
+                title: `${nickname || speciesName || '식물'} 물주기 완료 💧`,
+                body: '오늘 물을 줬어요.',
+                source: 'local',
+                data: {
+                  type: 'WATERED',
+                  plantId: id,
+                },
+              })
+
+              //토스트로 피드백
+              toast(`${nickname || speciesName || '식물'} 물주기 완료`, 'success')
 
               setTimeout(() => setIsWatering(false), 600)
             }}
@@ -102,7 +118,6 @@ export default function PlantCard({
             <Droplets className="h-5 w-5" />
           </Button>
         </form>
-        {/* 텍스트(닉네임/종명 + D-Day) */}
         <div className="min-w-0 flex-1">
           <div className="mb-1 truncate text-base font-semibold text-foreground">{nickname}</div>
           {speciesName ? (

@@ -6,6 +6,8 @@ import { Suspense } from 'react'
 
 import FcmBootstrapper from '@/components/notification/FcmBootstrapper'
 import FcmInAppListener from '@/components/notification/FcmInAppListener'
+import NotificationHydrator from '@/components/notification/NotificationHydrator'
+import type { AppNotification } from '@/store/useNotificationStore'
 
 export default async function Home() {
   const supabase = await createClient()
@@ -19,10 +21,30 @@ export default async function Home() {
     redirect('/login')
   }
 
-  // 유저 정보가 있다면 컨텐츠 표시
+  // DB에서 내 알림 목록 가져오기
+  const { data: rows } = await supabase
+    .from('notifications')
+    .select('id, title, body, created_at, is_read, source, data')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(50)
+
+  // zustand에서 쓰는 형태로 변환
+  const initialNotifications: AppNotification[] =
+    rows?.map((row) => ({
+      id: row.id,
+      title: row.title,
+      body: row.body ?? undefined,
+      createdAt: row.created_at,
+      read: row.is_read,
+      source: (row.source as 'local' | 'fcm') ?? 'local',
+      data: (row.data as Record<string, string> | null) ?? undefined,
+    })) ?? []
+
   return (
     <>
       <Header />
+      <NotificationHydrator initialNotifications={initialNotifications} />
       <FcmBootstrapper />
       <FcmInAppListener />
       <Suspense fallback={null}>

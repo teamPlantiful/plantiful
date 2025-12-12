@@ -14,7 +14,7 @@ export async function updateWaterPlantAction(formData: FormData): Promise<void> 
   // 1) 현재 식물의 마지막 물준 날짜 조회
   const { data: plant, error: fetchError } = await supabase
     .from('plants')
-    .select('last_watered_at')
+    .select('last_watered_at, nickname')
     .eq('id', id)
     .eq('user_id', user.id)
     .single()
@@ -45,6 +45,26 @@ export async function updateWaterPlantAction(formData: FormData): Promise<void> 
 
   if (updateError) {
     throw new Error(updateError.message ?? '물주기 업데이트에 실패했습니다.')
+  }
+  // 3) 알림 저장
+  const title = `${plant.nickname ?? '식물'} 물주기 완료 💧`
+  const body = '오늘 물을 줬어요.'
+
+  const { error: notifError } = await supabase.from('notifications').insert({
+    user_id: user.id,
+    title,
+    body,
+    type: 'success',
+    source: 'local',
+    data: {
+      plantId: id,
+      event: 'WATERED',
+    },
+  })
+
+  if (notifError) {
+    console.error('[notifications insert error]', notifError)
+    throw new Error(notifError.message ?? '알림 저장에 실패했습니다.')
   }
 
   //revalidatePath('/')
