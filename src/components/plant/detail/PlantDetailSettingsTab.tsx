@@ -26,7 +26,7 @@ interface PlantDetailSettingsTabProps {
   open: boolean
   confirmOnSave: boolean
   onSaveIntervals?: (next: PlantIntervalsUpdatePayload) => void
-  onDone?: () => void // 저장 후 상태 탭으로 전환
+  onDone?: () => void
 }
 
 export default function PlantDetailSettingsTab({
@@ -85,7 +85,6 @@ export default function PlantDetailSettingsTab({
 
     let lastWateredChanged = false
     if (!plant.lastWateredAt) {
-      // 원래 값이 없었는데 설정 탭에서 지정하면 변경으로 판단
       lastWateredChanged = true
     } else {
       const initialLast = new Date(plant.lastWateredAt)
@@ -121,7 +120,7 @@ export default function PlantDetailSettingsTab({
       id="panel-settings"
       role="tabpanel"
       aria-labelledby="tab-settings"
-      className="space-y-4"
+      className="flex flex-col relative min-h-full"
       onSubmit={(e) => {
         if (!hasChanges) {
           e.preventDefault()
@@ -158,75 +157,80 @@ export default function PlantDetailSettingsTab({
       <input type="hidden" name="lastWateredAt" value={lastWateredDate.toISOString()} />
       <input type="hidden" name="removeImage" value={removeImage ? 'true' : 'false'} />
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-foreground/80">사진</label>
+      {/* 스크롤되는 콘텐츠 영역 */}
+      <div className="space-y-4 pb-4">
+        <div className="space-y-2 pl-2">
+          <label className="text-sm font-medium text-foreground/80">사진</label>
 
-        <div className="p-6 rounded-lg bg-secondary/10 border border-border">
-          <div className="flex flex-col items-center gap-4">
-            <ImageUpload
-              name="file"
-              initialImageUrl={plant.coverImageUrl || plant.defaultImageUrl || null}
-              onImageChange={(file) => {
-                setSelectedFile(file)
-                if (file) {
-                  setRemoveImage(false)
-                } else if (plant.coverImageUrl) {
-                  setRemoveImage(true)
-                } else {
-                  setRemoveImage(false)
-                }
-              }}
-            />
-            <p className="text-xs text-muted-foreground">ⓧ 버튼을 클릭해서 변경할 수 있어요</p>
+          <div className="p-6 rounded-lg bg-secondary/10 border border-border">
+            <div className="flex flex-col items-center gap-4">
+              <ImageUpload
+                name="file"
+                initialImageUrl={plant.coverImageUrl || plant.defaultImageUrl || null}
+                onImageChange={(file) => {
+                  setSelectedFile(file)
+                  if (file) {
+                    setRemoveImage(false)
+                  } else if (plant.coverImageUrl) {
+                    setRemoveImage(true)
+                  } else {
+                    setRemoveImage(false)
+                  }
+                }}
+              />
+              <p className="text-xs text-muted-foreground">ⓧ 버튼을 클릭해서 변경할 수 있어요</p>
+            </div>
           </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 pl-2 ">
+          <DateSelect label="처음 함께한 날짜" value={adoptedDate} onChange={setAdoptedDate} />
+          <DateSelect
+            label="마지막 물 준 날짜"
+            value={lastWateredDate}
+            onChange={setLastWateredDate}
+          />
+        </div>
+
+        <div className="space-y-2 pl-2">
+          <label className="text-sm font-medium text-foreground/80">물주기 주기</label>
+          <SelectBox
+            value={wateringInterval}
+            placeholder="주기 선택"
+            options={DAY_MAX.map((o) => ({ ...o, label: `${o.value}일` }))}
+            onSelect={setWateringInterval}
+            className="py-1 w-90"
+          />
+        </div>
+
+        <div className="space-y-2 pl-2">
+          <label className="text-sm font-medium text-foreground/80">영양제 주기</label>
+          <SelectBox
+            value={fertilizerIntervalMonth}
+            placeholder="주기 선택"
+            options={MONTH_MAX.map((o) => ({ ...o, label: `${o.value}개월` }))}
+            onSelect={setFertilizerIntervalMonth}
+            className="py-1 w-90"
+          />
+        </div>
+
+        <div className="space-y-2 pl-2">
+          <label className="text-sm font-medium text-foreground/80">분갈이 주기</label>
+          <SelectBox
+            value={repottingIntervalMonth}
+            placeholder="주기 선택"
+            options={MONTH_MAX.map((o) => ({ ...o, label: `${o.value}개월` }))}
+            onSelect={setRepottingIntervalMonth}
+            className="py-1 w-90"
+          />
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <DateSelect label="처음 함께한 날짜" value={adoptedDate} onChange={setAdoptedDate} />
-        <DateSelect
-          label="마지막 물 준 날짜"
-          value={lastWateredDate}
-          onChange={setLastWateredDate}
-        />
+      <div className="sticky bottom-0 z-10 bg-background pt-2 pb-1 mt-auto">
+        <Button className="w-full mt-2" type="submit" disabled={!hasChanges}>
+          변경 사항 저장
+        </Button>
       </div>
-
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-foreground/80">물주기 주기</label>
-        <SelectBox
-          value={wateringInterval}
-          placeholder="주기 선택"
-          options={DAY_MAX.map((o) => ({ ...o, label: `${o.value}일` }))}
-          onSelect={setWateringInterval}
-          className="py-0.5"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-foreground/80">영양제 주기</label>
-        <SelectBox
-          value={fertilizerIntervalMonth}
-          placeholder="주기 선택"
-          options={MONTH_MAX.map((o) => ({ ...o, label: `${o.value}개월` }))}
-          onSelect={setFertilizerIntervalMonth}
-          className="py-0.5"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-foreground/80">분갈이 주기</label>
-        <SelectBox
-          value={repottingIntervalMonth}
-          placeholder="주기 선택"
-          options={MONTH_MAX.map((o) => ({ ...o, label: `${o.value}개월` }))}
-          onSelect={setRepottingIntervalMonth}
-          className="py-0.5"
-        />
-      </div>
-
-      <Button className="w-full mt-1" type="submit" disabled={!hasChanges}>
-        변경 사항 저장
-      </Button>
     </form>
   )
 }
