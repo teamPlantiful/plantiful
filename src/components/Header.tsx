@@ -18,7 +18,6 @@ export default async function Header() {
     .join('; ')
 
   const res = await fetch(`${baseUrl}/apis/me`, {
-    cache: 'no-store',
     headers: {
       Cookie: cookieString,  // 직접 쿠키를 넣어줌
     }
