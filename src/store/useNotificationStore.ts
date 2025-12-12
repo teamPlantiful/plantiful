@@ -18,6 +18,7 @@ interface NotificationStore {
   notifications: AppNotification[]
   unreadCount: number
   addNotification: (input: {
+    id?: string
     title: string
     body?: string
     source: AppNotificationSource
@@ -39,8 +40,10 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
     }),
 
   addNotification: (input) => {
+    const id = input.id ?? crypto.randomUUID()
+
     const newItem: AppNotification = {
-      id: crypto.randomUUID(),
+      id,
       title: input.title,
       body: input.body,
       createdAt: new Date().toISOString(),

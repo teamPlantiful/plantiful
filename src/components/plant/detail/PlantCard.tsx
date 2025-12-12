@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import type React from 'react'
 import { Droplets } from 'lucide-react'
 import Button from '@/components/common/button'
 import { Card } from '@/components/common/card'
@@ -9,7 +10,7 @@ import type { PlantCardInfo } from '@/types/plant'
 import { updateWaterPlantAction } from '@/app/actions/plant/updateWaterPlantAction'
 import Image from 'next/image'
 import optimizeImage from '@/utils/optimizeImage'
-import { useNotificationStore } from '@/store/useNotificationStore'
+import { notifyInApp } from '@/utils/notifyInApp'
 import { toast } from '@/store/useToastStore'
 
 export default function PlantCard({
@@ -26,8 +27,6 @@ export default function PlantCard({
   priority = false,
 }: PlantCardInfo & { priority?: boolean }) {
   const [isWatering, setIsWatering] = useState(false)
-
-  const addNotification = useNotificationStore((s) => s.addNotification)
 
   const image = useMemo(() => {
     const rawUrl = coverImageUrl || defaultImageUrl || ''
@@ -57,6 +56,32 @@ export default function PlantCard({
 
   const imageSrc = image || 'https://placehold.co/64x64/EBF4E5/3B5935.png?text=%3F'
 
+  const handleWaterClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation()
+
+    if (isWateredToday) {
+      e.preventDefault()
+      toast(`${nickname}은 오늘 이미 물을 줬어요.`, 'info')
+      return
+    }
+
+    // 오늘 처음 물 주는 경우만 서버 액션 + 인앱알림
+    onWater?.(id)
+    setIsWatering(true)
+
+    // 알림센터 + 토스트 동시 처리
+    notifyInApp({
+      title: `${nickname} 물주기 완료 💧`,
+      body: '오늘 물을 줬어요.',
+      toastMessage: `${nickname} 물주기 완료`,
+      toastType: 'success',
+      event: 'WATERED',
+      plantId: id,
+    })
+
+    setTimeout(() => setIsWatering(false), 600)
+  }
+
   return (
     <Card
       role="button"
@@ -81,33 +106,7 @@ export default function PlantCard({
             size="icon"
             variant="ghost"
             disabled={isWatering}
-            onClick={(e) => {
-              e.stopPropagation()
-
-              if (isWateredToday) {
-                e.preventDefault()
-                toast(`${nickname || speciesName || '이 식물'}은 오늘 이미 물을 줬어요.`, 'info')
-                return
-              }
-
-              onWater?.(id)
-              setIsWatering(true)
-
-              addNotification({
-                title: `${nickname || speciesName || '식물'} 물주기 완료 💧`,
-                body: '오늘 물을 줬어요.',
-                source: 'local',
-                data: {
-                  type: 'WATERED',
-                  plantId: id,
-                },
-              })
-
-              //토스트로 피드백
-              toast(`${nickname || speciesName || '식물'} 물주기 완료`, 'success')
-
-              setTimeout(() => setIsWatering(false), 600)
-            }}
+            onClick={handleWaterClick}
             className={cn(
               'h-10 w-10 shrink-0 rounded-full transition-all hover:bg-secondary/20 hover:text-secondary',
               isWateredToday &&
