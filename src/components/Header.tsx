@@ -18,7 +18,6 @@ export default async function Header() {
     .join('; ')
 
   const res = await fetch(`${baseUrl}/apis/me`, {
-    cache: 'no-store',
     headers: {
       Cookie: cookieString,  // 직접 쿠키를 넣어줌
     }
@@ -31,14 +30,14 @@ export default async function Header() {
       <div className="max-w-200 mx-auto flex items-center justify-between">
         <div className="flex items-center gap-1">
           <Image
-            src="/plantiful-logo.png"
+            src="/plantiful-logo.webp"
             alt="Plantiful Logo"
             width={36}
             height={36}
             priority
             className="rounded-full select-none"
           />
-          <h1 
+          <h1
             className="text-2xl text-primary cursor-default select-none"
             style={{ fontFamily: "'Pacifico', cursive" }}
           >

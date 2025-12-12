@@ -40,8 +40,8 @@ export default function LoginOAuthForm() {
         onClick={() => handleSocialLogin('google')}
         disabled={loading}
       >
-        <Image 
-          src="/google-logo.png"
+        <Image
+          src="/google-logo.webp"
           alt="Google"
           width={18}
           height={18}
