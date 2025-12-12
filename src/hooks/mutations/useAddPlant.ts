@@ -9,7 +9,7 @@ interface AddPlantContext {
   tempId: string
   tempCoverImageUrl?: string
   tempDefaultImageUrl?: string
-  previousPlants?: Plant[]
+  previousData?: InfiniteData<CursorPagedResult>
 }
 
 const generateTempId = () => `temp-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
@@ -47,7 +47,9 @@ export const useAddPlant = () => {
       await queryClient.cancelQueries({ queryKey: queryKeys.plants.lists() })
 
       // 이전 데이터 저장 (롤백용)
-      const previousPlants = queryClient.getQueryData<Plant[]>(queryKeys.plants.list())
+      const previousData = queryClient.getQueryData<InfiniteData<CursorPagedResult>>(
+        queryKeys.plants.lists()
+      )
 
       const tempId = generateTempId()
 
@@ -121,7 +123,7 @@ export const useAddPlant = () => {
         }
       )
 
-      return { tempId, tempCoverImageUrl, tempDefaultImageUrl, previousPlants }
+      return { tempId, tempCoverImageUrl, tempDefaultImageUrl, previousData }
     },
 
     onSuccess: (newPlant, _variables, context) => {
@@ -152,8 +154,13 @@ export const useAddPlant = () => {
     },
 
     onError: (_error, _variables, context) => {
-      // 에러 시 전체 쿼리 무효화 (서버에서 다시 fetch)
-      queryClient.invalidateQueries({ queryKey: queryKeys.plants.lists() })
+      // 에러 시 이전 데이터로 롤백
+      if (context?.previousData) {
+        queryClient.setQueriesData(
+          { queryKey: queryKeys.plants.lists() },
+          context.previousData
+        )
+      }
     },
 
     onSettled: () => {
