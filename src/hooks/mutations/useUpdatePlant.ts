@@ -4,6 +4,7 @@ import { queryKeys } from '@/lib/queryKeys'
 import type { Plant, CursorPagedResult } from '@/types/plant'
 import { monthsToDays } from '@/utils/generateDay'
 import { addDays, normalizeToMidnight } from '@/utils/date'
+import { toast } from '@/store/useToastStore'
 
 interface UpdateIntervalsVariables {
   id: string
@@ -17,7 +18,7 @@ interface UpdateIntervalsVariables {
 }
 
 interface MutationContext {
-  previousData?: InfiniteData<CursorPagedResult>
+  previousQueries: [any, InfiniteData<CursorPagedResult> | undefined][]
   tempImageUrl?: string
 }
 
@@ -74,10 +75,10 @@ export const useUpdatePlant = () => {
     }) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.plants.lists() })
 
-      // 이전 데이터 저장 (롤백용)
-      const previousData = queryClient.getQueryData<InfiniteData<CursorPagedResult>>(
-        queryKeys.plants.lists()
-      )
+      // 모든 매칭되는 쿼리의 이전 데이터 저장 (롤백용)
+      const previousQueries = queryClient.getQueriesData<InfiniteData<CursorPagedResult>>({
+        queryKey: queryKeys.plants.lists(),
+      })
 
       const tempImageUrl = file ? URL.createObjectURL(file) : undefined
 
@@ -111,25 +112,25 @@ export const useUpdatePlant = () => {
           }
         }
       )
-      return { previousData, tempImageUrl }
+      return { previousQueries, tempImageUrl }
     },
 
-    onError: (_error, _variables, context) => {
+    onSuccess: () => {
+      // 서버 데이터로 즉시 refetch (이미지 URL 동기화)
+      queryClient.invalidateQueries({ queryKey: queryKeys.plants.lists() })
+    },
+
+    onError: (error, _variables, context) => {
+      console.error('식물 정보 수정 실패:', error)
+      toast('식물 정보 수정에 실패했습니다.', 'error')
       // 에러 시 이전 데이터로 롤백
-      if (context?.previousData) {
-        queryClient.setQueriesData(
-          { queryKey: queryKeys.plants.lists() },
-          context.previousData
-        )
+      if (context?.previousQueries) {
+        context.previousQueries.forEach(([queryKey, data]) => {
+          if (data) {
+            queryClient.setQueryData(queryKey, data)
+          }
+        })
       }
-    },
-
-    onSettled: () => {
-      // stale 표시만 (즉시 refetch 안 함, 다음 포커스/마운트 시 동기화)
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.plants.lists(),
-        refetchType: 'none',
-      })
     },
   })
 }

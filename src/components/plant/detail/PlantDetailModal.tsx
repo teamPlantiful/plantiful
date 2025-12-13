@@ -40,6 +40,7 @@ export default function PlantDetailModal({
   const [editing, setEditing] = useState(false)
   const [nickname, setNickname] = useState(plant.nickname)
   const [tab, setTab] = useState<TabKey>('status')
+  const [hasSettingsChanges, setHasSettingsChanges] = useState(false)
 
   // 모달 열릴 때 닉네임 상태 초기화
   useEffect(() => {
@@ -80,7 +81,7 @@ export default function PlantDetailModal({
               tabIndex={tab === 'status' ? 0 : -1}
               onClick={() => setTab('status')}
               className={cn(
-                'rounded-md text-sm py-1.5 font-medium transition-colors outline-none',
+                'rounded-md text-sm py-1.5 font-medium transition-colors outline-none cursor-pointer',
                 'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
                 tab === 'status'
                   ? 'bg-white text-foreground shadow-sm'
@@ -99,7 +100,7 @@ export default function PlantDetailModal({
               tabIndex={tab === 'settings' ? 0 : -1}
               onClick={() => setTab('settings')}
               className={cn(
-                'rounded-md text-sm py-1.5 font-medium transition-colors outline-none',
+                'rounded-md text-sm py-1.5 font-medium transition-colors outline-none cursor-pointer',
                 'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
                 tab === 'settings'
                   ? 'bg-white text-foreground shadow-sm'
@@ -120,25 +121,38 @@ export default function PlantDetailModal({
               confirmOnSave={confirmOnSave}
               onSaveIntervals={onSaveIntervals}
               onDone={() => setTab('status')}
+              onHasChangesChange={setHasSettingsChanges}
             />
           )}
         </ModalContent>
 
-        {/* 삭제 버튼 */}
+        {/* 하단 버튼 영역 */}
         <ModalFooter className="pt-4 shrink-0">
-          <Button
-            variant="destructive-outline"
-            className="w-full"
-            onClick={() => {
-              if (confirmOnDelete && !window.confirm('정말 삭제할까요?')) {
-                return
-              }
-              onDelete()
-            }}
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            삭제하기
-          </Button>
+          <div className="w-full space-y-2">
+            {tab === 'settings' && (
+              <Button
+                type="submit"
+                form="panel-settings"
+                className="w-full"
+                disabled={!hasSettingsChanges}
+              >
+                변경 사항 저장
+              </Button>
+            )}
+            <Button
+              variant="destructive-outline"
+              className="w-full"
+              onClick={() => {
+                if (confirmOnDelete && !window.confirm('정말 삭제할까요?')) {
+                  return
+                }
+                onDelete()
+              }}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              삭제하기
+            </Button>
+          </div>
         </ModalFooter>
       </div>
     </Modal>

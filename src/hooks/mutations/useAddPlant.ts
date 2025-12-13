@@ -4,12 +4,13 @@ import type { PlantData, Plant, CursorPagedResult } from '@/types/plant'
 import addPlantAction from '@/app/actions/plant/addPlantAction'
 import { monthsToDays } from '@/utils/generateDay'
 import { addDays, normalizeToMidnight, toDateOnlyISO } from '@/utils/date'
+import { toast } from '@/store/useToastStore'
 
 interface AddPlantContext {
   tempId: string
   tempCoverImageUrl?: string
   tempDefaultImageUrl?: string
-  previousData?: InfiniteData<CursorPagedResult>
+  previousQueries: [any, InfiniteData<CursorPagedResult> | undefined][]
 }
 
 const generateTempId = () => `temp-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
@@ -46,10 +47,10 @@ export const useAddPlant = () => {
       // 진행 중인 쿼리 취소
       await queryClient.cancelQueries({ queryKey: queryKeys.plants.lists() })
 
-      // 이전 데이터 저장 (롤백용)
-      const previousData = queryClient.getQueryData<InfiniteData<CursorPagedResult>>(
-        queryKeys.plants.lists()
-      )
+      // 모든 매칭되는 쿼리의 이전 데이터 저장 (롤백용)
+      const previousQueries = queryClient.getQueriesData<InfiniteData<CursorPagedResult>>({
+        queryKey: queryKeys.plants.lists(),
+      })
 
       const tempId = generateTempId()
 
@@ -123,7 +124,7 @@ export const useAddPlant = () => {
         }
       )
 
-      return { tempId, tempCoverImageUrl, tempDefaultImageUrl, previousData }
+      return { tempId, tempCoverImageUrl, tempDefaultImageUrl, previousQueries }
     },
 
     onSuccess: () => {
@@ -131,13 +132,16 @@ export const useAddPlant = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.plants.lists() })
     },
 
-    onError: (_error, _variables, context) => {
+    onError: (error, _variables, context) => {
+      console.error('식물 등록 실패:', error)
+      toast('식물 등록에 실패했습니다.', 'error')
       // 에러 시 이전 데이터로 롤백
-      if (context?.previousData) {
-        queryClient.setQueriesData(
-          { queryKey: queryKeys.plants.lists() },
-          context.previousData
-        )
+      if (context?.previousQueries) {
+        context.previousQueries.forEach(([queryKey, data]) => {
+          if (data) {
+            queryClient.setQueryData(queryKey, data)
+          }
+        })
       }
     },
   })

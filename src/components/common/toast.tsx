@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import cn from '@/lib/cn'
 import Button from '@/components/common/button'
-import { Card } from '@/components/common/card'
 
 export type ToastType = 'success' | 'error' | 'info' | 'default'
 
@@ -16,12 +15,10 @@ interface ToastProps {
 }
 
 const TOAST_STYLES: Record<ToastType, string> = {
-  default: '',
-  success:
-    'bg-green-50 border-green-200 text-green-800 dark:bg-green-900/30 dark:border-green-800 dark:text-green-200',
-  error:
-    'bg-red-50 border-red-200 text-red-800 dark:bg-red-900/30 dark:border-red-800 dark:text-red-200',
-  info: 'bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-200',
+  default: 'bg-card border-border text-card-foreground',
+  success: 'bg-green-50 border-green-200 text-green-800',
+  error: 'bg-red-50 border-red-200 text-red-800',
+  info: 'bg-blue-50 border-blue-200 text-blue-800',
 }
 
 const TOAST_ICONS = {
@@ -68,10 +65,10 @@ export default function Toast({ id, message, type, duration = 3000, onClose }: T
   }, [duration])
 
   return (
-    <Card
+    <div
       role="alert"
       className={cn(
-        'pointer-events-auto flex w-full max-w-sm items-center p-4 shadow-lg',
+        'pointer-events-auto flex w-full max-w-sm items-center p-4 shadow-lg rounded-2xl border',
         'transition-all duration-300 ease-in-out',
         isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0',
         TOAST_STYLES[type]
@@ -96,6 +93,6 @@ export default function Toast({ id, message, type, duration = 3000, onClose }: T
           />
         </svg>
       </Button>
-    </Card>
+    </div>
   )
 }
