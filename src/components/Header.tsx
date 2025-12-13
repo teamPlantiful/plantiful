@@ -46,9 +46,9 @@ export default async function Header() {
           </h1>
         </div>
         <div className="flex items-center gap-3">
+          {userName && <span className="text-sm text-muted-foreground">{userName} 님</span>}
+          <NotificationBell />
           <Link href="/mypage" aria-label="마이페이지">
-            {userName && <span className="text-sm text-muted-foreground">{userName} 님</span>}
-            <NotificationBell />
             <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center">
               <User className="h-4 w-4" />
             </div>
