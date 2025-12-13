@@ -3,9 +3,12 @@ import { queryKeys } from '@/lib/queryKeys'
 import { deletePlantAction } from '@/app/actions/plant/deletePlantAction'
 import type { CursorPagedResult } from '@/types/plant'
 import { toast } from '@/store/useToastStore'
+import { notifyInApp } from '@/utils/notifyInApp'
+import type { NotificationEvent } from '@/types/notification'
 
 interface DeletePlantVariables {
   id: string
+  nickname?: string
 }
 
 interface DeletePlantContext {
@@ -49,7 +52,18 @@ export const useDeletePlant = () => {
       return { previousQueries }
     },
 
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
+      const nickname = variables.nickname ?? '식물'
+
+      // 인앱 알림 + 토스
+      notifyInApp({
+        title: `${nickname} 삭제 완료 🗑️`,
+        body: '해당 식물과 관련된 기록이 삭제되었어요.',
+        toastMessage: `${nickname} 삭제 완료`,
+        toastType: 'success',
+        event: 'PLANT_DELETED' as NotificationEvent,
+        plantId: variables.id,
+      })
       // 서버 데이터로 즉시 refetch
       queryClient.invalidateQueries({ queryKey: queryKeys.plants.lists() })
     },

@@ -4,9 +4,12 @@ import { updateWaterPlantAction } from '@/app/actions/plant/updateWaterPlantActi
 import type { CursorPagedResult } from '@/types/plant'
 import { addDays, normalizeToMidnight } from '@/utils/date'
 import { toast } from '@/store/useToastStore'
+import { notifyInApp } from '@/utils/notifyInApp'
+import type { NotificationEvent } from '@/types/notification'
 
 interface WaterPlantVariables {
   id: string
+  nickname?: string
 }
 
 interface WaterPlantContext {
@@ -63,7 +66,17 @@ export const useWaterPlant = () => {
       return { previousQueries }
     },
 
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
+      const nickname = variables.nickname ?? '식물'
+
+      notifyInApp({
+        title: `${nickname} 물주기 완료 💧`,
+        body: '오늘 물을 줬어요.',
+        toastMessage: `${nickname} 물주기 완료`,
+        toastType: 'success',
+        event: 'WATERED' satisfies NotificationEvent,
+        plantId: variables.id,
+      })
       // 서버 데이터로 즉시 refetch
       queryClient.invalidateQueries({ queryKey: queryKeys.plants.lists() })
     },

@@ -3,7 +3,8 @@ import { queryKeys } from '@/lib/queryKeys'
 import { updatePlantNicknameAction } from '@/app/actions/plant/updatePlantNicknameAction'
 import type { CursorPagedResult } from '@/types/plant'
 import { toast } from '@/store/useToastStore'
-
+import { notifyInApp } from '@/utils/notifyInApp'
+import type { NotificationEvent } from '@/types/notification'
 interface UpdateNicknameVariables {
   id: string
   nickname: string
@@ -51,7 +52,17 @@ export const useUpdatePlantNickname = () => {
       return { previousQueries }
     },
 
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
+      const nickname = variables.nickname
+
+      notifyInApp({
+        title: '식물 이름 수정 완료 ✏️',
+        body: `이제 "${nickname}" 이름으로 기록할게요.`,
+        toastMessage: '식물 이름을 수정했어요.',
+        toastType: 'success',
+        event: 'NICKNAME_UPDATED' satisfies NotificationEvent,
+        plantId: variables.id,
+      })
       // 서버 데이터로 즉시 refetch
       queryClient.invalidateQueries({ queryKey: queryKeys.plants.lists() })
     },

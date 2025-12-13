@@ -19,10 +19,10 @@ interface PlantListSectionProps {
   fetchNextPage: () => void
   isFetchingNextPage: boolean
 
-  onWater: (id: string) => void
+  onWater: (id: string, nickname: string) => void
   onSaveNickname: (id: string, nextName: string) => void
-  onSaveIntervals: (id: string, next: PlantIntervalsUpdatePayload) => void
-  onDelete: (id: string) => void
+  onSaveIntervals: (id: string, nickname: string, next: PlantIntervalsUpdatePayload) => void
+  onDelete: (id: string, nickname: string) => void
 }
 
 export default function PlantListSection({
@@ -52,8 +52,8 @@ export default function PlantListSection({
     setOpen(true)
   }
 
-  const handleWater = (id: string) => {
-    onWater(id)
+  const handleWater = (id: string, nickname: string) => {
+    onWater(id, nickname)
   }
 
   const handleSaveNickname = async (nextName: string) => {
@@ -65,12 +65,12 @@ export default function PlantListSection({
 
   const handleSaveIntervals = (next: PlantIntervalsUpdatePayload) => {
     if (!selected) return
-    onSaveIntervals(selected.id, next)
+    onSaveIntervals(selected.id, selected.nickname, next)
   }
 
   const handleDelete = async () => {
     if (!selected) return
-    onDelete(selected.id)
+    onDelete(selected.id, selected.nickname)
     setOpen(false)
   }
 
