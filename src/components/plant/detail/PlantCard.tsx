@@ -65,7 +65,7 @@ export default function PlantCard({
 
     setIsWatering(true)
 
-    onWater?.(id)
+    onWater?.(id, nickname)
 
     setTimeout(() => setIsWatering(false), 600)
   }
