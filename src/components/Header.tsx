@@ -26,7 +26,7 @@ export default async function Header() {
   const { userName } = await res.json()
   
   return (
-    <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-4 shadow-soft">
+    <header className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-4 shadow-soft">
       <div className="max-w-200 mx-auto flex items-center justify-between">
         <div className="flex items-center gap-1">
           <Image
@@ -50,13 +50,13 @@ export default async function Header() {
                 {userName} 님
               </span>
             )}
-          <Link href="/mypage">
+          <Link href="/mypage" aria-label="마이페이지">
             <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center">
               <User className="h-4 w-4" />
             </div>
           </Link>
         </div>
       </div>
-    </div>
+    </header>
   )
 }

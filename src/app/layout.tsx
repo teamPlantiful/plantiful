@@ -39,8 +39,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ko" className={`${notoSansKR.variable} ${pacifico.variable}`}>
-      <body>{children}</body>
-      <Toaster />
+      <body>
+        <main>{children}</main>
+        <Toaster />
+      </body>
     </html>
   )
 }
