@@ -1,9 +1,10 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient, InfiniteData } from '@tanstack/react-query'
 import { updatePlantAction } from '@/app/actions/plant/updatePlantAction'
 import { queryKeys } from '@/lib/queryKeys'
-import type { Plant } from '@/types/plant'
+import type { Plant, CursorPagedResult } from '@/types/plant'
 import { monthsToDays } from '@/utils/generateDay'
 import { addDays, normalizeToMidnight } from '@/utils/date'
+import { toast } from '@/store/useToastStore'
 
 interface UpdateIntervalsVariables {
   id: string
@@ -17,7 +18,7 @@ interface UpdateIntervalsVariables {
 }
 
 interface MutationContext {
-  previousPlants?: Plant[]
+  previousQueries: [any, InfiniteData<CursorPagedResult> | undefined][]
   tempImageUrl?: string
 }
 
@@ -35,7 +36,7 @@ const calcNextWateringDate = (
 export const useUpdatePlant = () => {
   const queryClient = useQueryClient()
   const dateOnly = (d: Date) => d.toISOString().slice(0, 10)
-  return useMutation<void, Error, UpdateIntervalsVariables>({
+  return useMutation<void, Error, UpdateIntervalsVariables, MutationContext>({
     mutationFn: async ({
       id,
       wateringDays,
@@ -72,34 +73,64 @@ export const useUpdatePlant = () => {
       file,
       removeImage,
     }) => {
-      await queryClient.cancelQueries({ queryKey: queryKeys.plants.list() })
+      await queryClient.cancelQueries({ queryKey: queryKeys.plants.lists() })
 
-      const previousPlants = queryClient.getQueryData<Plant[]>(queryKeys.plants.list())
+      // 모든 매칭되는 쿼리의 이전 데이터 저장 (롤백용)
+      const previousQueries = queryClient.getQueriesData<InfiniteData<CursorPagedResult>>({
+        queryKey: queryKeys.plants.lists(),
+      })
 
       const tempImageUrl = file ? URL.createObjectURL(file) : undefined
 
-      queryClient.setQueryData<Plant[]>(queryKeys.plants.list(), (prev = []) =>
-        prev.map((plant) => {
-          if (plant.id !== id) return plant
+      // 무한 쿼리 캐시 낙관적 업데이트
+      queryClient.setQueriesData<InfiniteData<CursorPagedResult>>(
+        { queryKey: queryKeys.plants.lists() },
+        (old) => {
+          if (!old) return old
 
           const nextWateringDate = calcNextWateringDate(lastWateredAt, wateringDays)
+
           return {
-            ...plant,
-            wateringIntervalDays: wateringDays,
-            fertilizerIntervalDays: monthsToDays(fertilizerMonths),
-            repottingIntervalDays: monthsToDays(repottingMonths),
-            adoptedAt: adoptedAt.toISOString(),
-            lastWateredAt: lastWateredAt.toISOString(),
-            nextWateringDate,
-            coverImageUrl: removeImage ? null : (tempImageUrl ?? plant.coverImageUrl),
+            ...old,
+            pages: old.pages.map((page) => ({
+              ...page,
+              items: page.items.map((plant) => {
+                if (plant.id !== id) return plant
+
+                return {
+                  ...plant,
+                  wateringIntervalDays: wateringDays,
+                  fertilizerIntervalDays: monthsToDays(fertilizerMonths),
+                  repottingIntervalDays: monthsToDays(repottingMonths),
+                  adoptedAt: adoptedAt.toISOString(),
+                  lastWateredAt: lastWateredAt.toISOString(),
+                  nextWateringDate,
+                  coverImageUrl: removeImage ? null : (tempImageUrl ?? plant.coverImageUrl),
+                }
+              }),
+            })),
           }
-        })
+        }
       )
-      return { previousPlants, tempImageUrl }
+      return { previousQueries, tempImageUrl }
     },
 
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.plants.list() })
+    onSuccess: () => {
+      // 서버 데이터로 즉시 refetch (이미지 URL 동기화)
+      queryClient.invalidateQueries({ queryKey: queryKeys.plants.lists() })
+    },
+
+    onError: (error, _variables, context) => {
+      console.error('식물 정보 수정 실패:', error)
+      toast('식물 정보 수정에 실패했습니다.', 'error')
+      // 에러 시 이전 데이터로 롤백
+      if (context?.previousQueries) {
+        context.previousQueries.forEach(([queryKey, data]) => {
+          if (data) {
+            queryClient.setQueryData(queryKey, data)
+          }
+        })
+      }
     },
   })
 }

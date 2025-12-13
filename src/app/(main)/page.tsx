@@ -1,5 +1,5 @@
-import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
+import { createClient } from '@/utils/supabase/server'
 import Header from '@/components/Header'
 import DashboardClient from './dashboard-client'
 import { Suspense } from 'react'

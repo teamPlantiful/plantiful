@@ -1,11 +1,14 @@
 'use client'
 
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+
 import TodayPlantSection from '@/components/home/TodayPlantSection'
 import PlantListSection from '@/components/home/PlantListSection'
 import PlantFilterBar from '@/components/home/PlantFilterBar'
 import PlantRegisterFab from '@/components/home/PlantRegisterFab'
-import { useState } from 'react'
-import { useGetPlants, type SortKey } from '@/hooks/queries/useGetPlants'
+
+import { useInfiniteMain } from '@/hooks/queries/useInfiniteMain'
+import type { SortKey } from '@/types/plant'
 import { useWaterPlant } from '@/hooks/mutations/useWaterPlant'
 import { useUpdatePlantNickname } from '@/hooks/mutations/useUpdatePlantNickname'
 import { useUpdatePlant } from '@/hooks/mutations/useUpdatePlant'
@@ -13,23 +16,53 @@ import { useDeletePlant } from '@/hooks/mutations/useDeletePlant'
 import type { PlantIntervalsUpdatePayload } from '@/components/plant/detail/PlantDetailSettingsTab'
 
 export default function DashboardClient() {
-  const [search, setSearch] = useState('')
-  const [sort, setSort] = useState<SortKey>('recent')
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
 
-  //상태를 서버에 넘김
-  const { data: plants = [], isLoading } = useGetPlants({ search, sort })
+  // URL 기반 상태
+  const search = searchParams.get('q') ?? ''
+  const sort = (searchParams.get('sort') as SortKey) ?? 'recent'
+
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteMain({
+    q: search,
+    sort,
+  })
+
+  const plants = data?.pages.flatMap((page) => page.items) ?? []
 
   const waterPlant = useWaterPlant()
   const updateNickname = useUpdatePlantNickname()
   const updateIntervals = useUpdatePlant()
   const deletePlant = useDeletePlant()
 
+  // URL 업데이트
+  const setParams = (next: Partial<{ q: string; sort: SortKey }>) => {
+    const sp = new URLSearchParams(searchParams?.toString() ?? '')
+
+    const merged = {
+      q: next.q ?? search,
+      sort: next.sort ?? sort,
+    }
+
+    if (!merged.q) sp.delete('q')
+    else sp.set('q', merged.q)
+
+    if (!merged.sort || merged.sort === 'recent') sp.delete('sort')
+    else sp.set('sort', merged.sort)
+
+    const query = sp.toString()
+    const url = query ? `${pathname}?${query}` : pathname
+
+    router.push(url)
+  }
+
   const handleSearchChange = (value: string) => {
-    setSearch(value)
+    setParams({ q: value })
   }
 
   const handleSortChange = (value: SortKey) => {
-    setSort(value)
+    setParams({ sort: value })
   }
 
   const handleWater = (id: string) => {
@@ -61,24 +94,29 @@ export default function DashboardClient() {
     <div>
       <div className="max-w-190 mx-auto p-4 space-y-6 md:space-y-8 animate-fade-in">
         <TodayPlantSection plants={plants} />
+
         <PlantFilterBar
           search={search}
           sort={sort}
           onSearchChange={handleSearchChange}
           onSortChange={handleSortChange}
         />
+
         <PlantListSection
           plants={plants}
           isLoading={isLoading}
           search={search}
           sort={sort}
+          isFetchingNextPage={isFetchingNextPage}
+          hasNextPage={hasNextPage}
+          fetchNextPage={fetchNextPage}
           onWater={handleWater}
           onSaveNickname={handleSaveNickname}
           onSaveIntervals={handleSaveIntervals}
           onDelete={handleDelete}
         />
       </div>
-      <PlantRegisterFab />
+      <PlantRegisterFab existingPlants={plants} />
     </div>
   )
 }

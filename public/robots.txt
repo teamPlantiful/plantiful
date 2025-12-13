@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /apis/
+Disallow: /mypage
+Disallow: /account/
+Disallow: /authError

@@ -11,9 +11,9 @@ import { DateSelect } from './DateSelect'
 import { CareGuideSection } from '../../shared/CareGuideSection'
 import { generateDayOptions, generateMonthOptions } from '@/utils/date'
 import { useAddPlant } from '@/hooks/mutations/useAddPlant'
-import { useGetPlants } from '@/hooks/queries/useGetPlants'
 import cn from '@/lib/cn'
 import { useEffect } from 'react'
+import type { Plant } from '@/types/plant'
 
 interface FormData {
   nickname: string
@@ -28,6 +28,7 @@ interface FormData {
 interface PlantRegisterContentProps {
   selectedSpecies: PlantSpeciesInfo
   initialNickname?: string
+  existingPlants?: Plant[]
   onComplete: () => void
   onDirtyChange?: (isDirty: boolean) => void
 }
@@ -38,11 +39,11 @@ const monthOptions = generateMonthOptions()
 export default function PlantRegisterContent({
   selectedSpecies,
   initialNickname = '',
+  existingPlants = [],
   onComplete,
   onDirtyChange,
 }: PlantRegisterContentProps) {
   const { mutate: addPlant } = useAddPlant()
-  const { data: existingPlants } = useGetPlants()
 
   const {
     register,
@@ -124,7 +125,7 @@ export default function PlantRegisterContent({
               validate: (value) => {
                 const nickname = value.trim()
                 const isDuplicate = existingPlants?.some(
-                  (plant) => plant.nickname.toLowerCase() === nickname.toLowerCase()
+                  (plant: Plant) => plant.nickname.toLowerCase() === nickname.toLowerCase()
                 )
                 return isDuplicate ? '이미 존재하는 이름입니다.' : true
               },

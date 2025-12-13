@@ -1,15 +1,16 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient, InfiniteData } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/queryKeys'
-import type { PlantData, Plant } from '@/types/plant'
+import type { PlantData, Plant, CursorPagedResult } from '@/types/plant'
 import addPlantAction from '@/app/actions/plant/addPlantAction'
 import { monthsToDays } from '@/utils/generateDay'
 import { addDays, normalizeToMidnight, toDateOnlyISO } from '@/utils/date'
+import { toast } from '@/store/useToastStore'
 
 interface AddPlantContext {
   tempId: string
   tempCoverImageUrl?: string
   tempDefaultImageUrl?: string
-  previousPlants?: Plant[]
+  previousQueries: [any, InfiniteData<CursorPagedResult> | undefined][]
 }
 
 const generateTempId = () => `temp-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
@@ -46,8 +47,10 @@ export const useAddPlant = () => {
       // 진행 중인 쿼리 취소
       await queryClient.cancelQueries({ queryKey: queryKeys.plants.lists() })
 
-      // 이전 데이터 저장 (롤백용)
-      const previousPlants = queryClient.getQueryData<Plant[]>(queryKeys.plants.list())
+      // 모든 매칭되는 쿼리의 이전 데이터 저장 (롤백용)
+      const previousQueries = queryClient.getQueriesData<InfiniteData<CursorPagedResult>>({
+        queryKey: queryKeys.plants.lists(),
+      })
 
       const tempId = generateTempId()
 
@@ -99,47 +102,47 @@ export const useAddPlant = () => {
         updatedAt: now,
       }
 
-      // 낙관적 데이터 추가
-      queryClient.setQueriesData<Plant[]>({ queryKey: queryKeys.plants.lists() }, (prev = []) => [
-        optimisticPlant,
-        ...prev,
-      ])
+      // 무한 쿼리 캐시 낙관적 업데이트
+      queryClient.setQueriesData<InfiniteData<CursorPagedResult>>(
+        { queryKey: queryKeys.plants.lists() },
+        (old) => {
+          if (!old) return old
 
-      return { tempId, tempCoverImageUrl, tempDefaultImageUrl, previousPlants }
-    },
-
-    onSuccess: (newPlant, _variables, context) => {
-      // 서버 데이터로 교체하되, 이미지 URL은 유지
-      queryClient.setQueriesData<Plant[]>({ queryKey: queryKeys.plants.lists() }, (prev = []) =>
-        prev.map((plant) => {
-          if (plant.id === context?.tempId) {
-            return {
-              ...newPlant,
-              coverImageUrl: plant.coverImageUrl,
-              defaultImageUrl: plant.defaultImageUrl,
-            }
+          return {
+            ...old,
+            pages: old.pages.map((page, index) => {
+              // 첫 페이지에만 새 식물 추가
+              if (index === 0) {
+                return {
+                  ...page,
+                  items: [optimisticPlant, ...page.items],
+                }
+              }
+              return page
+            }),
           }
-          return plant
-        })
+        }
       )
+
+      return { tempId, tempCoverImageUrl, tempDefaultImageUrl, previousQueries }
     },
 
-    onError: (_error, _variables, context) => {
-      // 에러 시 이전 상태로 복구 (모든 list 쿼리)
-      if (context?.previousPlants) {
-        queryClient.setQueriesData<Plant[]>(
-          { queryKey: queryKeys.plants.lists() },
-          context.previousPlants
-        )
+    onSuccess: () => {
+      // 서버 데이터로 즉시 refetch (올바른 정렬 순서 적용)
+      queryClient.invalidateQueries({ queryKey: queryKeys.plants.lists() })
+    },
+
+    onError: (error, _variables, context) => {
+      console.error('식물 등록 실패:', error)
+      toast('식물 등록에 실패했습니다.', 'error')
+      // 에러 시 이전 데이터로 롤백
+      if (context?.previousQueries) {
+        context.previousQueries.forEach(([queryKey, data]) => {
+          if (data) {
+            queryClient.setQueryData(queryKey, data)
+          }
+        })
       }
-    },
-
-    onSettled: () => {
-      // stale 표시만 (즉시 refetch 안 함, 다음 포커스/마운트 시 동기화)
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.plants.lists(),
-        refetchType: 'none',
-      })
     },
   })
 }

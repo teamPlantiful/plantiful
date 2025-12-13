@@ -3,7 +3,6 @@ import { Pencil } from 'lucide-react'
 import Input from '@/components/common/input'
 import Button from '@/components/common/button'
 import type { Plant } from '@/types/plant'
-import { updatePlantNicknameAction } from '@/app/actions/plant/updatePlantNicknameAction'
 
 interface PlantDetailHeaderProps {
   plant: Plant
@@ -28,11 +27,11 @@ export default function PlantDetailHeader({
     <div className="flex items-center gap-2 w-full">
       {editing ? (
         <form
-          action={updatePlantNicknameAction}
           className="flex w-full items-center gap-2"
           onSubmit={(e) => {
+            e.preventDefault()
+
             if (confirmOnSave && !window.confirm('변경하시겠습니까?')) {
-              e.preventDefault()
               return
             }
 
@@ -44,7 +43,6 @@ export default function PlantDetailHeader({
             setEditing(false)
           }}
         >
-          <input type="hidden" name="id" value={plant.id} />
           <div className="w-full min-w-0">
             <Input
               name="nickname"
