@@ -7,10 +7,8 @@ import Button from '@/components/common/button'
 import { Card } from '@/components/common/card'
 import cn from '@/lib/cn'
 import type { PlantCardInfo } from '@/types/plant'
-import { updateWaterPlantAction } from '@/app/actions/plant/updateWaterPlantAction'
 import Image from 'next/image'
 import optimizeImage from '@/utils/optimizeImage'
-import { notifyInApp } from '@/utils/notifyInApp'
 import { toast } from '@/store/useToastStore'
 
 export default function PlantCard({
@@ -65,19 +63,9 @@ export default function PlantCard({
       return
     }
 
-    // 오늘 처음 물 주는 경우만 서버 액션 + 인앱알림
-    onWater?.(id)
     setIsWatering(true)
 
-    // 알림센터 + 토스트 동시 처리
-    notifyInApp({
-      title: `${nickname} 물주기 완료 💧`,
-      body: '오늘 물을 줬어요.',
-      toastMessage: `${nickname} 물주기 완료`,
-      toastType: 'success',
-      event: 'WATERED',
-      plantId: id,
-    })
+    onWater?.(id)
 
     setTimeout(() => setIsWatering(false), 600)
   }
@@ -97,26 +85,24 @@ export default function PlantCard({
     >
       <div className="flex items-center gap-4">
         {/* 물주기 버튼 */}
-        <form action={updateWaterPlantAction}>
-          <input type="hidden" name="id" value={id} />
-          <Button
-            type="submit"
-            aria-label="물주기"
-            title="물주기"
-            size="icon"
-            variant="ghost"
-            disabled={isWatering}
-            onClick={handleWaterClick}
-            className={cn(
-              'h-10 w-10 shrink-0 rounded-full transition-all hover:bg-secondary/20 hover:text-secondary',
-              isWateredToday &&
-                'cursor-not-allowed opacity-60 hover:bg-transparent hover:text-muted-foreground',
-              isWatering && 'animate-water-drop'
-            )}
-          >
-            <Droplets className="h-5 w-5" />
-          </Button>
-        </form>
+        <input type="hidden" name="id" value={id} />
+        <Button
+          type="submit"
+          aria-label="물주기"
+          title="물주기"
+          size="icon"
+          variant="ghost"
+          disabled={isWatering}
+          onClick={handleWaterClick}
+          className={cn(
+            'h-10 w-10 shrink-0 rounded-full transition-all hover:bg-secondary/20 hover:text-secondary',
+            isWateredToday &&
+              'cursor-not-allowed opacity-60 hover:bg-transparent hover:text-muted-foreground',
+            isWatering && 'animate-water-drop'
+          )}
+        >
+          <Droplets className="h-5 w-5" />
+        </Button>
         <div className="min-w-0 flex-1">
           <div className="mb-1 truncate text-base font-semibold text-foreground">{nickname}</div>
           {speciesName ? (
@@ -128,9 +114,9 @@ export default function PlantCard({
           <div
             className={cn(
               'mt-2 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium transition',
-              ddayVariant === 'urgent' && 'bg-destructive/10 text-red-700',
+              ddayVariant === 'urgent' && 'bg-destructive/10 text-destructive',
               ddayVariant === 'warning' && 'bg-accent/30 text-foreground',
-              ddayVariant === 'normal' && 'bg-secondary/20 text-primary'
+              ddayVariant === 'normal' && 'bg-secondary/20 text-secondary'
             )}
           >
             {ddayWater >= 0 ? `D-${ddayWater}` : `D+${Math.abs(ddayWater)}`}
