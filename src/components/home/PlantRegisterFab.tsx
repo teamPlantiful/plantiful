@@ -17,6 +17,7 @@ export default function PlantRegisterFab({ existingPlants }: PlantRegisterFabPro
       <Fab
         onClick={() => setIsModalOpen(true)}
         className="fixed right-[calc((100vw-57rem)/2-1rem)] max-md:right-6 max-lg:right-8 "
+        aria-label="새 식물 등록"
       />
       <PlantRegisterModal open={isModalOpen} onOpenChange={setIsModalOpen} existingPlants={existingPlants} />
     </>
