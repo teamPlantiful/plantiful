@@ -21,7 +21,7 @@ interface PlantListSectionProps {
 
   onWater: (id: string, nickname: string) => void
   onSaveNickname: (id: string, nextName: string) => void
-  onSaveIntervals: (id: string, next: PlantIntervalsUpdatePayload) => void
+  onSaveIntervals: (id: string, nickname: string, next: PlantIntervalsUpdatePayload) => void
   onDelete: (id: string, nickname: string) => void
 }
 
@@ -65,7 +65,7 @@ export default function PlantListSection({
 
   const handleSaveIntervals = (next: PlantIntervalsUpdatePayload) => {
     if (!selected) return
-    onSaveIntervals(selected.id, next)
+    onSaveIntervals(selected.id, selected.nickname, next)
   }
 
   const handleDelete = async () => {

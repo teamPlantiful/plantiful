@@ -73,9 +73,10 @@ export default function DashboardClient() {
     updateNickname.mutate({ id, nickname })
   }
 
-  const handleSaveIntervals = (id: string, next: PlantIntervalsUpdatePayload) => {
+  const handleSaveIntervals = (id: string, nickname: string, next: PlantIntervalsUpdatePayload) => {
     updateIntervals.mutate({
       id,
+      nickname,
       wateringDays: next.wateringDays,
       fertilizerMonths: next.fertilizerMonths,
       repottingMonths: next.repottingMonths,
