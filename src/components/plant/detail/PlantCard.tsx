@@ -114,9 +114,9 @@ export default function PlantCard({
           <div
             className={cn(
               'mt-2 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium transition',
-              ddayVariant === 'urgent' && 'bg-destructive/10 text-destructive',
+              ddayVariant === 'urgent' && 'bg-destructive/10 text-red-700',
               ddayVariant === 'warning' && 'bg-accent/30 text-foreground',
-              ddayVariant === 'normal' && 'bg-secondary/20 text-secondary'
+              ddayVariant === 'normal' && 'bg-secondary/20 text-primary'
             )}
           >
             {ddayWater >= 0 ? `D-${ddayWater}` : `D+${Math.abs(ddayWater)}`}
