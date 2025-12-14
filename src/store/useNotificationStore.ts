@@ -1,19 +1,8 @@
 'use client'
 
 import { create } from 'zustand'
-
-export type AppNotificationSource = 'fcm' | 'local'
-
-export interface AppNotification {
-  id: string
-  title: string
-  body?: string
-  createdAt: string
-  read: boolean
-  source: AppNotificationSource
-  data?: Record<string, string>
-}
-
+import { AppNotificationSource } from '@/types/notification'
+import { AppNotification } from '@/types/notification'
 interface NotificationStore {
   notifications: AppNotification[]
   unreadCount: number

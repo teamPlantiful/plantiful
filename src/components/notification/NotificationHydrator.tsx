@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { useNotificationStore, type AppNotification } from '@/store/useNotificationStore'
+import { useNotificationStore } from '@/store/useNotificationStore'
+import { AppNotification } from '@/types/notification'
 
 interface Props {
   initialNotifications: AppNotification[]
