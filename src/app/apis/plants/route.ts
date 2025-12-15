@@ -5,6 +5,7 @@ import { normalizeSearch, isChosungOnly } from '@/utils/normalizeSearch'
 
 const TABLE_NAME = 'plants'
 const DEFAULT_LIMIT = 10
+const MAX_DATE_VALUE = '9999-12-31'
 
 type SortKey = 'water' | 'name' | 'recent'
 
@@ -69,7 +70,7 @@ export async function GET(request: NextRequest) {
         if (sortParam === 'name') {
           nextCursor = lastItem.nickname
         } else if (sortParam === 'water') {
-          const dateVal = lastItem.nextWateringDate ?? '9999-12-31'
+          const dateVal = lastItem.nextWateringDate ?? MAX_DATE_VALUE
           nextCursor = `${dateVal}_${lastItem.createdAt}_${lastItem.id}`
         } else {
           nextCursor = lastItem.createdAt
