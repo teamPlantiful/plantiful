@@ -5,7 +5,8 @@ import addPlantAction from '@/app/actions/plant/addPlantAction'
 import { monthsToDays } from '@/utils/generateDay'
 import { addDays, normalizeToMidnight, toDateOnlyISO } from '@/utils/date'
 import { toast } from '@/store/useToastStore'
-
+import { notifyInApp } from '@/utils/notifyInApp'
+import type { NotificationEvent } from '@/types/notification'
 interface AddPlantContext {
   tempId: string
   tempCoverImageUrl?: string
@@ -127,7 +128,17 @@ export const useAddPlant = () => {
       return { tempId, tempCoverImageUrl, tempDefaultImageUrl, previousQueries }
     },
 
-    onSuccess: () => {
+    onSuccess: (createdPlant) => {
+      const nickname = createdPlant.nickname ?? '새 식물'
+
+      notifyInApp({
+        title: `${nickname} 등록 완료 🌱`,
+        body: '새 식물이 식물 목록에 추가되었어요.',
+        toastMessage: `${nickname} 등록 완료`,
+        toastType: 'success',
+        event: 'PLANT_CREATED' satisfies NotificationEvent, // 🔸 NotificationEvent에 'CREATED' 추가 필요
+        plantId: createdPlant.id,
+      })
       // 서버 데이터로 즉시 refetch (올바른 정렬 순서 적용)
       queryClient.invalidateQueries({ queryKey: queryKeys.plants.lists() })
     },
