@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 import { createClient } from '@/utils/supabase/server'
 
 export async function GET() {
@@ -18,9 +19,12 @@ export async function GET() {
     .eq('id', user.id)
     .single()
 
-  // 닉네임 반환
+  const cookieStore = await cookies()
+  const currentProvider = cookieStore.get('current_provider')?.value
+  
+  // 닉네임, 현재 플랫폼 반환
   return NextResponse.json({
     userName: profileData?.name ?? '',
-    provider: user.app_metadata?.provider ?? 'email',
+    provider: currentProvider,
   })
 }
