@@ -95,7 +95,7 @@ export default function PlantCard({
             className={cn(
               'h-10 w-10 shrink-0 rounded-full transition-all hover:bg-secondary/20 hover:text-secondary',
               isWateredToday &&
-                'cursor-not-allowed opacity-60 hover:bg-transparent hover:text-muted-foreground',
+                'cursor-not-allowed bg-blue-500 text-white hover:bg-blue-600 opacity-100 cursor-default shadow-sm',
               isWatering && 'animate-water-drop'
             )}
           >
