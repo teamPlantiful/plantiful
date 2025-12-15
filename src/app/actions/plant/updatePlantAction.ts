@@ -67,8 +67,6 @@ export async function updatePlantAction(formData: FormData): Promise<void> {
     }
   }
 
-  console.log('incoming lastWateredAtRaw:', lastWateredAtRaw)
-
   const { error } = await supabase
     .from('plants')
     .update(updatePayload)
@@ -78,13 +76,4 @@ export async function updatePlantAction(formData: FormData): Promise<void> {
   if (error) {
     throw new Error(error.message ?? '식물 정보 변경에 실패했습니다.')
   }
-
-  const { data: after } = await supabase
-    .from('plants')
-    .select('last_watered_at')
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .single()
-
-  console.log('saved last_watered_at:', after?.last_watered_at)
 }
