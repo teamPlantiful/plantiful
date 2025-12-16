@@ -10,7 +10,7 @@ import type { PlantCardInfo } from '@/types/plant'
 import Image from 'next/image'
 import optimizeImage from '@/utils/optimizeImage'
 import { toast } from '@/store/useToastStore'
-import { updateWaterPlantAction } from '@/app/actions/plant'
+import { updateWaterPlantAction } from '@/app/actions/plant/updateWaterPlantAction'
 
 export default function PlantCard({
   id,
