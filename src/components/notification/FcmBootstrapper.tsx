@@ -7,8 +7,6 @@ export default function FcmBootstrapper() {
 
   if (error) {
     console.error('FCM registration error:', error)
-  } else if (token) {
-    console.log('FCM registered token:', token)
   }
 
   return null

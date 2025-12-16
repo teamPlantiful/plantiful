@@ -3,7 +3,7 @@ import { updatePlantAction } from '@/app/actions/plant/updatePlantAction'
 import { queryKeys } from '@/lib/queryKeys'
 import type { Plant, CursorPagedResult } from '@/types/plant'
 import { monthsToDays } from '@/utils/generateDay'
-import { addDays, normalizeToMidnight } from '@/utils/date'
+import { addDays, normalizeToMidnight, toDateOnlyISO } from '@/utils/date'
 import { toast } from '@/store/useToastStore'
 import { notifyInApp } from '@/utils/notifyInApp'
 import type { NotificationEvent } from '@/types/notification'
@@ -37,7 +37,6 @@ const calcNextWateringDate = (
 
 export const useUpdatePlant = () => {
   const queryClient = useQueryClient()
-  const dateOnly = (d: Date) => d.toISOString().slice(0, 10)
   return useMutation<void, Error, UpdateIntervalsVariables, MutationContext>({
     mutationFn: async ({
       id,
@@ -54,8 +53,8 @@ export const useUpdatePlant = () => {
       formData.set('wateringInterval', String(wateringDays))
       formData.set('fertilizerIntervalMonth', String(fertilizerMonths))
       formData.set('repottingIntervalMonth', String(repottingMonths))
-      formData.set('adoptedAt', dateOnly(adoptedAt))
-      formData.set('lastWateredAt', dateOnly(lastWateredAt))
+      formData.set('adoptedAt', toDateOnlyISO(adoptedAt))
+      formData.set('lastWateredAt', toDateOnlyISO(lastWateredAt))
       formData.set('removeImage', removeImage ? 'true' : 'false')
 
       if (file) {

@@ -1,7 +1,6 @@
 'use server'
 
 import { requireAuth } from '@/utils/supabase/helpers'
-import { revalidatePath } from 'next/cache'
 import { clamp, monthsToDays } from '@/utils/generateDay'
 import { addDays, toDateOnlyISO } from '@/utils/date'
 
@@ -31,14 +30,13 @@ export async function updatePlantAction(formData: FormData): Promise<void> {
   }
 
   if (typeof adoptedAtRaw === 'string' && adoptedAtRaw) {
-    updatePayload.adopted_at = toDateOnlyISO(adoptedAtRaw)
+    updatePayload.adopted_at = adoptedAtRaw
   }
 
   if (typeof lastWateredAtRaw === 'string' && lastWateredAtRaw) {
-    const lastDateISO = toDateOnlyISO(lastWateredAtRaw)
-    updatePayload.last_watered_at = lastDateISO
+    updatePayload.last_watered_at = lastWateredAtRaw
 
-    const nextDate = addDays(lastDateISO, wateringDays)
+    const nextDate = addDays(lastWateredAtRaw, wateringDays)
     updatePayload.next_watering_date = toDateOnlyISO(nextDate)
   }
 
@@ -78,6 +76,4 @@ export async function updatePlantAction(formData: FormData): Promise<void> {
   if (error) {
     throw new Error(error.message ?? '식물 정보 변경에 실패했습니다.')
   }
-
-  revalidatePath('/')
 }
