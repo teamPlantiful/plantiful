@@ -10,6 +10,7 @@ import type { PlantCardInfo } from '@/types/plant'
 import Image from 'next/image'
 import optimizeImage from '@/utils/optimizeImage'
 import { toast } from '@/store/useToastStore'
+import { updateWaterPlantAction } from '@/app/actions/plant/updateWaterPlantAction'
 
 export default function PlantCard({
   id,
@@ -85,24 +86,27 @@ export default function PlantCard({
     >
       <div className="flex items-center gap-4">
         {/* 물주기 버튼 */}
-        <input type="hidden" name="id" value={id} />
-        <Button
-          type="submit"
-          aria-label="물주기"
-          title="물주기"
-          size="icon"
-          variant="ghost"
-          disabled={isWatering}
-          onClick={handleWaterClick}
-          className={cn(
-            'h-10 w-10 shrink-0 rounded-full transition-all hover:bg-secondary/20 hover:text-secondary',
-            isWateredToday &&
-              'cursor-not-allowed opacity-60 hover:bg-transparent hover:text-muted-foreground',
-            isWatering && 'animate-water-drop'
-          )}
-        >
-          <Droplets className="h-5 w-5" />
-        </Button>
+        <form action={updateWaterPlantAction}>
+          <input type="hidden" name="id" value={id} />
+          <Button
+            type="submit"
+            aria-label="물주기"
+            title="물주기"
+            size="icon"
+            variant="ghost"
+            disabled={isWatering}
+            onClick={handleWaterClick}
+            className={cn(
+              'h-10 w-10 shrink-0 rounded-full transition-all hover:bg-secondary/20 hover:text-secondary',
+              isWateredToday &&
+                'cursor-not-allowed bg-blue-500 text-white hover:bg-blue-600 opacity-100 cursor-default shadow-sm',
+              isWatering && 'animate-water-drop'
+            )}
+          >
+            <Droplets className="h-5 w-5" />
+          </Button>
+        </form>
+        {/* 텍스트(닉네임/종명 + D-Day) */}
         <div className="min-w-0 flex-1">
           <div className="mb-1 truncate text-base font-semibold text-foreground">{nickname}</div>
           {speciesName ? (

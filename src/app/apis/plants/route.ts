@@ -5,6 +5,7 @@ import { normalizeSearch, isChosungOnly } from '@/utils/normalizeSearch'
 
 const TABLE_NAME = 'plants'
 const DEFAULT_LIMIT = 10
+const MAX_DATE_VALUE = '9999-12-31'
 
 type SortKey = 'water' | 'name' | 'recent'
 
@@ -37,8 +38,16 @@ export async function GET(request: NextRequest) {
     } else if (sortParam === 'water') {
       query = query
         .order('next_watering_date', { ascending: true })
-        .order('id', { ascending: true })
-      if (cursor) query = query.gt('next_watering_date', cursor)
+        .order('created_at', { ascending: false })
+        .order('id', { ascending: false })
+      if (cursor) {
+        const [lastDate, lastCreated, lastId] = cursor.split('_')
+        query = query.or(
+          `next_watering_date.gt.${lastDate},` +
+            `and(next_watering_date.eq.${lastDate},created_at.lt.${lastCreated}),` +
+            `and(next_watering_date.eq.${lastDate},created_at.eq.${lastCreated},id.lt.${lastId})`
+        )
+      }
     } else {
       query = query.order('created_at', { ascending: false }).order('id', { ascending: false })
       if (cursor) query = query.lt('created_at', cursor)
@@ -61,7 +70,8 @@ export async function GET(request: NextRequest) {
         if (sortParam === 'name') {
           nextCursor = lastItem.nickname
         } else if (sortParam === 'water') {
-          nextCursor = lastItem.nextWateringDate ?? undefined
+          const dateVal = lastItem.nextWateringDate ?? MAX_DATE_VALUE
+          nextCursor = `${dateVal}_${lastItem.createdAt}_${lastItem.id}`
         } else {
           nextCursor = lastItem.createdAt
         }
