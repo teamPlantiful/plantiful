@@ -20,7 +20,7 @@ export async function GET() {
     .single()
 
   const cookieStore = await cookies()
-  const currentProvider = cookieStore.get('current_provider')?.value
+  const currentProvider = cookieStore.get('current_provider')?.value || 'email'
   
   // 닉네임, 현재 플랫폼 반환
   return NextResponse.json({
