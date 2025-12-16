@@ -164,7 +164,7 @@ export default function PlantDetailSettingsTab({
       <input type="hidden" name="removeImage" value={removeImage ? 'true' : 'false'} />
 
       {/* 스크롤되는 콘텐츠 영역 */}
-      <div className="space-y-4 p-3">
+      <div className="space-y-4">
         <div className="space-y-2">
           <p className="-mt-3 text-sm font-medium text-foreground/80">사진</p>
 
@@ -205,7 +205,7 @@ export default function PlantDetailSettingsTab({
             placeholder="주기 선택"
             options={DAY_MAX.map((o) => ({ ...o, label: `${o.value}일` }))}
             onSelect={setWateringInterval}
-            className="py-1 w-90"
+            className="p-1"
           />
         </div>
 
@@ -216,7 +216,7 @@ export default function PlantDetailSettingsTab({
             placeholder="주기 선택"
             options={MONTH_MAX.map((o) => ({ ...o, label: `${o.value}개월` }))}
             onSelect={setFertilizerIntervalMonth}
-            className="py-1 w-90"
+            className="p-1"
           />
         </div>
 
@@ -227,7 +227,7 @@ export default function PlantDetailSettingsTab({
             placeholder="주기 선택"
             options={MONTH_MAX.map((o) => ({ ...o, label: `${o.value}개월` }))}
             onSelect={setRepottingIntervalMonth}
-            className="py-1 w-90"
+            className="p-1"
           />
         </div>
       </div>
