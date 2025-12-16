@@ -13,6 +13,7 @@ import PlantDetailStatusTab from '@/components/plant/detail/PlantDetailStatusTab
 import PlantDetailSettingsTab, {
   PlantIntervalsUpdatePayload,
 } from '@/components/plant/detail/PlantDetailSettingsTab'
+import { Alert } from '@/components/common/alert'
 
 type TabKey = 'status' | 'settings'
 
@@ -42,11 +43,16 @@ export default function PlantDetailModal({
   const [tab, setTab] = useState<TabKey>('status')
   const [hasSettingsChanges, setHasSettingsChanges] = useState(false)
 
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+
   // 모달 열릴 때 닉네임 상태 초기화
   useEffect(() => {
     if (!open) return
     setEditing(false)
     setNickname(plant.nickname)
+    setDeleteOpen(false)
+    setDeleting(false)
   }, [open, plant.nickname])
 
   return (
@@ -143,7 +149,8 @@ export default function PlantDetailModal({
               variant="destructive-outline"
               className="w-full"
               onClick={() => {
-                if (confirmOnDelete && !window.confirm('정말 삭제할까요?')) {
+                if (confirmOnDelete) {
+                  setDeleteOpen(true)
                   return
                 }
                 onDelete()
@@ -153,6 +160,26 @@ export default function PlantDetailModal({
               삭제하기
             </Button>
           </div>
+
+          <Alert
+            open={deleteOpen}
+            onClose={() => !deleting && setDeleteOpen(false)}
+            title="정말 삭제할까요?"
+            description="삭제하면 되돌릴 수 없어요."
+            confirmText="삭제"
+            cancelText="취소"
+            variant="destructive"
+            loading={deleting}
+            onConfirm={async () => {
+              try {
+                setDeleting(true)
+                await Promise.resolve(onDelete())
+                setDeleteOpen(false)
+              } finally {
+                setDeleting(false)
+              }
+            }}
+          />
         </ModalFooter>
       </div>
     </Modal>
