@@ -2,8 +2,8 @@
 
 import { requireAuth } from '@/utils/supabase/helpers'
 import { toDbFormat, fromDbFormat, prepareCardForInsert } from '@/utils/plant'
-import { revalidatePath } from 'next/cache'
 import type { Plant } from '@/types/plant'
+import saveDefaultImage from '@/utils/saveDefaultImage'
 
 const TABLE_NAME = 'plants'
 const STORAGE_BUCKET = 'plant-images'
@@ -23,8 +23,8 @@ export default async function addPlantAction(formData: FormData): Promise<Plant>
       startDate: new Date(parsedData.startDate),
     }
 
-    // 이미지 업로드 처리
-    let coverImageUrl = plantData.image
+    // 1. 사용자 업로드 이미지 처리
+    let coverImageUrl = null
     if (file) {
       // 파일 업로드
       const fileExt = file.name?.split('.').pop()
@@ -47,8 +47,25 @@ export default async function addPlantAction(formData: FormData): Promise<Plant>
       coverImageUrl = publicUrl
     }
 
-    // 데이터 준비
-    const plantToInsert = prepareCardForInsert({ ...plantData, image: coverImageUrl }, user.id)
+    // 2. 농사로 API 기본 이미지를 Storage에 저장
+    let defaultImageUrl = plantData.species.imageUrl
+    if (defaultImageUrl) {
+      const savedUrl = await saveDefaultImage(plantData.species.cntntsNo, defaultImageUrl, supabase)
+      defaultImageUrl = savedUrl || defaultImageUrl // 실패 시 원본 URL 사용
+    }
+
+    // 3. 데이터 준비
+    const plantToInsert = prepareCardForInsert(
+      {
+        ...plantData,
+        species: {
+          ...plantData.species,
+          imageUrl: defaultImageUrl,
+        },
+        image: coverImageUrl,
+      },
+      user.id
+    )
     const dbPlant = toDbFormat(plantToInsert)
 
     // DB 삽입
@@ -57,9 +74,6 @@ export default async function addPlantAction(formData: FormData): Promise<Plant>
     if (error) throw error
 
     const plant = fromDbFormat(data)
-
-    // 캐시 무효화
-    revalidatePath('/')
 
     return plant
   } catch (error) {

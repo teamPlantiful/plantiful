@@ -5,17 +5,20 @@ import cn from '@/lib/cn'
 import useImageUpload from '@/hooks/useImageUpload'
 import { useRef, useEffect } from 'react'
 import Image from 'next/image'
+import optimizeImage from '@/utils/optimizeImage'
 
 interface ImageUploadProps {
   className?: string
   onImageChange?: (file: File | null) => void
   initialImageUrl?: string | null
+  name?: string
 }
 
 export default function ImageUpload({
   className,
   onImageChange,
   initialImageUrl,
+  name,
 }: ImageUploadProps) {
   const { previewUrl, setPreviewUrl, handleImageSelect, handleImageRemove, error } =
     useImageUpload()
@@ -52,17 +55,24 @@ export default function ImageUpload({
         ref={inputRef}
         type="file"
         accept="image/*"
+        name={name}
         onChange={handleChange}
         className="hidden"
       />
 
       {previewUrl ? (
-        <div className="relative group w-32 h-32">
-          <Image src={previewUrl} alt="Preview" fill className="rounded-lg object-cover" />
+        <div className="relative w-32 h-32">
+          <Image
+            src={optimizeImage(previewUrl, 256) || previewUrl}
+            alt="Preview"
+            fill
+            sizes="128px"
+            className="rounded-lg object-contain"
+          />
           <button
             type="button"
             onClick={handleRemove}
-            className="absolute -top-2 -right-2 cursor-pointer bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute -top-2 -right-2 cursor-pointer bg-destructive text-destructive-foreground rounded-full p-1 shadow-md"
           >
             <X className="h-4 w-4" />
           </button>

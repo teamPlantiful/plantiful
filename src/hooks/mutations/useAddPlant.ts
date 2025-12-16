@@ -1,26 +1,38 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient, InfiniteData } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/queryKeys'
-import type { PlantData, Plant } from '@/types/plant'
+import type { PlantData, Plant, CursorPagedResult } from '@/types/plant'
 import addPlantAction from '@/app/actions/plant/addPlantAction'
+import { monthsToDays } from '@/utils/generateDay'
+import { addDays, normalizeToMidnight, toDateOnlyISO } from '@/utils/date'
+import { toast } from '@/store/useToastStore'
+import { notifyInApp } from '@/utils/notifyInApp'
+import type { NotificationEvent } from '@/types/notification'
+interface AddPlantContext {
+  tempId: string
+  tempCoverImageUrl?: string
+  tempDefaultImageUrl?: string
+  previousQueries: [any, InfiniteData<CursorPagedResult> | undefined][]
+}
 
-interface MutationContext {
-  previousPlants?: Plant[]
-  tempImageUrl?: string
+const generateTempId = () => `temp-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+
+const calcNextWateringDate = (lastWateredAt: Date, wateringDays: number): string => {
+  const base = normalizeToMidnight(lastWateredAt)
+  const next = addDays(base, wateringDays)
+  return toDateOnlyISO(next)
 }
 
 export const useAddPlant = () => {
   const queryClient = useQueryClient()
 
-  return useMutation<Plant, Error, PlantData, MutationContext>({
+  return useMutation<Plant, Error, PlantData, AddPlantContext>({
     mutationFn: async (plantData: PlantData) => {
       const formData = new FormData()
 
-      // 파일이 있으면 추가
       if (plantData.uploadedImage) {
         formData.append('file', plantData.uploadedImage)
       }
 
-      // 나머지 데이터를 JSON으로 추가 (Date를 ISO string으로 변환)
       const { uploadedImage, lastWateredDate, startDate, ...rest } = plantData
       const dataToSend = {
         ...rest,
@@ -29,104 +41,119 @@ export const useAddPlant = () => {
       }
       formData.append('data', JSON.stringify(dataToSend))
 
-      // Server Action 호출
       return await addPlantAction(formData)
     },
-    onMutate: async (newPlant) => {
-      // 진행 중인 리페치 취소
-      await queryClient.cancelQueries({ queryKey: queryKeys.plants.list() })
 
-      // 이전 데이터 백업
-      const previousPlants = queryClient.getQueryData<Plant[]>(queryKeys.plants.list())
+    onMutate: async (plantData) => {
+      // 진행 중인 쿼리 취소
+      await queryClient.cancelQueries({ queryKey: queryKeys.plants.lists() })
 
-      // 임시 이미지 URL 생성 (사용자가 업로드한 파일)
-      const tempImageUrl = newPlant.uploadedImage
-        ? URL.createObjectURL(newPlant.uploadedImage)
-        : newPlant.image || ''
-
-      // 임시 Plant 객체 생성
-      const tempPlant: Plant = {
-        id: 'temp-' + Date.now(),
-        userId: 'temp',
-        cntntsNo: newPlant.species.cntntsNo,
-        koreanName: newPlant.species.koreanName,
-        scientificName: newPlant.species.scientificName || null,
-        defaultImageUrl: newPlant.image || null,
-        coverImageUrl: tempImageUrl,
-        nickname: newPlant.nickname || newPlant.species.koreanName,
-        wateringIntervalDays: newPlant.wateringInterval,
-        fertilizerIntervalDays: newPlant.fertilizerInterval,
-        repottingIntervalDays: newPlant.repottingInterval,
-        adoptedAt: newPlant.startDate.toISOString(),
-        lastWateredAt: newPlant.lastWateredDate.toISOString(),
-        nextWateringDate: new Date(
-          newPlant.lastWateredDate.getTime() + newPlant.wateringInterval * 24 * 60 * 60 * 1000
-        ).toISOString(),
-        lightDemandCode: newPlant.species.careInfo?.lightDemandCode || null,
-        waterCycleCode: newPlant.species.careInfo?.waterCycleCode || null,
-        temperatureCode: newPlant.species.careInfo?.temperatureCode || null,
-        humidityCode: newPlant.species.careInfo?.humidityCode || null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      }
-
-      // 임시 데이터 즉시 추가 (최신 등록순이므로 맨 앞에)
-      queryClient.setQueryData<Plant[]>(queryKeys.plants.list(), (old = []) => [tempPlant, ...old])
-
-      // 롤백을 위해 이전 데이터 반환
-      return { previousPlants, tempImageUrl }
-    },
-    onError: (_err, _newPlant, context) => {
-      // 실패 시 이전 상태로 롤백
-      if (context?.previousPlants) {
-        queryClient.setQueryData(queryKeys.plants.list(), context.previousPlants)
-      }
-      // 임시 이미지 URL 정리
-      if (context?.tempImageUrl && context.tempImageUrl.startsWith('blob:')) {
-        URL.revokeObjectURL(context.tempImageUrl)
-      }
-    },
-    onSuccess: (data, _variables, context) => {
-      // 1단계: 먼저 blob URL 유지하면서 ID 업데이트 (즉시 반응)
-      queryClient.setQueryData<Plant[]>(queryKeys.plants.list(), (old = []) => {
-        return old.map((plant) => {
-          if (plant.id.startsWith('temp-')) {
-            return {
-              ...data,
-              coverImageUrl: plant.coverImageUrl, // blob URL 유지
-            }
-          }
-          return plant
-        })
+      // 모든 매칭되는 쿼리의 이전 데이터 저장 (롤백용)
+      const previousQueries = queryClient.getQueriesData<InfiniteData<CursorPagedResult>>({
+        queryKey: queryKeys.plants.lists(),
       })
 
-      // 2단계: 서버 이미지가 있으면 preload 후 교체
-      if (data.coverImageUrl && context?.tempImageUrl) {
-        const img = new Image()
-        img.onload = () => {
-          // 이미지 캐시 완료 후 서버 URL로 교체
-          setTimeout(() => {
-            queryClient.setQueryData<Plant[]>(queryKeys.plants.list(), (old = []) => {
-              return old.map((plant) => {
-                if (plant.id === data.id) {
-                  return data
-                }
-                return plant
-              })
-            })
+      const tempId = generateTempId()
 
-            // blob URL 정리
-            if (context?.tempImageUrl?.startsWith('blob:')) {
-              URL.revokeObjectURL(context.tempImageUrl)
-            }
-          }, 500)
-        }
-        img.src = data.coverImageUrl
+      // Data URL 생성
+      let tempCoverImageUrl: string | undefined
+      let tempDefaultImageUrl: string | undefined
+
+      // 사용자 업로드 이미지 → Data URL
+      if (plantData.uploadedImage) {
+        tempCoverImageUrl = await new Promise<string>((resolve) => {
+          const reader = new FileReader()
+          reader.onloadend = () => resolve(reader.result as string)
+          reader.readAsDataURL(plantData.uploadedImage!)
+        })
       }
+
+      // API 이미지는 원본 URL 사용
+      if (plantData.species.imageUrl && !plantData.uploadedImage) {
+        tempDefaultImageUrl = plantData.species.imageUrl
+      }
+
+      const now = new Date().toISOString()
+      const lastWateredAt = toDateOnlyISO(plantData.lastWateredDate)
+      const adoptedAt = plantData.startDate.toISOString()
+
+      const optimisticPlant: Plant = {
+        id: tempId,
+        userId: 'temp-user',
+        cntntsNo: plantData.species.cntntsNo,
+        koreanName: plantData.species.koreanName,
+        scientificName: plantData.species.scientificName || null,
+        defaultImageUrl: tempDefaultImageUrl || plantData.species.imageUrl || null,
+        coverImageUrl: tempCoverImageUrl || null,
+        nickname: plantData.nickname,
+        wateringIntervalDays: plantData.wateringInterval,
+        fertilizerIntervalDays: monthsToDays(plantData.fertilizerInterval),
+        repottingIntervalDays: monthsToDays(plantData.repottingInterval),
+        adoptedAt,
+        lastWateredAt,
+        nextWateringDate: calcNextWateringDate(
+          plantData.lastWateredDate,
+          plantData.wateringInterval
+        ),
+        lightDemandCode: plantData.species.careInfo?.lightDemandCode || null,
+        waterCycleCode: plantData.species.careInfo?.waterCycleCode || null,
+        temperatureCode: plantData.species.careInfo?.temperatureCode || null,
+        humidityCode: plantData.species.careInfo?.humidityCode || null,
+        createdAt: now,
+        updatedAt: now,
+      }
+
+      // 무한 쿼리 캐시 낙관적 업데이트
+      queryClient.setQueriesData<InfiniteData<CursorPagedResult>>(
+        { queryKey: queryKeys.plants.lists() },
+        (old) => {
+          if (!old) return old
+
+          return {
+            ...old,
+            pages: old.pages.map((page, index) => {
+              // 첫 페이지에만 새 식물 추가
+              if (index === 0) {
+                return {
+                  ...page,
+                  items: [optimisticPlant, ...page.items],
+                }
+              }
+              return page
+            }),
+          }
+        }
+      )
+
+      return { tempId, tempCoverImageUrl, tempDefaultImageUrl, previousQueries }
     },
-    onSettled: () => {
-      // 성공/실패 관계없이 서버와 동기화
-      queryClient.invalidateQueries({ queryKey: queryKeys.plants.list() })
+
+    onSuccess: (createdPlant) => {
+      const nickname = createdPlant.nickname ?? '새 식물'
+
+      notifyInApp({
+        title: `${nickname} 등록 완료 🌱`,
+        body: '새 식물이 식물 목록에 추가되었어요.',
+        toastMessage: `${nickname} 등록 완료`,
+        toastType: 'success',
+        event: 'PLANT_CREATED' satisfies NotificationEvent, // 🔸 NotificationEvent에 'CREATED' 추가 필요
+        plantId: createdPlant.id,
+      })
+      // 서버 데이터로 즉시 refetch (올바른 정렬 순서 적용)
+      queryClient.invalidateQueries({ queryKey: queryKeys.plants.lists() })
+    },
+
+    onError: (error, _variables, context) => {
+      console.error('식물 등록 실패:', error)
+      toast('식물 등록에 실패했습니다.', 'error')
+      // 에러 시 이전 데이터로 롤백
+      if (context?.previousQueries) {
+        context.previousQueries.forEach(([queryKey, data]) => {
+          if (data) {
+            queryClient.setQueryData(queryKey, data)
+          }
+        })
+      }
     },
   })
 }

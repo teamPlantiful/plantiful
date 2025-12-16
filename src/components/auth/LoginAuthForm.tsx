@@ -78,7 +78,7 @@ export default function LoginAuthForm() {
         />
       </div>
       {/* 비밀번호 입력 */}
-      <div className="pb-3">
+      <div>
         <label 
           className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
           htmlFor="password"

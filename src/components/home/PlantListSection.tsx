@@ -1,31 +1,36 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useState, useMemo } from 'react'
 import PlantCard from '@/components/plant/detail/PlantCard'
 import PlantDetailModal from '@/components/plant/detail/PlantDetailModal'
-import { normalizeSearch, isChosungOnly } from '@/utils/normalizeSearch'
-import { calculateDday } from '@/utils/date'
+import { addDays, calculateDday } from '@/utils/date'
 import type { Plant } from '@/types/plant'
+import type { PlantIntervalsUpdatePayload } from '@/components/plant/detail/PlantDetailSettingsTab'
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
+import PlantListSkeleton from '@/components/plant/search/PlantListSkeleton'
 
 interface PlantListSectionProps {
   plants: Plant[]
   isLoading: boolean
   search?: string
   sort?: 'water' | 'name' | 'recent'
-  onWater: (id: string) => void
+
+  hasNextPage: boolean
+  fetchNextPage: () => void
+  isFetchingNextPage: boolean
+
+  onWater: (id: string, nickname: string) => void
   onSaveNickname: (id: string, nextName: string) => void
-  onSaveIntervals: (
-    id: string,
-    next: { watering: number; fertilizer: number; repotting: number }
-  ) => void
-  onDelete: (id: string) => void
+  onSaveIntervals: (id: string, nickname: string, next: PlantIntervalsUpdatePayload) => void
+  onDelete: (id: string, nickname: string) => void
 }
 
 export default function PlantListSection({
   plants,
   isLoading,
-  search = '',
-  sort = 'water',
+  hasNextPage,
+  fetchNextPage,
+  isFetchingNextPage,
   onWater,
   onSaveNickname,
   onSaveIntervals,
@@ -34,46 +39,9 @@ export default function PlantListSection({
   const [open, setOpen] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
-  const sortedPlants = useMemo(() => {
-    // 1. 검색 필터링 (완성형 + 초성 둘 다 지원)
-    const { original: searchWord, chosung: searchCho } = normalizeSearch(search)
-    const useChosungSearch = isChosungOnly(searchWord)
+  const loadMoreRef = useInfiniteScroll({ hasNextPage, fetchNextPage })
 
-    let filtered = plants
-
-    if (searchWord) {
-      filtered = plants.filter((plant) => {
-        const nickname = plant.nickname ?? ''
-        const { original: nickWord, chosung: nickCho } = normalizeSearch(nickname)
-
-        if (!nickWord) return false
-
-        if (useChosungSearch) {
-          return nickCho.includes(searchWord)
-        }
-
-        return nickWord.includes(searchWord)
-      })
-    }
-
-    // 2. 정렬
-    if (sort === 'name') {
-      return [...filtered].sort((a, b) => a.nickname.localeCompare(b.nickname))
-    }
-    if (sort === 'recent') {
-      return [...filtered].sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      )
-    }
-
-    // 물주기 우선 정렬
-    return [...filtered].sort((a, b) => {
-      const ddayA = a.nextWateringDate ? calculateDday(a.nextWateringDate) : Infinity
-      const ddayB = b.nextWateringDate ? calculateDday(b.nextWateringDate) : Infinity
-      return ddayA - ddayB
-    })
-  }, [plants, sort, search])
-
+  // 선택된 식물
   const selected = useMemo(
     () => plants.find((p) => p.id === selectedId) ?? null,
     [plants, selectedId]
@@ -84,11 +52,10 @@ export default function PlantListSection({
     setOpen(true)
   }
 
-  const handleWater = (id: string) => {
-    onWater(id)
+  const handleWater = (id: string, nickname: string) => {
+    onWater(id, nickname)
   }
 
-  // 모달 내의 액션들
   const handleSaveNickname = async (nextName: string) => {
     if (!selected) return
     const trimmed = nextName.trim()
@@ -96,53 +63,79 @@ export default function PlantListSection({
     onSaveNickname(selected.id, trimmed)
   }
 
-  const handleSaveIntervals = async (next: {
-    watering: number
-    fertilizer: number
-    repotting: number
-  }) => {
+  const handleSaveIntervals = (next: PlantIntervalsUpdatePayload) => {
     if (!selected) return
-    onSaveIntervals(selected.id, next)
+    onSaveIntervals(selected.id, selected.nickname, next)
   }
 
   const handleDelete = async () => {
     if (!selected) return
-    onDelete(selected.id)
+    onDelete(selected.id, selected.nickname)
     setOpen(false)
   }
+
+  // 초기 로딩 시 skeleton UI
+  if (isLoading) {
+    return (
+      <section className="grid gap-3 grid-cols-1 md:grid-cols-2">
+        <PlantListSkeleton count={6} />
+      </section>
+    )
+  }
+
+  // 빈 목록
+  if (plants.length === 0) {
+    return (
+      <section className="py-10 text-center">
+        <p className="text-muted-foreground">아직 등록된 식물이 없습니다 🌱</p>
+      </section>
+    )
+  }
+
   return (
     <>
-      {/* 식물 목록 */}
-      {isLoading ? (
-        <section>
-          <p className="text-center text-muted-foreground">식물 목록을 불러오는 중...</p>
-        </section>
-      ) : sortedPlants.length === 0 ? (
-        <section>
-          <p className="text-center text-muted-foreground">아직 등록된 식물이 없습니다</p>
-        </section>
-      ) : (
+      <div className="space-y-6">
         <section className="grid gap-3 grid-cols-1 md:grid-cols-2">
-          {sortedPlants.map((p) => {
-            const ddayWater = p.nextWateringDate ? calculateDday(p.nextWateringDate) : 0
+          {plants.map((p, index) => {
+            const ddayWater =
+              p.lastWateredAt && p.wateringIntervalDays
+                ? calculateDday(addDays(p.lastWateredAt, p.wateringIntervalDays))
+                : 0
 
             return (
               <PlantCard
                 key={p.id}
                 id={p.id}
                 nickname={p.nickname}
-                speciesName={p.scientificName}
+                speciesName={p.koreanName}
                 coverImageUrl={p.coverImageUrl}
                 defaultImageUrl={p.defaultImageUrl}
                 ddayWater={ddayWater}
+                lastWateredAt={p.lastWateredAt}
                 onClick={handleCardClick}
                 onWater={handleWater}
                 className="w-full"
+                priority={index < 2}
               />
             )
           })}
         </section>
-      )}
+
+        {/* Infinite Scroll */}
+        {hasNextPage && (
+          <div ref={loadMoreRef} className="w-full">
+            {isFetchingNextPage ? (
+              <div className="mt-4 grid gap-3 grid-cols-1 md:grid-cols-2">
+                <PlantListSkeleton count={2} />
+              </div>
+            ) : (
+              <div className="h-4" />
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* 상세 모달 */}
       {open && selected && (
         <PlantDetailModal
           open={open}
