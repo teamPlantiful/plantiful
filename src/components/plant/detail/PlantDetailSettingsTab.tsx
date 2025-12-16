@@ -7,7 +7,7 @@ import { DateSelect } from '@/components/plant/register/DateSelect'
 import ImageUpload from '@/components/plant/register/ImageUpload'
 
 import type { Plant } from '@/types/plant'
-import { generateDayOptions, generateMonthOptions } from '@/utils/date'
+import { generateDayOptions, generateMonthOptions, toDateOnlyISO } from '@/utils/date'
 import { clamp, daysToMonths } from '@/utils/generateDay'
 
 export interface PlantIntervalsUpdatePayload {
@@ -159,8 +159,8 @@ export default function PlantDetailSettingsTab({
       <input type="hidden" name="wateringInterval" value={wateringInterval} />
       <input type="hidden" name="fertilizerIntervalMonth" value={fertilizerIntervalMonth} />
       <input type="hidden" name="repottingIntervalMonth" value={repottingIntervalMonth} />
-      <input type="hidden" name="adoptedAt" value={adoptedDate.toISOString()} />
-      <input type="hidden" name="lastWateredAt" value={lastWateredDate.toISOString()} />
+      <input type="hidden" name="adoptedAt" value={toDateOnlyISO(adoptedDate)} />
+      <input type="hidden" name="lastWateredAt" value={toDateOnlyISO(lastWateredDate)} />
       <input type="hidden" name="removeImage" value={removeImage ? 'true' : 'false'} />
 
       {/* 스크롤되는 콘텐츠 영역 */}

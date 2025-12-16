@@ -1,14 +1,16 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import type React from 'react'
 import { Droplets } from 'lucide-react'
 import Button from '@/components/common/button'
 import { Card } from '@/components/common/card'
 import cn from '@/lib/cn'
 import type { PlantCardInfo } from '@/types/plant'
-import { updateWaterPlantAction } from '@/app/actions/plant/updateWaterPlantAction'
 import Image from 'next/image'
 import optimizeImage from '@/utils/optimizeImage'
+import { toast } from '@/store/useToastStore'
+import { updateWaterPlantAction } from '@/app/actions/plant'
 
 export default function PlantCard({
   id,
@@ -53,6 +55,22 @@ export default function PlantCard({
 
   const imageSrc = image || 'https://placehold.co/64x64/EBF4E5/3B5935.png?text=%3F'
 
+  const handleWaterClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation()
+
+    if (isWateredToday) {
+      e.preventDefault()
+      toast(`${nickname}은 오늘 이미 물을 줬어요.`, 'info')
+      return
+    }
+
+    setIsWatering(true)
+
+    onWater?.(id, nickname)
+
+    setTimeout(() => setIsWatering(false), 600)
+  }
+
   return (
     <Card
       role="button"
@@ -77,21 +95,7 @@ export default function PlantCard({
             size="icon"
             variant="ghost"
             disabled={isWatering}
-            onClick={(e) => {
-              e.stopPropagation()
-
-              if (isWateredToday) {
-                e.preventDefault()
-                alert(`${nickname}: 오늘 이미 물을 줬습니다.`)
-                return
-              }
-              alert(`${nickname}: 물을 줬습니다.`)
-
-              onWater?.(id)
-              setIsWatering(true)
-
-              setTimeout(() => setIsWatering(false), 600)
-            }}
+            onClick={handleWaterClick}
             className={cn(
               'h-10 w-10 shrink-0 rounded-full transition-all hover:bg-secondary/20 hover:text-secondary',
               isWateredToday &&

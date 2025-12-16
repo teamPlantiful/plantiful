@@ -65,17 +65,18 @@ export default function DashboardClient() {
     setParams({ sort: value })
   }
 
-  const handleWater = (id: string) => {
-    waterPlant.mutate({ id })
+  const handleWater = (id: string, nickname: string) => {
+    waterPlant.mutate({ id, nickname })
   }
 
   const handleSaveNickname = (id: string, nickname: string) => {
     updateNickname.mutate({ id, nickname })
   }
 
-  const handleSaveIntervals = (id: string, next: PlantIntervalsUpdatePayload) => {
+  const handleSaveIntervals = (id: string, nickname: string, next: PlantIntervalsUpdatePayload) => {
     updateIntervals.mutate({
       id,
+      nickname,
       wateringDays: next.wateringDays,
       fertilizerMonths: next.fertilizerMonths,
       repottingMonths: next.repottingMonths,
@@ -86,8 +87,8 @@ export default function DashboardClient() {
     })
   }
 
-  const handleDelete = (id: string) => {
-    deletePlant.mutate({ id })
+  const handleDelete = (id: string, nickname: string) => {
+    deletePlant.mutate({ id, nickname })
   }
 
   return (

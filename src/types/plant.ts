@@ -33,7 +33,7 @@ export interface PlantCardInfo {
   defaultImageUrl?: string | null
   ddayWater: number
   lastWateredAt?: string | null
-  onWater: (id: string) => void
+  onWater: (id: string, nickname: string) => void
   onClick: (id: string) => void
   className?: string
 }

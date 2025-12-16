@@ -3,11 +3,13 @@ import { updatePlantAction } from '@/app/actions/plant/updatePlantAction'
 import { queryKeys } from '@/lib/queryKeys'
 import type { Plant, CursorPagedResult } from '@/types/plant'
 import { monthsToDays } from '@/utils/generateDay'
-import { addDays, normalizeToMidnight } from '@/utils/date'
+import { addDays, normalizeToMidnight, toDateOnlyISO } from '@/utils/date'
 import { toast } from '@/store/useToastStore'
-
+import { notifyInApp } from '@/utils/notifyInApp'
+import type { NotificationEvent } from '@/types/notification'
 interface UpdateIntervalsVariables {
   id: string
+  nickname?: string
   wateringDays: number
   fertilizerMonths: number
   repottingMonths: number
@@ -35,7 +37,6 @@ const calcNextWateringDate = (
 
 export const useUpdatePlant = () => {
   const queryClient = useQueryClient()
-  const dateOnly = (d: Date) => d.toISOString().slice(0, 10)
   return useMutation<void, Error, UpdateIntervalsVariables, MutationContext>({
     mutationFn: async ({
       id,
@@ -52,8 +53,8 @@ export const useUpdatePlant = () => {
       formData.set('wateringInterval', String(wateringDays))
       formData.set('fertilizerIntervalMonth', String(fertilizerMonths))
       formData.set('repottingIntervalMonth', String(repottingMonths))
-      formData.set('adoptedAt', dateOnly(adoptedAt))
-      formData.set('lastWateredAt', dateOnly(lastWateredAt))
+      formData.set('adoptedAt', toDateOnlyISO(adoptedAt))
+      formData.set('lastWateredAt', toDateOnlyISO(lastWateredAt))
       formData.set('removeImage', removeImage ? 'true' : 'false')
 
       if (file) {
@@ -115,7 +116,17 @@ export const useUpdatePlant = () => {
       return { previousQueries, tempImageUrl }
     },
 
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
+      const nickname = variables.nickname ?? '식물'
+
+      notifyInApp({
+        title: `${nickname} 관리 정보 수정 완료 🌿`,
+        body: '식물 관리 정보를 업데이트했어요.',
+        toastMessage: '식물 관리 정보가 수정되었어요.',
+        toastType: 'success',
+        event: 'PLANT_UPDATED' satisfies NotificationEvent,
+        plantId: variables.id,
+      })
       // 서버 데이터로 즉시 refetch (이미지 URL 동기화)
       queryClient.invalidateQueries({ queryKey: queryKeys.plants.lists() })
     },

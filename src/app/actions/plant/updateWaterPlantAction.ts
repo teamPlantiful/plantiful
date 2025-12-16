@@ -14,7 +14,7 @@ export async function updateWaterPlantAction(formData: FormData): Promise<void> 
   // 1) 현재 식물의 마지막 물준 날짜 조회
   const { data: plant, error: fetchError } = await supabase
     .from('plants')
-    .select('last_watered_at')
+    .select('last_watered_at, nickname')
     .eq('id', id)
     .eq('user_id', user.id)
     .single()
@@ -46,6 +46,4 @@ export async function updateWaterPlantAction(formData: FormData): Promise<void> 
   if (updateError) {
     throw new Error(updateError.message ?? '물주기 업데이트에 실패했습니다.')
   }
-
-  //revalidatePath('/')
 }
