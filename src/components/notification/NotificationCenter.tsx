@@ -42,10 +42,13 @@ export default function NotificationCenter({ open, onClose }: NotificationCenter
   }
 
   return (
-    <div className="fixed inset-0 z-[140] flex items-start justify-end">
-      <div className="absolute inset-0" onClick={onClose} />
+  <div className="fixed inset-0 z-[140] flex items-start justify-center px-4 sm:justify-end sm:px-2">
+    <div className="absolute inset-0" onClick={onClose} />
 
-      <Card className="relative z-[150] mt-16 mr-4 w-full max-w-sm border border-border bg-background shadow-lg">
+    <Card
+      className="relative z-[150] mt-16 w-full max-w-[calc(100vw-2rem)] sm:max-w-sm sm:mr-4 border border-border bg-background shadow-lg
+      "
+    >
         <div className="flex items-center justify-between border-b px-4 py-3">
           <div className="flex items-center gap-2">
             <span className="font-semibold text-sm">알림 센터</span>
