@@ -19,7 +19,9 @@ export async function GET() {
     .eq('id', user.id)
     .single()
 
+  // 플랫폼 가져오기
   const cookieStore = await cookies()
+  // 소셜 로그인 아니면 email 로그인 반환
   const currentProvider = cookieStore.get('current_provider')?.value || 'email'
   
   // 닉네임, 현재 플랫폼 반환
