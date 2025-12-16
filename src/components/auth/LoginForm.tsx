@@ -3,6 +3,7 @@ import LoginOAuthForm from '@/components/auth/LoginOAuthForm'
 import { Card, CardContent, CardHeader } from '@/components/common/card'
 import Link from 'next/link'
 import Image from 'next/image'
+import Button from '@/components/common/button'
 import ForgotPasswordButton from '@/components/auth/ForgotPasswordButton'
 
 export default function LoginForm() {
@@ -36,19 +37,22 @@ export default function LoginForm() {
           <CardContent>
             <LoginAuthForm />
             <LoginOAuthForm />
-            <div className="relative my-3">
+            <div className="relative my-4">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-border" />
               </div>
             </div>
-
             <div className="text-center text-sm mt-8">
               {/* 비밀번호 찾기 버튼 */}
               <ForgotPasswordButton />
               <Link href="/register">
-                <button type="button" className="text-primary hover:underline cursor-pointer">
+                <Button
+                  type="button"
+                  variant="link"
+                  className="text-primary hover:underline cursor-pointer"
+                >
                   계정이 없으신가요? 회원가입하기
-                </button>
+                </Button>
               </Link>
             </div>
           </CardContent>

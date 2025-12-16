@@ -18,7 +18,7 @@ export default function ForgotPasswordButton({ label = '비밀번호를 잊으�
         type="button"
         variant="link"
         onClick={() => setIsOpen(true)}
-        className="mb-1 text-primary hover:underline cursor-pointer"
+        className="text-primary hover:underline cursor-pointer"
       >
         {label}
       </Button>
