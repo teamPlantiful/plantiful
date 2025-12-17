@@ -4,7 +4,7 @@ interface PlantListSkeletonProps {
 
 export default function PlantListSkeleton({ count = 6 }: PlantListSkeletonProps) {
   return (
-    <div className="space-y-2">
+    <>
       {Array.from({ length: count }).map((_, i) => (
         <div
           key={i}
@@ -17,6 +17,6 @@ export default function PlantListSkeleton({ count = 6 }: PlantListSkeletonProps)
           </div>
         </div>
       ))}
-    </div>
+    </>
   )
 }
