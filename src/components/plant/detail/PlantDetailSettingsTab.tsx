@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 
 import SelectBox from '@/components/common/select-box'
 import { DateSelect } from '@/components/plant/register/DateSelect'
 import ImageUpload from '@/components/plant/register/ImageUpload'
+import { Alert } from '@/components/common/alert'
 
 import type { Plant } from '@/types/plant'
 import { generateDayOptions, generateMonthOptions, toDateOnlyISO } from '@/utils/date'
@@ -49,6 +50,8 @@ export default function PlantDetailSettingsTab({
   )
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [removeImage, setRemoveImage] = useState(false)
+  const [alertOpen, setAlertOpen] = useState(false)
+  const pendingConfirmRef = useRef<(() => void) | null>(null)
 
   // 모달 열릴 때 설정 탭 상태 초기화
   useEffect(() => {
@@ -134,9 +137,31 @@ export default function PlantDetailSettingsTab({
           return
         }
 
-        if (confirmOnSave && !window.confirm('변경하시겠습니까?')) {
+        const doSave = () => {
+          const wateringDays = clamp(Number(wateringInterval) || 1, 1)
+          const fertilizerMonths = clamp(Number(fertilizerIntervalMonth) || 1, 1)
+          const repottingMonths = clamp(Number(repottingIntervalMonth) || 1, 1)
+
+          onSaveIntervals?.({
+            wateringDays,
+            fertilizerMonths,
+            repottingMonths,
+            adoptedAt: adoptedDate,
+            lastWateredAt: lastWateredDate,
+            file: selectedFile ?? null,
+            removeImage,
+          })
+
+          onDone?.()
+        }
+
+        if (confirmOnSave) {
+          pendingConfirmRef.current = doSave
+          setAlertOpen(true)
           return
         }
+
+        doSave()
 
         const wateringDays = clamp(Number(wateringInterval) || 1, 1)
         const fertilizerMonths = clamp(Number(fertilizerIntervalMonth) || 1, 1)
@@ -155,6 +180,22 @@ export default function PlantDetailSettingsTab({
         onDone?.()
       }}
     >
+      <Alert
+        open={alertOpen}
+        onClose={() => {
+          setAlertOpen(false)
+          pendingConfirmRef.current = null
+        }}
+        title="변경하시겠습니까?"
+        description="설정 변경 내용을 저장할까요?"
+        confirmText="변경"
+        cancelText="취소"
+        onConfirm={() => {
+          pendingConfirmRef.current?.()
+          setAlertOpen(false)
+          pendingConfirmRef.current = null
+        }}
+      />
       <input type="hidden" name="id" value={plant.id} />
       <input type="hidden" name="wateringInterval" value={wateringInterval} />
       <input type="hidden" name="fertilizerIntervalMonth" value={fertilizerIntervalMonth} />
@@ -164,7 +205,7 @@ export default function PlantDetailSettingsTab({
       <input type="hidden" name="removeImage" value={removeImage ? 'true' : 'false'} />
 
       {/* 스크롤되는 콘텐츠 영역 */}
-      <div className="space-y-4">
+      <div className="space-y-4 p-3">
         <div className="space-y-2">
           <p className="-mt-3 text-sm font-medium text-foreground/80">사진</p>
 
@@ -205,7 +246,7 @@ export default function PlantDetailSettingsTab({
             placeholder="주기 선택"
             options={DAY_MAX.map((o) => ({ ...o, label: `${o.value}일` }))}
             onSelect={setWateringInterval}
-            className="p-1"
+            className="py-1 w-90"
           />
         </div>
 
@@ -216,7 +257,7 @@ export default function PlantDetailSettingsTab({
             placeholder="주기 선택"
             options={MONTH_MAX.map((o) => ({ ...o, label: `${o.value}개월` }))}
             onSelect={setFertilizerIntervalMonth}
-            className="p-1"
+            className="py-1 w-90"
           />
         </div>
 
@@ -227,7 +268,7 @@ export default function PlantDetailSettingsTab({
             placeholder="주기 선택"
             options={MONTH_MAX.map((o) => ({ ...o, label: `${o.value}개월` }))}
             onSelect={setRepottingIntervalMonth}
-            className="p-1"
+            className="py-1 w-90"
           />
         </div>
       </div>
