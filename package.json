@@ -26,7 +26,6 @@
     "next": "^16.0.10",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-
     "react-hook-form": "^7.66.0",
     "react-intersection-observer": "^10.0.0",
     "tailwind-merge": "^3.3.1",
@@ -38,6 +37,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "autoprefixer": "^10.4.21",
+    "baseline-browser-mapping": "^2.10.0",
     "eslint": "^9",
     "eslint-config-next": "16.0.1",
     "husky": "^9.1.7",
