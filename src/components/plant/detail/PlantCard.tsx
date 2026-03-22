@@ -8,7 +8,6 @@ import { Card } from '@/components/common/card'
 import cn from '@/lib/cn'
 import type { PlantCardInfo } from '@/types/plant'
 import Image from 'next/image'
-import optimizeImage from '@/utils/optimizeImage'
 import { toast } from '@/store/useToastStore'
 import { updateWaterPlantAction } from '@/app/actions/plant/updateWaterPlantAction'
 
@@ -28,9 +27,7 @@ export default function PlantCard({
   const [isWatering, setIsWatering] = useState(false)
 
   const image = useMemo(() => {
-    const rawUrl = coverImageUrl || defaultImageUrl || ''
-    // Retina 대응: 64px 이미지이므로 128px (2x) 요청
-    return optimizeImage(rawUrl, 128) || rawUrl
+    return coverImageUrl || defaultImageUrl || ''
   }, [coverImageUrl, defaultImageUrl])
 
   const handleCardClick = () => onClick(id)
@@ -132,6 +129,7 @@ export default function PlantCard({
             alt={nickname || '식물 이미지'}
             width={64}
             height={64}
+            quality={65}
             className="object-contain"
             priority={priority}
             {...(priority && {
